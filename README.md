@@ -1,27 +1,25 @@
-# Plux Adapter
+# DAid
 
 Connects to sensors and distributes their data over TCP/IP allowing connection to incompatible devices, data distribution to multiple clients and aggregated csv logging.
 
 ## Installation
 
 For development:
-1. [https://dotnet.microsoft.com/download/dotnet/5.0](https://dotnet.microsoft.com/download/dotnet/5.0) - used to compile code.
-1. [https://dotnet.microsoft.com/download/dotnet-framework/net451](https://dotnet.microsoft.com/download/dotnet-framework/net451) - used to compile code.
-1. [https://github.com/biosignalsplux/c-sharp-sample](https://github.com/biosignalsplux/c-sharp-sample) - used to connect to Plux devices, simply drop "plux.dll" and (optional - used for intellisense) "plux.xml" in [PluxAdapter/Servers/lib/PluxDotNet](./PluxAdapter/Servers/lib/PluxDotNet).
+1. [https://dotnet.microsoft.com/en-us/download/dotnet/7.0](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) - used to compile code.
+1. //[https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) - used to compile code.
 1. (optional) [https://code.visualstudio.com/](https://code.visualstudio.com/) - used to write code. Note that there are some VSC specific configuration files included in [.vscode](./.vscode). Especially consider [.vscode/launch.json](./.vscode/launch.json), without it VSC can't execute code(note that "dotnet.exe" still can, it's just that VSC can't figure out if it's supposed to use ".NET Framework" or ".NET Core" debugger).
 
 For deployment:
 1. Compile source(see [Compilation](#Compilation)).
 1. Distribute client or server depending on use case, but note that:
     * Server can also perform as client.
-    * Target machine requires "Runtime" from [https://dotnet.microsoft.com/download/dotnet-framework/net451](https://dotnet.microsoft.com/download/dotnet-framework/net451) or later("Windows 8.1" or later has it by default).
+    * Target machine requires "Runtime" from [https://dotnet.microsoft.com/en-us/download/dotnet/7.0](https://dotnet.microsoft.com/download/dotnet-framework/net451) or later("Windows 8.1" or later has it by default).
 
 ## Compilation
 
 To compile from source:
-1. Make sure "Developer Pack" from [https://dotnet.microsoft.com/download/dotnet-framework/net451](https://dotnet.microsoft.com/download/dotnet-framework/net451) is installed.
-1. Make sure "SDK" from [https://dotnet.microsoft.com/download/dotnet/5.0](https://dotnet.microsoft.com/download/dotnet/5.0) is installed.
-1. Download/clone the source from [https://github.com/arehab-app/plux-adapter](https://github.com/arehab-app/plux-adapter) and extract it somewhere.
+1. Make sure "Developer Pack" from [https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) is installed.
+1. Make sure "SDK" from [https://dotnet.microsoft.com/en-us/download/dotnet/7.0](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) is installed.
 1. Download/clone plux driver from [https://github.com/biosignalsplux/c-sharp-sample](https://github.com/biosignalsplux/c-sharp-sample) and extract it next to "plux-adapter" directory.
 1. Go to "plux-adapter/PluxAdapter/Clients" directory and execute "dotnet.exe publish" from terminal:
     ```bash
