@@ -1,86 +1,35 @@
 using System;
-using System.IO;
 using System.IO.Ports;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using NLog;
 
-namespace DAid.Servers
+public class SensorAdapter
 {
-    public class SensorAdapter
+    private SerialPort serialPort;
+    private const byte StartByte = 0xF0;
+    private const byte StopByte = 0x55;
+    private const int PacketLength = 47;
+    private readonly byte[] buffer = new byte[1024];
+    private int bufferPos = 0;
+
+    private const int DefaultBaudRate = 92600;
+    private readonly int[] SensorPositions = { 30, 32, 38, 40 };
+    private readonly double[] XPositions = { 6.0, -6.0, 6.0, -6.0 };
+    private readonly double[] YPositions = { 2.0, 2.0, -2.0, -2.0 };
+
+    private double[] sensorResistance = new double[4];
+    private double[] sensorOffsets = new double[4];
+    private bool isStreaming = false;
+    private readonly object syncLock = new object();
+
+    public event EventHandler<string> RawDataReceived;
+    public event EventHandler<(double CoPX, double CoPY, double[] Pressures)> CoPUpdated;
+
+    public void Initialize(string comPort, int baudRate = DefaultBaudRate)
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
-        private SerialPort serialPort;
-        private const byte StartByte = 0xF0;
-        private const byte StopByte = 0x55;
-        private const int PacketLength = 47;
-        private readonly byte[] buffer = new byte[1024];
-        private int bufferPos = 0;
-        private const string CsvFilePath = "output.csv";
-
-        private readonly string[] SensorNames = { "RS1", "RS2", "RS3", "RS4", "RS5", "RS6" };
-        private double[] sensorValues = new double[6];
-        private double[] xCoordinates = new double[6];
-        private double[] yCoordinates = new double[6];
-
-        private bool isCalibrated = false;
-
-        // Sensor Positions
-        private readonly double[] sensorXPositions = { 0.3, -0.3, 0.3, -0.3, 0.3, -0.3 };
-        private readonly double[] sensorYPositions = { 1, 1, 0, 0, -1, -1 };
-
-        private double copX = 0;
-        private double copY = 0;
-
-        // Configurable Multiplier
-        public double ResistanceMultiplier { get; set; } = 1.0;
-
-        // DAid Commands
-        private const string StartStreamCommand = "BT^START\r";
-        private const string StopStreamCommand = "BT^STOP\r";
-
-        // Lock object for thread-safety
-        private readonly object syncLock = new object();
-
-        /// <summary>
-        /// Event triggered when raw data is received from the sensor.
-        /// </summary>
-        public event EventHandler<string> RawDataReceived;
-
-        /// <summary>
-        /// Initializes the SensorAdapter with the given COM port and baud rate.
-        /// </summary>
-        public void Initialize(string comPort, int baudRate)
-        {
-            try
-            {
-                InitializeSerialPort(comPort, baudRate);
-                serialPort.Open();
-                logger.Info($"Connected to {comPort}.");
-            }
-            catch (Exception ex)
-            {
-                logger.Error($"Error initializing Sensor Adapter: {ex.Message}");
-            }
-        }
-        public static List<string> ScanPorts()
-{
-    try
-    {
-        return SerialPort.GetPortNames().ToList();
-    }
-    catch (Exception ex)
-    {
-        logger.Error($"Error scanning ports: {ex.Message}");
-        return new List<string>();
-    }
-}
-
-        private void InitializeSerialPort(string comPort, int baudRate)
+        try
         {
             serialPort = new SerialPort(comPort, baudRate)
             {
@@ -88,251 +37,219 @@ namespace DAid.Servers
                 DataBits = 8,
                 StopBits = StopBits.One,
                 Handshake = Handshake.None,
-                ReadTimeout = 3000,
-                WriteTimeout = 3000
+                ReadTimeout = 5000,
+                WriteTimeout = 5000
             };
+
             serialPort.DataReceived += DataReceivedHandler;
+            serialPort.Open();
+            Console.WriteLine($"[SensorAdapter]: Initialized on {comPort} at {baudRate} baud.");
         }
-
-        /// <summary>
-        /// Starts the data stream from the sensor.
-        /// </summary>
-        public void StartSensorStream()
+        catch (Exception ex)
         {
-            if (serialPort?.IsOpen == true)
-            {
-                serialPort.WriteLine(StartStreamCommand);
-                logger.Info("Sensor data stream started.");
-            }
-            else
-            {
-                logger.Warn("Cannot start sensor stream; serial port is not open.");
-            }
+            Console.WriteLine($"[SensorAdapter]: Error initializing on {comPort}: {ex.Message}");
+            throw;
         }
-
-        public bool Calibrate()
-{
-    try
-    {
-        // Add calibration logic here
-        logger.Info("Calibrating sensor...");
-        // Simulate calibration success
-        return true;
     }
-    catch (Exception ex)
+
+    public void Cleanup()
     {
-        logger.Error($"Calibration failed: {ex.Message}");
-        return false;
+        lock (syncLock)
+        {
+            StopSensorStream();
+            if (serialPort != null && serialPort.IsOpen)
+            {
+                serialPort.Close();
+                Console.WriteLine("[SensorAdapter]: Serial port closed.");
+            }
+        }
     }
-}
 
-
-        /// <summary>
-        /// Stops the data stream from the sensor.
-        /// </summary>
-        public void StopSensorStream()
+    public void StartSensorStream()
+    {
+        lock (syncLock)
         {
-            if (serialPort?.IsOpen == true)
+            if (serialPort?.IsOpen == true && !isStreaming)
             {
-                serialPort.WriteLine(StopStreamCommand);
-                logger.Info("Sensor data stream stopped.");
-            }
-            else
-            {
-                logger.Warn("Cannot stop sensor stream; serial port is not open.");
+                serialPort.WriteLine("BT^START\r");
+                isStreaming = true;
+                Console.WriteLine("[SensorAdapter]: Data stream started.");
             }
         }
+    }
 
-        /// <summary>
-        /// Cleans up the resources by closing the serial port.
-        /// </summary>
-        public void Cleanup()
+    public static List<string> ScanPorts()
+    {
+        try
         {
-            if (serialPort?.IsOpen == true)
+            var ports = SerialPort.GetPortNames().ToList();
+            return ports;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SensorAdapter]: Error scanning ports: {ex.Message}");
+            return new List<string>();
+        }
+    }
+
+    public double[] GetSensorPressures()
+    {
+        lock (syncLock)
+        {
+            return (double[])sensorResistance.Clone();
+        }
+    }
+
+    public void StopSensorStream()
+    {
+        lock (syncLock)
+        {
+            if (serialPort?.IsOpen == true && isStreaming)
             {
-                try
-                {
-                    serialPort.Close();
-                    logger.Info("Serial port closed.");
-                }
-                catch (Exception ex)
-                {
-                    logger.Error($"Error closing serial port: {ex.Message}");
-                }
+                serialPort.WriteLine("BT^STOP\r");
+                isStreaming = false;
+                Console.WriteLine("[SensorAdapter]: Data stream stopped.");
             }
         }
+    }
 
-        /// <summary>
-        /// Handles data received from the serial port.
-        /// </summary>
-        private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
-        {
-            if (serialPort == null) return;
+    public bool Calibrate()
+    {
+        Console.WriteLine("[SensorAdapter]: Starting calibration...");
+        double[] sumValues = new double[SensorPositions.Length];
+        int sampleCount = 0;
+        DateTime startTime = DateTime.Now;
 
-            try
-            {
-                int bytesToRead = serialPort.BytesToRead;
-                byte[] incomingData = new byte[bytesToRead];
-                serialPort.Read(incomingData, 0, bytesToRead);
-                ProcessIncomingData(incomingData);
-            }
-            catch (Exception ex)
-            {
-                logger.Error($"Error during data reception: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Processes incoming data and handles complete packets.
-        /// </summary>
-        private void ProcessIncomingData(byte[] incomingData)
+        while ((DateTime.Now - startTime).TotalSeconds < 10)
         {
             lock (syncLock)
             {
-                Array.Copy(incomingData, 0, buffer, bufferPos, incomingData.Length);
-                bufferPos += incomingData.Length;
-
-                while (bufferPos >= PacketLength)
+                if (sensorResistance.All(r => r > 0))
                 {
-                    int startIndex = Array.IndexOf(buffer, StartByte, 0, bufferPos);
-                    if (startIndex == -1) break;
-
-                    if (startIndex + PacketLength <= bufferPos)
+                    for (int i = 0; i < SensorPositions.Length; i++)
                     {
-                        byte[] packet = new byte[PacketLength];
-                        Array.Copy(buffer, startIndex, packet, 0, PacketLength);
-
-                        if (ValidatePacket(packet))
-                        {
-                            HandleValidPacket(packet);
-                        }
-
-                        bufferPos -= (startIndex + PacketLength);
-                        Array.Copy(buffer, startIndex + PacketLength, buffer, 0, bufferPos);
+                        sumValues[i] += 1.0 / sensorResistance[i]; // Inverted calibration
                     }
-                    else
+                    sampleCount++;
+                }
+            }
+            Thread.Sleep(100);
+        }
+
+        if (sampleCount > 0)
+        {
+            for (int i = 0; i < SensorPositions.Length; i++)
+            {
+                sensorOffsets[i] = sumValues[i] / sampleCount;
+                Console.WriteLine($"[Calibration]: Sensor {i + 1} Offset: {sensorOffsets[i]:F2}");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+    {
+        if (serialPort == null) return;
+
+        try
+        {
+            int bytesToRead = serialPort.BytesToRead;
+            byte[] incomingData = new byte[bytesToRead];
+            serialPort.Read(incomingData, 0, bytesToRead);
+            RawDataReceived?.Invoke(this, BitConverter.ToString(incomingData));
+            ProcessIncomingData(incomingData);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SensorAdapter]: Data reception error: {ex.Message}");
+        }
+    }
+
+    private void ProcessIncomingData(byte[] incomingData)
+    {
+        lock (syncLock)
+        {
+            if (incomingData.Length + bufferPos > buffer.Length)
+            {
+                Console.WriteLine("[SensorAdapter]: Incoming data exceeds buffer size.");
+                return;
+            }
+
+            Array.Copy(incomingData, 0, buffer, bufferPos, incomingData.Length);
+            bufferPos += incomingData.Length;
+
+            while (bufferPos >= PacketLength)
+            {
+                int startIndex = Array.IndexOf(buffer, StartByte, 0, bufferPos);
+                if (startIndex == -1) break;
+
+                if (startIndex + PacketLength <= bufferPos)
+                {
+                    byte[] packet = new byte[PacketLength];
+                    Array.Copy(buffer, startIndex, packet, 0, PacketLength);
+
+                    if (ValidatePacket(packet))
                     {
-                        break;
+                        ExtractSensorValues(packet);
+                        CalculateAndNotifyCoP();
                     }
+
+                    bufferPos -= startIndex + PacketLength;
+                    Array.Copy(buffer, startIndex + PacketLength, buffer, 0, bufferPos);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Validates a packet for checksum and stop byte.
-        /// </summary>
-        private bool ValidatePacket(byte[] packet)
-        {
-            byte calculatedChecksum = CalculateChecksum(packet, PacketLength - 2);
-            byte receivedChecksum = packet[PacketLength - 2];
-            return calculatedChecksum == receivedChecksum && packet[PacketLength - 1] == StopByte;
-        }
-
-        /// <summary>
-        /// Handles valid packets: extracts values, performs calibration, and calculates COP.
-        /// </summary>
-        private void HandleValidPacket(byte[] packet)
-        {
-            ExtractSensorValues(packet);
-
-            if (!isCalibrated)
-            {
-                PerformCalibration();
-            }
-            else
-            {
-                NormalizeSensorValues();
-                CalculateCoordinates();
-                CalculateCOP();
-                WriteToCsv();
-            }
-
-            // Trigger the RawDataReceived event with the extracted sensor data
-            string rawData = string.Join(",", sensorValues.Select(v => v.ToString("F2")));
-            RawDataReceived?.Invoke(this, rawData);
-        }
-
-        private void ExtractSensorValues(byte[] packet)
-        {
-            int[] mappedPositions = { 33, 35, 37, 39, 41, 43 };
-
-            for (int i = 0; i < SensorNames.Length; i++)
-            {
-                int startPos = mappedPositions[i];
-                if (startPos + 1 < PacketLength)
+                else
                 {
-                    int rawValue = (packet[startPos] << 8) | packet[startPos + 1];
-                    sensorValues[i] = rawValue * ResistanceMultiplier;
-                    logger.Debug($"Extracted {SensorNames[i]}: {sensorValues[i]}");
+                    break;
                 }
             }
         }
+    }
 
-        private void PerformCalibration()
-        {
-            isCalibrated = true;
-            logger.Info("Calibration completed.");
-        }
+    private bool ValidatePacket(byte[] packet)
+    {
+        byte calculatedChecksum = CalculateChecksum(packet, PacketLength - 2);
+        byte receivedChecksum = packet[PacketLength - 2];
+        return calculatedChecksum == receivedChecksum && packet[PacketLength - 1] == StopByte;
+    }
 
-        private void NormalizeSensorValues()
+    private void ExtractSensorValues(byte[] packet)
+    {
+        lock (syncLock)
         {
-            double maxSensorValue = sensorValues.Max();
-            if (maxSensorValue > 0)
+            for (int i = 0; i < SensorPositions.Length; i++)
             {
-                for (int i = 0; i < SensorNames.Length; i++)
-                {
-                    sensorValues[i] /= maxSensorValue;
-                }
-            }
-            else
-            {
-                logger.Warn("Max sensor value is zero; skipping normalization.");
-            }
-        }
+                int pos = SensorPositions[i];
+                int rawValue = (packet[pos] << 8) | packet[pos + 1];
 
-        private void CalculateCoordinates()
-        {
-            double totalNormalized = sensorValues.Sum();
-            for (int i = 0; i < SensorNames.Length; i++)
-            {
-                xCoordinates[i] = (sensorValues[i] / totalNormalized) * sensorXPositions[i];
-                yCoordinates[i] = (sensorValues[i] / totalNormalized) * sensorYPositions[i];
+                sensorResistance[i] = 1.0 / rawValue; 
             }
         }
+    }
 
-        private void CalculateCOP()
+    private void CalculateAndNotifyCoP()
+    {
+        lock (syncLock)
         {
-            double totalNormalized = sensorValues.Sum();
-            if (totalNormalized > 0)
-            {
-                copX = sensorValues.Zip(sensorXPositions, (value, xPos) => value * xPos).Sum() / totalNormalized;
-                copY = sensorValues.Zip(sensorYPositions, (value, yPos) => value * yPos).Sum() / totalNormalized;
-                logger.Info($"Calculated COP: X = {copX:F2}, Y = {copY:F2}");
-            }
-            else
-            {
-                logger.Warn("Total normalized sensor value is zero; COP not calculated.");
-            }
-        }
+            double totalPressure = sensorResistance.Sum();
 
-        private void WriteToCsv()
-        {
-            try
+            if (totalPressure <= 0)
             {
-                string csvLine = string.Join(",", SensorNames.Zip(sensorValues, (name, value) => $"{name}:{value:F2}"))
-                                 + $", COP_X: {copX:F2}, COP_Y: {copY:F2}";
-                File.AppendAllLines(CsvFilePath, new[] { csvLine });
-                logger.Info($"Data written to CSV: {csvLine}");
+                Console.WriteLine("[SensorAdapter]: Total pressure is zero. CoP set to (0, 0).");
+                Task.Run(() => CoPUpdated?.Invoke(this, (0, 0, sensorResistance)));
+                return;
             }
-            catch (Exception ex)
-            {
-                logger.Error($"Error writing to CSV: {ex.Message}");
-            }
-        }
 
-        private byte CalculateChecksum(byte[] data, int length)
-        {
-            return (byte)data.Take(length).Sum(b => b);
+            double copX = sensorResistance.Zip(XPositions, (p, x) => p * x).Sum() / totalPressure;
+            double copY = sensorResistance.Zip(YPositions, (p, y) => p * y).Sum() / totalPressure;
+
+            Task.Run(() => CoPUpdated?.Invoke(this, (copX, copY, sensorResistance)));
         }
+    }
+
+    private byte CalculateChecksum(byte[] data, int length)
+    {
+        int sum = data.Take(length).Sum(b => b);
+        return (byte)(sum & 0xFF);
     }
 }

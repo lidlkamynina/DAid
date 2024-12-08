@@ -9,23 +9,29 @@ namespace DAid.Servers
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private readonly string path;
-        private readonly float frequency;
+        private readonly int baudRate;
         private SensorAdapter sensorAdapter;
 
         private readonly object _syncLock = new object();
-        private CancellationTokenSource cancellationTokenSource;
+        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
         public event EventHandler<string> RawDataReceived;
+        public event EventHandler<(double CoPX, double CoPY, double[] Pressures)> CoPUpdated;
 
         public bool IsConnected { get; private set; }
+        public bool IsStreaming { get; private set; } // Tracks streaming state
         public string Path => path;
-        public float Frequency => frequency;
+        public float Frequency { get; private set; }
         public string Name { get; private set; }
+
+        // Expose the SensorAdapter as a read-only property
+        public SensorAdapter SensorAdapter => sensorAdapter;
 
         public Device(string path, float frequency, string name)
         {
             this.path = path ?? throw new ArgumentNullException(nameof(path));
-            this.frequency = frequency;
+            this.baudRate = (int)frequency;
+            this.Frequency = frequency;
             this.Name = name ?? throw new ArgumentNullException(nameof(name));
 
             InitializeSensorAdapter();
@@ -35,11 +41,11 @@ namespace DAid.Servers
         {
             sensorAdapter = new SensorAdapter();
 
-            // Subscribe to RawDataReceived
+            // Subscribe to events
             sensorAdapter.RawDataReceived += OnRawDataReceived;
+            sensorAdapter.CoPUpdated += OnCoPUpdated;
 
-            // Initialize sensor
-            sensorAdapter.Initialize(path, (int)frequency);
+            logger.Info($"SensorAdapter initialized for device {Name} on {path} with baud rate {baudRate}.");
         }
 
         public void Connect()
@@ -48,23 +54,20 @@ namespace DAid.Servers
             {
                 if (IsConnected)
                 {
-                    logger.Info($"Device on {path} is already connected.");
+                    logger.Info($"Device {Name} on {path} is already connected.");
                     return;
                 }
 
-                logger.Info($"Connecting to device on {path}...");
+                logger.Info($"Connecting to device {Name} on {path}...");
                 try
                 {
-                    if (sensorAdapter == null)
-                        InitializeSensorAdapter();
-
-                    sensorAdapter.StartSensorStream();
+                    sensorAdapter.Initialize(path, baudRate);
                     IsConnected = true;
-                    logger.Info($"Device successfully connected on {path}.");
+                    logger.Info($"Device {Name} successfully connected on {path}.");
                 }
                 catch (Exception ex)
                 {
-                    logger.Error($"Failed to connect to device on {path}: {ex.Message}");
+                    logger.Error($"Failed to connect to device {Name} on {path}: {ex.Message}");
                     IsConnected = false;
                 }
             }
@@ -76,12 +79,27 @@ namespace DAid.Servers
             {
                 if (!IsConnected)
                 {
-                    logger.Warn($"Cannot start acquisition. Device on {path} is not connected.");
+                    logger.Warn($"Cannot start acquisition for device {Name} because it is not connected.");
                     return;
                 }
 
-                logger.Info($"Starting data acquisition for device on {path}...");
-                cancellationTokenSource = new CancellationTokenSource();
+                if (IsStreaming)
+                {
+                    logger.Info($"Data acquisition for device {Name} is already in progress.");
+                    return;
+                }
+
+                try
+                {
+                    sensorAdapter.StartSensorStream();
+                    IsStreaming = true;
+                    logger.Info($"Data acquisition started for device {Name}.");
+                }
+                catch (Exception ex)
+                {
+                    logger.Error($"Failed to start data acquisition for {Name}: {ex.Message}");
+                    IsStreaming = false;
+                }
             }
         }
 
@@ -89,30 +107,76 @@ namespace DAid.Servers
         {
             lock (_syncLock)
             {
+                if (!IsConnected)
+                {
+                    logger.Warn($"Cannot stop acquisition for device {Name} on {path} because it is not connected.");
+                    return;
+                }
+
+                if (!IsStreaming)
+                {
+                    logger.Info($"Data acquisition for device {Name} is not currently running.");
+                    return;
+                }
+
+                logger.Info($"Stopping data acquisition for device {Name} on {path}...");
                 try
                 {
-                    if (!IsConnected)
-                    {
-                        logger.Warn($"Cannot stop. Device on {path} is not connected.");
-                        return;
-                    }
-
-                    logger.Info($"Stopping device on {path}...");
-                    cancellationTokenSource?.Cancel();
+                    cancellationTokenSource.Cancel();
                     sensorAdapter.StopSensorStream();
-                    IsConnected = false;
-                    logger.Info($"Device stopped on {path}.");
+                    IsStreaming = false;
+                    logger.Info($"Device {Name} on {path} stopped successfully.");
                 }
                 catch (Exception ex)
                 {
-                    logger.Error($"Error stopping device on {path}: {ex.Message}");
+                    logger.Error($"Failed to stop data acquisition for device {Name} on {path}: {ex.Message}");
                 }
             }
         }
 
+        public double[] GetSensorPressures()
+        {
+            if (!IsConnected || !IsStreaming)
+            {
+                logger.Warn($"Attempted to get sensor pressures for device {Name} while not streaming.");
+                return Array.Empty<double>();
+            }
+
+            return sensorAdapter.GetSensorPressures();
+        }
+
         private void OnRawDataReceived(object sender, string rawData)
         {
+            // Ensure RawDataReceived is triggered asynchronously
             Task.Run(() => RawDataReceived?.Invoke(this, rawData));
+        }
+
+        private void OnCoPUpdated(object sender, (double CoPX, double CoPY, double[] Pressures) copData)
+        {
+
+            CoPUpdated?.Invoke(this, copData); // Ensure this event is invoked
+        }
+
+        public void Calibrate()
+        {
+            lock (_syncLock)
+            {
+                if (!IsConnected)
+                {
+                    logger.Warn($"Cannot calibrate device {Name} because it is not connected.");
+                    return;
+                }
+
+                logger.Info($"Starting calibration for device {Name}...");
+                if (sensorAdapter.Calibrate())
+                {
+                    logger.Info($"Calibration completed successfully for device {Name}.");
+                }
+                else
+                {
+                    logger.Warn($"Calibration failed for device {Name}.");
+                }
+            }
         }
     }
 }

@@ -35,7 +35,7 @@ namespace DAid.Servers
             {
                 this.offsets = offsets;
                 this.buffer = new byte[offsets.Sum(offset => offset) + 5];
-                this.buffer[0] = index;
+                this.buffer[0] = index; // Assign device index at the start of the buffer
             }
         }
 
@@ -49,22 +49,28 @@ namespace DAid.Servers
         /// <summary>
         /// Initiates communication and negotiates requested devices.
         /// </summary>
-        public async Task Start()
+        public async Task StartAsync()
         {
             try
             {
-                logger.Info("Handler started.");
+                Console.WriteLine("[Handler]: Handler started.");
+                logger.Info("[Handler]: Handler started.");
 
                 // Read the size of the message
                 byte[] sizeBuffer = new byte[1];
                 await stream.ReadAsync(sizeBuffer, 0, 1, token);
                 int messageSize = sizeBuffer[0];
+                Console.WriteLine($"[Handler]: Message size received: {messageSize}");
+                logger.Debug($"[Handler]: Message size received: {messageSize}");
 
                 // Read the device request message
                 byte[] buffer = new byte[messageSize];
                 await stream.ReadAsync(buffer, 0, messageSize, token);
                 string[] requestedPaths = Encoding.ASCII.GetString(buffer)
                     .Split(new[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+
+                Console.WriteLine($"[Handler]: Requested device paths: {string.Join(", ", requestedPaths)}");
+                logger.Debug($"[Handler]: Requested device paths: {string.Join(", ", requestedPaths)}");
 
                 // Retrieve and register devices
                 IEnumerable<Device> requestedDevices = GetRequestedDevices(requestedPaths);
@@ -73,18 +79,24 @@ namespace DAid.Servers
                 // Prepare and send the response buffer
                 byte[] response = PrepareResponseBuffer(requestedDevices);
                 await stream.WriteAsync(response, 0, response.Length, token);
+                Console.WriteLine($"[Handler]: Response buffer sent to client.");
+                logger.Info($"[Handler]: Response buffer sent to client.");
 
                 // Subscribe to device events
                 foreach (Device device in devices.Keys)
                 {
                     device.RawDataReceived += OnRawDataReceived;
+                    Console.WriteLine($"[Handler]: Subscribed to RawDataReceived for device {device.Name}");
+                    logger.Info($"[Handler]: Subscribed to RawDataReceived for device {device.Name}");
                 }
 
-                logger.Info("Handler setup complete.");
+                Console.WriteLine("[Handler]: Handler setup complete.");
+                logger.Info("[Handler]: Handler setup complete.");
             }
             catch (Exception ex)
             {
-                logger.Error($"Handler failed to start: {ex.Message}");
+                Console.WriteLine($"[Handler]: Handler failed to start: {ex.Message}");
+                logger.Error($"[Handler]: Handler failed to start: {ex.Message}");
                 Stop();
             }
         }
@@ -96,14 +108,8 @@ namespace DAid.Servers
         {
             lock (syncLock)
             {
-                try
-                {
-                    logger.Info("Stopping handler.");
-                }
-                catch
-                {
-                    // Ignored
-                }
+                Console.WriteLine("[Handler]: Stopping handler.");
+                logger.Info("[Handler]: Stopping handler.");
 
                 foreach (var device in devices.Keys)
                 {
@@ -111,6 +117,8 @@ namespace DAid.Servers
                 }
 
                 devices.Clear();
+                logger.Info("[Handler]: Handler stopped and devices cleared.");
+                Console.WriteLine("[Handler]: Handler stopped and devices cleared.");
             }
         }
 
@@ -123,18 +131,24 @@ namespace DAid.Servers
             {
                 if (sender is Device device && devices.TryGetValue(device, out Cache cache))
                 {
+                    Console.WriteLine($"[Handler]: Raw data received from device {device.Name}: {rawData}");
+                    logger.Debug($"[Handler]: Raw data received from device {device.Name}: {rawData}");
+
                     byte[] data = Encoding.ASCII.GetBytes(rawData);
                     Array.Copy(data, 0, cache.buffer, 1, data.Length);
 
                     lock (syncLock)
                     {
                         stream.Write(cache.buffer, 0, cache.buffer.Length);
+                        Console.WriteLine($"[Handler]: Data forwarded to client for device {device.Name}");
+                        logger.Info($"[Handler]: Data forwarded to client for device {device.Name}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                logger.Warn($"Error during data handling: {ex.Message}");
+                Console.WriteLine($"[Handler]: Error during data handling: {ex.Message}");
+                logger.Warn($"[Handler]: Error during data handling: {ex.Message}");
                 Stop();
             }
         }
@@ -149,8 +163,11 @@ namespace DAid.Servers
             {
                 response.AddRange(Encoding.ASCII.GetBytes(device.Path));
                 response.Add(0); // Null terminator
-                response.AddRange(BitConverter.GetBytes(device.Frequency));
+                response.AddRange(BitConverter.GetBytes((int)device.Frequency));
             }
+
+            Console.WriteLine($"[Handler]: Prepared response buffer: {BitConverter.ToString(response.ToArray())}");
+            logger.Debug($"[Handler]: Prepared response buffer: {BitConverter.ToString(response.ToArray())}");
             return response.ToArray();
         }
 
@@ -158,17 +175,18 @@ namespace DAid.Servers
         /// Retrieves the requested devices from the server's manager.
         /// </summary>
         private IEnumerable<Device> GetRequestedDevices(string[] paths)
-        {
-            if (paths.Length == 0)
-            {
-                logger.Info("Requesting all available devices.");
-                server.Manager.Scan("");
-                return server.Manager.GetAllDevices();
-            }
+{
+    if (paths.Length == 0)
+    {
+        Console.WriteLine("[Handler]: Requesting all available devices.");
+        return server.Manager.GetAllDevices();
+    }
 
-            logger.Info($"Requesting devices for paths: {string.Join(", ", paths)}");
-            return paths.Select(path => server.Manager.Get(path)).Where(device => device != null);
-        }
+    Console.WriteLine($"[Handler]: Requesting devices for paths: {string.Join(", ", paths)}");
+    return paths.Select(path => server.Manager.GetAllDevices().FirstOrDefault(d => d.Path == path))
+                .Where(device => device != null);
+}
+
 
         /// <summary>
         /// Registers devices with internal caches and connects them.
@@ -181,14 +199,20 @@ namespace DAid.Servers
             {
                 if (!devices.ContainsKey(device))
                 {
-                    devices[device] = new Cache(deviceIndex++, new byte[0]); // Initialize cache
+                    devices[device] = new Cache(deviceIndex++, new byte[0]);
+                    Console.WriteLine($"[Handler]: Registering device {device.Name} at {device.Path}");
+                    logger.Info($"[Handler]: Registering device {device.Name} at {device.Path}");
+
                     try
                     {
                         device.Connect();
+                        Console.WriteLine($"[Handler]: Device {device.Name} connected successfully.");
+                        logger.Info($"[Handler]: Device {device.Name} connected successfully.");
                     }
                     catch (Exception ex)
                     {
-                        logger.Warn($"Failed to connect to device {device.Path}: {ex.Message}");
+                        Console.WriteLine($"[Handler]: Failed to connect to device {device.Name}: {ex.Message}");
+                        logger.Warn($"[Handler]: Failed to connect to device {device.Name}: {ex.Message}");
                     }
                 }
             }

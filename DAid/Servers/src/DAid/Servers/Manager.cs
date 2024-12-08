@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using NLog;
 
@@ -14,17 +15,16 @@ namespace DAid.Servers
         private readonly Dictionary<string, Device> devices = new Dictionary<string, Device>();
         private readonly object syncLock = new object();
 
+        private Device activeDevice; // Tracks the currently connected and active device
+
         /// <summary>
         /// Scans for available devices and adds them to the internal devices list.
         /// </summary>
-        /// <param name="path">Optional path for device discovery.</param>
-        public void Scan(string path = "")
+        public void Scan()
         {
-            logger.Info("Scanning for devices...");
-
             try
             {
-                var discoveredDevices = DiscoverDevices(path);
+                var discoveredDevices = DiscoverDevices();
 
                 lock (syncLock)
                 {
@@ -33,63 +33,63 @@ namespace DAid.Servers
                         if (!devices.ContainsKey(device.Path))
                         {
                             devices[device.Path] = device;
-                            try
-                            {
-                                device.Connect();
-                                logger.Info($"Discovered and connected: {device.Name} on {device.Path}");
-                            }
-                            catch (Exception ex)
-                            {
-                                logger.Warn($"Failed to connect to device: {device.Name} on {device.Path}: {ex.Message}");
-                            }
+                            logger.Info($"[Manager]: Discovered new device: {device.Name} on {device.Path}");
                         }
                     }
                 }
 
-                logger.Info("Device scan completed.");
+                logger.Info("[Manager]: Device scan completed.");
             }
             catch (Exception ex)
             {
-                logger.Error($"Error during device scan: {ex.Message}");
+                logger.Error($"[Manager]: Error during device scan: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Retrieves a device by its path.
+        /// Connects to a specified device and sets it as the active device.
         /// </summary>
-        /// <param name="path">The device path.</param>
-        /// <returns>The device if found; otherwise, null.</returns>
-        public Device Get(string path)
+        public Device Connect(string path)
         {
             lock (syncLock)
             {
                 if (devices.TryGetValue(path, out var device))
                 {
-                    if (!device.IsConnected)
+                    try
                     {
-                        logger.Info($"Reconnecting to device: {device.Name} on {device.Path}");
-                        try
-                        {
-                            device.Connect();
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.Warn($"Failed to reconnect to device: {device.Name} on {device.Path}: {ex.Message}");
-                        }
+                        device.Connect();
+                        activeDevice = device; // Mark the connected device as active
+                        logger.Info($"[Manager]: Device {device.Name} on {device.Path} connected and set as active.");
+                        return device;
                     }
-
-                    return device;
+                    catch (Exception ex)
+                    {
+                        logger.Warn($"[Manager]: Failed to connect to device {device.Name}: {ex.Message}");
+                    }
                 }
-            }
+                else
+                {
+                    logger.Warn($"[Manager]: No device found at path {path}.");
+                }
 
-            logger.Warn($"Device not found on path: {path}");
-            return null;
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the currently active device.
+        /// </summary>
+        public Device GetActiveDevice()
+        {
+            lock (syncLock)
+            {
+                return activeDevice;
+            }
         }
 
         /// <summary>
         /// Returns all registered devices.
         /// </summary>
-        /// <returns>An enumerable collection of all devices.</returns>
         public IEnumerable<Device> GetAllDevices()
         {
             lock (syncLock)
@@ -103,7 +103,7 @@ namespace DAid.Servers
         /// </summary>
         public void Cleanup()
         {
-            logger.Info("Cleaning up devices...");
+            logger.Info("[Manager]: Cleaning up devices...");
 
             lock (syncLock)
             {
@@ -111,34 +111,55 @@ namespace DAid.Servers
                 {
                     try
                     {
-                        logger.Info($"Disconnecting device: {device.Name} on {device.Path}");
+                        logger.Info($"[Manager]: Disconnecting device: {device.Name} on {device.Path}");
                         device.Stop();
                     }
                     catch (Exception ex)
                     {
-                        logger.Warn($"Failed to disconnect device: {device.Name} on {device.Path}: {ex.Message}");
+                        logger.Warn($"[Manager]: Failed to disconnect device: {device.Name}: {ex.Message}");
                     }
                 }
 
+                activeDevice = null;
                 devices.Clear();
+                Console.WriteLine("[Manager]: Cleanup completed.");
+                logger.Info("[Manager]: Cleanup completed.");
             }
         }
 
         /// <summary>
-        /// Simulates device discovery.
+        /// Discovers actual devices connected to COM ports but does not automatically connect them.
         /// </summary>
-        /// <param name="path">Optional discovery path.</param>
-        /// <returns>A list of discovered devices.</returns>
-        private IEnumerable<Device> DiscoverDevices(string path)
+        private IEnumerable<Device> DiscoverDevices()
         {
-            logger.Info($"Simulating device discovery with path: {path}");
+            logger.Info("[Manager]: Discovering devices connected to COM ports...");
 
-            // Simulate discovering devices
-            return new List<Device>
+            var discoveredDevices = new List<Device>();
+            var availablePorts = SerialPort.GetPortNames();
+
+            if (availablePorts.Length == 0)
             {
-                new Device("COM3", 9600, "SensorDevice1"),
-                new Device("COM4", 115200, "SensorDevice2")
-            };
+                logger.Warn("[Manager]: No COM ports available.");
+                return discoveredDevices;
+            }
+
+            foreach (var port in availablePorts)
+            {
+                logger.Info($"[Manager]: Attempting to create device for port {port}...");
+
+                try
+                {
+                    // Use a default frequency (baud rate) as discovery does not connect automatically.
+                    var device = new Device(port, 9600, $"Device on {port}");
+                    discoveredDevices.Add(device);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Manager]: Failed to create device for port {port}: {ex.Message}");
+                }
+            }
+
+            return discoveredDevices;
         }
     }
 }
