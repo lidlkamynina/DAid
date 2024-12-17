@@ -1,9 +1,10 @@
 using System;
 using System.IO.Ports;
 using System.Linq;
+using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public class SensorAdapter
 {
@@ -11,7 +12,9 @@ public class SensorAdapter
     private const byte StartByte = 0xF0;
     private const byte StopByte = 0x55;
     private const int PacketLength = 47;
+
     private readonly byte[] buffer = new byte[1024];
+    private string moduleName = "Unknown";
     private int bufferPos = 0;
 
     private const int DefaultBaudRate = 92600;
@@ -51,6 +54,20 @@ public class SensorAdapter
             throw;
         }
     }
+     public static List<string> ScanPorts()
+    {
+        try
+        {
+            var ports = SerialPort.GetPortNames().ToList();
+            Console.WriteLine($"[SensorAdapter]: Available ports: {string.Join(", ", ports)}");
+            return ports;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SensorAdapter]: Error scanning ports: {ex.Message}");
+            return new List<string>();
+        }
+    }
 
     public void Cleanup()
     {
@@ -71,24 +88,23 @@ public class SensorAdapter
         {
             if (serialPort?.IsOpen == true && !isStreaming)
             {
-                serialPort.WriteLine("BT^START\r");
+                SendCommand("BT^START");
                 isStreaming = true;
                 Console.WriteLine("[SensorAdapter]: Data stream started.");
             }
         }
     }
 
-    public static List<string> ScanPorts()
+    public void StopSensorStream()
     {
-        try
+        lock (syncLock)
         {
-            var ports = SerialPort.GetPortNames().ToList();
-            return ports;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[SensorAdapter]: Error scanning ports: {ex.Message}");
-            return new List<string>();
+            if (serialPort?.IsOpen == true && isStreaming)
+            {
+                SendCommand("BT^STOP");
+                isStreaming = false;
+                Console.WriteLine("[SensorAdapter]: Data stream stopped.");
+            }
         }
     }
 
@@ -100,22 +116,10 @@ public class SensorAdapter
         }
     }
 
-    public void StopSensorStream()
-    {
-        lock (syncLock)
-        {
-            if (serialPort?.IsOpen == true && isStreaming)
-            {
-                serialPort.WriteLine("BT^STOP\r");
-                isStreaming = false;
-                Console.WriteLine("[SensorAdapter]: Data stream stopped.");
-            }
-        }
-    }
-
     public bool Calibrate()
     {
         Console.WriteLine("[SensorAdapter]: Starting calibration...");
+         RetrieveModuleName();
         double[] sumValues = new double[SensorPositions.Length];
         int sampleCount = 0;
         DateTime startTime = DateTime.Now;
@@ -128,14 +132,14 @@ public class SensorAdapter
                 {
                     for (int i = 0; i < SensorPositions.Length; i++)
                     {
-                        sumValues[i] += 1.0 / sensorResistance[i]; // Inverted calibration
+                        sumValues[i] += 1.0 / sensorResistance[i];
                     }
                     sampleCount++;
                 }
             }
             Thread.Sleep(100);
         }
-
+ RetrieveModuleName();
         if (sampleCount > 0)
         {
             for (int i = 0; i < SensorPositions.Length; i++)
@@ -148,10 +152,105 @@ public class SensorAdapter
         return false;
     }
 
+    private void SendCommand(string command)
+    {
+        try
+        {
+            if (serialPort != null && serialPort.IsOpen)
+            {
+                serialPort.WriteLine(command + "\r");
+                Console.WriteLine($"[SensorAdapter]: Command sent: {command}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SensorAdapter]: Error sending command '{command}': {ex.Message}");
+        }
+    }
+
+private void RetrieveModuleName()
+{
+    try
+    {
+        Console.WriteLine("[SensorAdapter]: Retrieving module name...");
+        Thread.Sleep(500); // Allow time for the reset to process
+
+        serialPort.DiscardInBuffer(); // Clear input buffer
+        SendCommand("BTS6?");
+        Thread.Sleep(1000); // Allow sufficient time for response
+
+        int bytesToRead = serialPort.BytesToRead;
+        if (bytesToRead > 0)
+        {
+            // Read the incoming raw data
+            byte[] incomingData = new byte[bytesToRead];
+            serialPort.Read(incomingData, 0, bytesToRead);
+
+            // Print the raw response in hex for debugging
+            Console.WriteLine($"Raw BTS6 Response (Hex): {BitConverter.ToString(incomingData)}");
+
+            // Convert raw hex to ASCII, filtering out non-printable characters
+            string response = Encoding.ASCII.GetString(incomingData).Trim();
+            Console.WriteLine($"[SensorAdapter]: Parsed Response: {response}");
+
+            // Search for the line containing the module name
+            foreach (var line in response.Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (line.IndexOf("Register 6 value:", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    // Extract the module name after the colon
+                    int index = line.IndexOf(':');
+                    if (index != -1 && index + 1 < line.Length)
+                    {
+                        string moduleValue = line.Substring(index + 1).Trim();
+                        Console.WriteLine($"[SensorAdapter]: Raw Module Value: {moduleValue}");
+
+                        // Try to parse module name as an integer
+                        if (int.TryParse(moduleValue, out int moduleNumber))
+                        {
+                            moduleName = moduleNumber.ToString();
+                            Console.WriteLine($"Module name retrieved successfully: {moduleName}");
+                            CheckLeftOrRight(moduleNumber);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[SensorAdapter]: Module name is not a valid number: {moduleValue}");
+                        }
+                        return; // Exit after processing
+                    }
+                }
+            }
+
+            Console.WriteLine("[SensorAdapter]: No valid module name found in response.");
+        }
+        else
+        {
+            Console.WriteLine("[SensorAdapter]: No data received for module name.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[SensorAdapter]: Error retrieving module name: {ex.Message}");
+    }
+}
+
+
+
+ private void CheckLeftOrRight(int moduleNumber)
+{
+    if (moduleNumber % 2 == 0)
+    {
+        Console.WriteLine("[SensorAdapter]: This module corresponds to: Right");
+    }
+    else
+    {
+        Console.WriteLine("[SensorAdapter]: This module corresponds to: Left");
+    }
+}
+
+
     private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
     {
-        if (serialPort == null) return;
-
         try
         {
             int bytesToRead = serialPort.BytesToRead;
@@ -159,10 +258,11 @@ public class SensorAdapter
             serialPort.Read(incomingData, 0, bytesToRead);
             RawDataReceived?.Invoke(this, BitConverter.ToString(incomingData));
             ProcessIncomingData(incomingData);
+            RetrieveModuleName();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[SensorAdapter]: Data reception error: {ex.Message}");
+            Console.WriteLine($"[SensorAdapter]: Error receiving data: {ex.Message}");
         }
     }
 
@@ -222,7 +322,7 @@ public class SensorAdapter
                 int pos = SensorPositions[i];
                 int rawValue = (packet[pos] << 8) | packet[pos + 1];
 
-                sensorResistance[i] = 1.0 / rawValue; 
+                sensorResistance[i] = rawValue > 0 ? 1.0 / rawValue : 0.0;
             }
         }
     }
