@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,10 +12,13 @@ namespace DAid.Servers
         public Manager Manager { get; }
         private bool isRunning;
         private bool isAcquiringData;
-        private SensorAdapter sensorAdapter = null;
-private bool isSensorConnected = false;
+        private bool isSensorConnected = false;
 
         private bool isCalibrating = false; // Prevent multiple calibrations
+
+        // Track connected devices and sensor adapters
+        private readonly List<Device> connectedDevices = new List<Device>();
+        private readonly List<SensorAdapter> sensorAdapters = new List<SensorAdapter>();
 
         public Server()
         {
@@ -70,224 +75,145 @@ private bool isSensorConnected = false;
                 isAcquiringData = false;
 
                 Manager.Cleanup();
-
-                if (sensorAdapter != null)
-                {
-                    try
-                    {
-                        sensorAdapter.Cleanup();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[Server]: Error during sensor cleanup: {ex.Message}");
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Processes a command sent by the client.
-        /// </summary>
-        public async Task HandleCommandAsync(string command, CancellationToken cancellationToken)
-        {
-            Console.WriteLine($"[Server]: Command received: {command}");
-
-            try
-            {
-                switch (command.ToLower())
-                {
-                    case "connect":
-                        await HandleConnectCommandAsync(cancellationToken);
-                        break;
-
-                    case "start":
-                        HandleStartVisualizationCommand();
-                        break;
-
-                    case "calibrate":
-                        HandleCalibrateCommand();
-                        break;
-
-                    case "stop":
-                        HandleStopCommand();
-                        break;
-
-                    case "exit":
-                        HandleExitCommand();
-                        break;
-
-                    default:
-                        Console.WriteLine("[Server]: Unknown command. Valid commands: connect, calibrate, start, stop, exit.");
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Server]: Error processing command '{command}': {ex.Message}");
+                connectedDevices.Clear();
+                sensorAdapters.Clear();
             }
         }
 
         /// <summary>
         /// Connects to a sensor by scanning available COM ports.
         /// </summary>
-  public Task HandleConnectCommandAsync(CancellationToken cancellationToken)
-{
-    Console.WriteLine("[Server]: Scanning available COM ports...");
-    var ports = SensorAdapter.ScanPorts();
-
-    if (ports.Count == 0)
-    {
-        Console.WriteLine("[Server]: No available COM ports.");
-        return Task.CompletedTask;
-    }
-
-    Console.WriteLine($"[Server]: Available COM ports: {string.Join(", ", ports)}");
-    Console.Write("[Server]: Enter the COM port to connect to: ");
-    string comPort = Console.ReadLine()?.Trim();
-
-    if (!ports.Contains(comPort))
-    {
-        Console.WriteLine($"[Server]: Invalid COM port '{comPort}'. Aborting connection.");
-        return Task.CompletedTask;
-    }
-
-    var connectedDevice = Manager.Connect(comPort);
-    if (connectedDevice != null)
-    {
-        sensorAdapter = connectedDevice.SensorAdapter; // Assign the SensorAdapter
-        isSensorConnected = true;                     // Mark the sensor as connected
-        Console.WriteLine($"[Server]: Sensor connected on {comPort}. Waiting for further commands.");
-    }
-    else
-    {
-        Console.WriteLine($"[Server]: Failed to connect to sensor on {comPort}.");
-    }
-
-    return Task.CompletedTask;
-}
-
-
-
-
-private void HandleCalibrateCommand()
-{
-    lock (syncLock)
-    {
-        if (!isSensorConnected)
+        public Task HandleConnectCommandAsync(CancellationToken cancellationToken)
         {
-            Console.WriteLine("[Server]: No sensor connected. Use 'connect' command first.");
-            return;
+            Console.WriteLine("[Server]: Scanning available COM ports...");
+            var ports = SensorAdapter.ScanPorts();
+
+            if (ports.Count == 0)
+            {
+                Console.WriteLine("[Server]: No available COM ports.");
+                return Task.CompletedTask;
+            }
+
+            int deviceCount = 2; // Number of devices to connect
+            for (int i = 1; i <= deviceCount; i++)
+            {
+                Console.Write($"[Server]: Enter the COM port to connect to Device {i}: ");
+                string comPort = Console.ReadLine()?.Trim();
+
+                if (!ports.Contains(comPort))
+                {
+                    Console.WriteLine($"[Server]: Invalid COM port '{comPort}'. Skipping Device {i}.");
+                    continue;
+                }
+
+                // Check if this port is already connected
+                if (connectedDevices.Any(d => d.Path == comPort))
+                {
+                    Console.WriteLine($"[Server]: Device on {comPort} is already connected. Skipping.");
+                    continue;
+                }
+
+                var connectedDevice = Manager.Connect(comPort);
+                if (connectedDevice != null)
+                {
+                    connectedDevices.Add(connectedDevice); // Add device to the list
+                    sensorAdapters.Add(connectedDevice.SensorAdapter); // Store adapter reference
+                    Console.WriteLine($"[Server]: Device {connectedDevice.Name} connected successfully on {comPort}.");
+                }
+                else
+                {
+                    Console.WriteLine($"[Server]: Failed to connect to device on {comPort}.");
+                }
+            }
+
+            Console.WriteLine("[Server]: All devices connected. Waiting for further commands.");
+            return Task.CompletedTask;
         }
-
-        if (isCalibrating)
-        {
-            Console.WriteLine("[Server]: Calibration is already in progress.");
-            return;
-        }
-
-        if (!isAcquiringData) // Start the data stream if not already running
-        {
-            Console.WriteLine("[Server]: Starting data stream for calibration...");
-            StartDataStream();
-        }
-
-        isCalibrating = true; // Set the flag to indicate calibration in progress
-    }
-
-    try
-    {
-        bool success = sensorAdapter.Calibrate();
-        Console.WriteLine(success ? "[Server]: Sensor calibrated successfully." : "[Server]: Sensor calibration failed.");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"[Server]: Error during calibration: {ex.Message}");
-    }
-    finally
-    {
-        lock (syncLock)
-        {
-            isCalibrating = false;
-        }
-    }
-}
-
-
 
         /// <summary>
-        /// Starts data acquisition from the sensor.
+        /// Handles the calibrate command.
         /// </summary>
-        private void StartDataStream()
-{
-    lock (syncLock)
-    {
-        if (isAcquiringData)
+        public void HandleCalibrateCommand()
         {
-            Console.WriteLine("[Server]: Data acquisition is already running.");
-            return;
+            lock (syncLock)
+            {
+                if (!connectedDevices.Any())
+                {
+                    Console.WriteLine("[Server]: No devices connected. Use 'connect' command first.");
+                    return;
+                }
+
+                if (isCalibrating)
+                {
+                    Console.WriteLine("[Server]: Calibration is already in progress.");
+                    return;
+                }
+            }
+
+            foreach (var device in connectedDevices)
+            {
+                Console.WriteLine($"[Server]: Calibrating device {device.Name}...");
+                device.Calibrate();
+            }
+
+            Console.WriteLine("[Server]: Calibration complete for all connected devices.");
         }
 
-        isAcquiringData = true;
-    }
-    try
-    {
-        sensorAdapter.StartSensorStream();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"[Server]: Error starting data stream: {ex.Message}");
-        lock (syncLock) { isAcquiringData = false; }
-    }
-}
+        /// <summary>
+        /// Starts data acquisition for all connected devices.
+        /// </summary>
+        private void StartDataStream()
+        {
+            lock (syncLock)
+            {
+                if (isAcquiringData)
+                {
+                    Console.WriteLine("[Server]: Data acquisition is already running.");
+                    return;
+                }
+
+                isAcquiringData = true;
+            }
+
+            foreach (var device in connectedDevices)
+            {
+                Console.WriteLine($"[Server]: Starting data stream for device {device.Name}...");
+                device.Start();
+            }
+        }
 
         /// <summary>
         /// Handles the start command to begin visualization.
         /// </summary>
         private void HandleStartVisualizationCommand()
         {
-            lock (syncLock)
+            if (!connectedDevices.Any())
             {
-                if (!isSensorConnected)
-                {
-                    Console.WriteLine("[Server]: No sensor connected. Use 'connect' command first.");
-                    return;
-                }
-
-                if (!isAcquiringData)
-                {
-                    Console.WriteLine("[Server]: Data stream is not running. Use 'calibrate' first to start the stream.");
-                    return;
-                }
-
-                Console.WriteLine("[Server]: Visualization will be handled by the client.");
+                Console.WriteLine("[Server]: No devices connected. Use 'connect' command first.");
+                return;
             }
+
+            StartDataStream();
+            Console.WriteLine("[Server]: Data stream started for all devices.");
         }
 
         /// <summary>
-        /// Stops data acquisition from the sensor.
+        /// Handles the stop command to stop all device data streams.
         /// </summary>
         private void HandleStopCommand()
         {
+            foreach (var device in connectedDevices)
+            {
+                Console.WriteLine($"[Server]: Stopping data stream for device {device.Name}...");
+                device.Stop();
+            }
+
             lock (syncLock)
             {
-                if (!isSensorConnected || !isAcquiringData)
-                {
-                    Console.WriteLine("[Server]: No data acquisition in progress to stop.");
-                    return;
-                }
-
                 isAcquiringData = false;
             }
 
-            Console.WriteLine("[Server]: Stopping data stream...");
-            try
-            {
-                sensorAdapter.StopSensorStream();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Server]: Error stopping data stream: {ex.Message}");
-            }
+            Console.WriteLine("[Server]: Data streams stopped for all devices.");
         }
 
         /// <summary>

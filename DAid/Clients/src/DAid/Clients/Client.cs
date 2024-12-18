@@ -44,7 +44,7 @@ namespace DAid.Clients
                             await HandleConnectCommandAsync(cancellationToken);
                             break;
                         case "calibrate":
-                            await HandleCalibrateCommandAsync(cancellationToken);
+                            HandleCalibrateCommand();
                             break;
                         case "start":
                             HandleStartCommand();
@@ -67,11 +67,11 @@ namespace DAid.Clients
         private async Task HandleConnectCommandAsync(CancellationToken cancellationToken)
         {
             Console.WriteLine("Connecting to the server...");
-            await _server.HandleCommandAsync("connect", cancellationToken);
+            await _server.HandleConnectCommandAsync(cancellationToken); // Explicitly call HandleConnectCommandAsync
             Console.WriteLine("Connection completed. Use 'calibrate' to start calibration.");
         }
 
-        private async Task HandleCalibrateCommandAsync(CancellationToken cancellationToken)
+        private void HandleCalibrateCommand()
         {
             if (_isCalibrated)
             {
@@ -80,10 +80,10 @@ namespace DAid.Clients
             }
 
             Console.WriteLine("Calibrating sensors...");
-            await _server.HandleCommandAsync("calibrate", cancellationToken);
-
+            _server.HandleCalibrateCommand(); // Call calibration method from Server
             _isCalibrated = true;
-            Console.WriteLine("Calibration completed. Data stream will remain active. Use 'start' to begin visualization.");
+
+            Console.WriteLine("Calibration completed. Use 'start' to begin visualization.");
         }
 
         private void HandleStartCommand()
@@ -137,28 +137,27 @@ namespace DAid.Clients
             }
         }
 
-    private void SubscribeToDeviceUpdates()
-{
-    var activeDevice = _server.Manager.GetActiveDevice();
+        private void SubscribeToDeviceUpdates()
+        {
+            var activeDevices = _server.Manager.GetAllDevices();
 
-    if (activeDevice == null)
-    {
-        Console.WriteLine("[Client]: No active device to subscribe to.");
-        return;
-    }
+            if (!activeDevices.Any())
+            {
+                Console.WriteLine("[Client]: No active devices to subscribe to.");
+                return;
+            }
 
-    activeDevice.CoPUpdated -= OnCoPUpdated;
-    activeDevice.CoPUpdated += OnCoPUpdated;
+            foreach (var device in activeDevices)
+            {
+                device.CoPUpdated -= OnCoPUpdated; // Avoid duplicate subscriptions
+                device.CoPUpdated += OnCoPUpdated;
 
-    Console.WriteLine($"[Client]: Subscribed to CoP updates for Device: {activeDevice.Name}");
-}
-
-
-
+                Console.WriteLine($"[Client]: Subscribed to CoP updates for Device: {device.Name}");
+            }
+        }
 
         private void OnCoPUpdated(object sender, (double CoPX, double CoPY, double[] Pressures) copData)
         {
-
             if (_visualizationWindow == null || _visualizationWindow.IsDisposed) return;
 
             _visualizationWindow.Invoke(new Action(() =>

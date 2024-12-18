@@ -20,9 +20,9 @@ namespace DAid.Servers
 
         public bool IsConnected { get; private set; }
         public bool IsStreaming { get; private set; } // Tracks streaming state
-        public string Path => path;
+        public string Path => path;                  // COM port path
         public float Frequency { get; private set; }
-        public string Name { get; private set; }
+        public string Name { get; private set; }     // Device name for identification
 
         // Expose the SensorAdapter as a read-only property
         public SensorAdapter SensorAdapter => sensorAdapter;
@@ -39,7 +39,7 @@ namespace DAid.Servers
 
         private void InitializeSensorAdapter()
         {
-            sensorAdapter = new SensorAdapter();
+            sensorAdapter = new SensorAdapter(Name); // Pass device Name as deviceId
 
             // Subscribe to events
             sensorAdapter.RawDataReceived += OnRawDataReceived;
@@ -134,29 +134,6 @@ namespace DAid.Servers
             }
         }
 
-        public double[] GetSensorPressures()
-        {
-            if (!IsConnected || !IsStreaming)
-            {
-                logger.Warn($"Attempted to get sensor pressures for device {Name} while not streaming.");
-                return Array.Empty<double>();
-            }
-
-            return sensorAdapter.GetSensorPressures();
-        }
-
-        private void OnRawDataReceived(object sender, string rawData)
-        {
-            // Ensure RawDataReceived is triggered asynchronously
-            Task.Run(() => RawDataReceived?.Invoke(this, rawData));
-        }
-
-        private void OnCoPUpdated(object sender, (double CoPX, double CoPY, double[] Pressures) copData)
-        {
-
-            CoPUpdated?.Invoke(this, copData); // Ensure this event is invoked
-        }
-
         public void Calibrate()
         {
             lock (_syncLock)
@@ -177,6 +154,29 @@ namespace DAid.Servers
                     logger.Warn($"Calibration failed for device {Name}.");
                 }
             }
+        }
+
+        private void OnRawDataReceived(object sender, string rawData)
+        {
+            // Trigger RawDataReceived event for this device
+            Task.Run(() => RawDataReceived?.Invoke(this, rawData));
+        }
+
+        private void OnCoPUpdated(object sender, (double CoPX, double CoPY, double[] Pressures) copData)
+        {
+            // Trigger CoPUpdated event for this device
+            CoPUpdated?.Invoke(this, copData);
+        }
+
+        public double[] GetSensorPressures()
+        {
+            if (!IsConnected || !IsStreaming)
+            {
+                logger.Warn($"Attempted to get sensor pressures for device {Name} while not streaming.");
+                return Array.Empty<double>();
+            }
+
+            return sensorAdapter.GetSensorPressures();
         }
     }
 }

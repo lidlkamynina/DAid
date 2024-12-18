@@ -26,12 +26,24 @@ public class SensorAdapter
     private double[] sensorOffsets = new double[4];
     private bool isStreaming = false;
     private readonly object syncLock = new object();
+    public string DeviceId { get; } 
+
+    private bool moduleNameRetrieved = false;
 
     public event EventHandler<string> RawDataReceived;
     public event EventHandler<(double CoPX, double CoPY, double[] Pressures)> CoPUpdated;
 
+      public SensorAdapter(string deviceId)
+    {
+        DeviceId = deviceId ?? throw new ArgumentNullException(nameof(deviceId));
+    }
     public void Initialize(string comPort, int baudRate = DefaultBaudRate)
     {
+            if (serialPort != null && serialPort.IsOpen)
+            {
+                Console.WriteLine($"[SensorAdapter {DeviceId}]: Serial port already initialized.");
+                return;
+            }
         try
         {
             serialPort = new SerialPort(comPort, baudRate)
@@ -73,11 +85,18 @@ public class SensorAdapter
     {
         lock (syncLock)
         {
-            StopSensorStream();
             if (serialPort != null && serialPort.IsOpen)
             {
-                serialPort.Close();
-                Console.WriteLine("[SensorAdapter]: Serial port closed.");
+                try
+                {
+                    StopSensorStream();
+                    serialPort.Close();
+                    Console.WriteLine($"[SensorAdapter {DeviceId}]: Serial port closed.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[SensorAdapter {DeviceId}]: Error closing serial port: {ex.Message}");
+                }
             }
         }
     }
@@ -90,7 +109,6 @@ public class SensorAdapter
             {
                 SendCommand("BT^START");
                 isStreaming = true;
-                Console.WriteLine("[SensorAdapter]: Data stream started.");
             }
         }
     }
@@ -118,8 +136,6 @@ public class SensorAdapter
 
     public bool Calibrate()
     {
-        Console.WriteLine("[SensorAdapter]: Starting calibration...");
-         RetrieveModuleName();
         double[] sumValues = new double[SensorPositions.Length];
         int sampleCount = 0;
         DateTime startTime = DateTime.Now;
@@ -139,7 +155,6 @@ public class SensorAdapter
             }
             Thread.Sleep(100);
         }
- RetrieveModuleName();
         if (sampleCount > 0)
         {
             for (int i = 0; i < SensorPositions.Length; i++)
@@ -154,27 +169,34 @@ public class SensorAdapter
 
     private void SendCommand(string command)
     {
-        try
+          lock (syncLock)
         {
-            if (serialPort != null && serialPort.IsOpen)
+            try
             {
-                serialPort.WriteLine(command + "\r");
-                Console.WriteLine($"[SensorAdapter]: Command sent: {command}");
+                if (serialPort?.IsOpen == true)
+                {
+                    serialPort.WriteLine(command + "\r");
+                    Console.WriteLine($"[SensorAdapter {DeviceId}]: Command sent: {command}");
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[SensorAdapter]: Error sending command '{command}': {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SensorAdapter {DeviceId}]: Error sending command '{command}': {ex.Message}");
+            }
         }
     }
 
+
 private void RetrieveModuleName()
 {
+    if (moduleNameRetrieved) return;
+
+        lock (syncLock)
+        {
+
     try
     {
         Console.WriteLine("[SensorAdapter]: Retrieving module name...");
-        Thread.Sleep(500); // Allow time for the reset to process
-
         serialPort.DiscardInBuffer(); // Clear input buffer
         SendCommand("BTS6?");
         Thread.Sleep(1000); // Allow sufficient time for response
@@ -182,17 +204,10 @@ private void RetrieveModuleName()
         int bytesToRead = serialPort.BytesToRead;
         if (bytesToRead > 0)
         {
-            // Read the incoming raw data
             byte[] incomingData = new byte[bytesToRead];
             serialPort.Read(incomingData, 0, bytesToRead);
-
-            // Print the raw response in hex for debugging
-            Console.WriteLine($"Raw BTS6 Response (Hex): {BitConverter.ToString(incomingData)}");
-
             // Convert raw hex to ASCII, filtering out non-printable characters
             string response = Encoding.ASCII.GetString(incomingData).Trim();
-            Console.WriteLine($"[SensorAdapter]: Parsed Response: {response}");
-
             // Search for the line containing the module name
             foreach (var line in response.Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries))
             {
@@ -203,25 +218,16 @@ private void RetrieveModuleName()
                     if (index != -1 && index + 1 < line.Length)
                     {
                         string moduleValue = line.Substring(index + 1).Trim();
-                        Console.WriteLine($"[SensorAdapter]: Raw Module Value: {moduleValue}");
-
-                        // Try to parse module name as an integer
                         if (int.TryParse(moduleValue, out int moduleNumber))
                         {
                             moduleName = moduleNumber.ToString();
-                            Console.WriteLine($"Module name retrieved successfully: {moduleName}");
+                            Console.WriteLine($"[SensorAdapter {DeviceId}]: Module name retrieved: {moduleName}");
                             CheckLeftOrRight(moduleNumber);
-                        }
-                        else
-                        {
-                            Console.WriteLine($"[SensorAdapter]: Module name is not a valid number: {moduleValue}");
                         }
                         return; // Exit after processing
                     }
                 }
             }
-
-            Console.WriteLine("[SensorAdapter]: No valid module name found in response.");
         }
         else
         {
@@ -233,8 +239,7 @@ private void RetrieveModuleName()
         Console.WriteLine($"[SensorAdapter]: Error retrieving module name: {ex.Message}");
     }
 }
-
-
+}
 
  private void CheckLeftOrRight(int moduleNumber)
 {
@@ -248,23 +253,26 @@ private void RetrieveModuleName()
     }
 }
 
-
-    private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+{
+    try
     {
-        try
+        int bytesToRead = serialPort.BytesToRead;
+        byte[] incomingData = new byte[bytesToRead];
+        serialPort.Read(incomingData, 0, bytesToRead);
+        RawDataReceived?.Invoke(this, BitConverter.ToString(incomingData));
+        ProcessIncomingData(incomingData);
+        if (!moduleNameRetrieved)
         {
-            int bytesToRead = serialPort.BytesToRead;
-            byte[] incomingData = new byte[bytesToRead];
-            serialPort.Read(incomingData, 0, bytesToRead);
-            RawDataReceived?.Invoke(this, BitConverter.ToString(incomingData));
-            ProcessIncomingData(incomingData);
             RetrieveModuleName();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[SensorAdapter]: Error receiving data: {ex.Message}");
+            moduleNameRetrieved = true; 
         }
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[SensorAdapter]: Error receiving data: {ex.Message}");
+    }
+}
 
     private void ProcessIncomingData(byte[] incomingData)
     {
