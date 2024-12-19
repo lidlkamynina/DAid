@@ -2,6 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
+using System.Linq;
+
 
 namespace DAid.Servers
 {
@@ -16,9 +18,15 @@ namespace DAid.Servers
         private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
         public event EventHandler<string> RawDataReceived;
-        public event EventHandler<(double CoPX, double CoPY, double[] Pressures)> CoPUpdated;
+        public event EventHandler<(string DeviceName, double CoPX, double CoPY, double[] Pressures)> CoPUpdated;
+
 
         public bool IsConnected { get; private set; }
+      public string ModuleName { get; private set; } = "Unknown";
+public bool IsLeftSock { get; private set; } = false;
+
+
+
         public bool IsStreaming { get; private set; } // Tracks streaming state
         public string Path => path;                  // COM port path
         public float Frequency { get; private set; }
@@ -27,51 +35,71 @@ namespace DAid.Servers
         // Expose the SensorAdapter as a read-only property
         public SensorAdapter SensorAdapter => sensorAdapter;
 
-        public Device(string path, float frequency, string name)
-        {
-            this.path = path ?? throw new ArgumentNullException(nameof(path));
-            this.baudRate = (int)frequency;
-            this.Frequency = frequency;
-            this.Name = name ?? throw new ArgumentNullException(nameof(name));
+     public Device(string path, float frequency, string name)
+{
+    this.path = path ?? throw new ArgumentNullException(nameof(path));
+    this.baudRate = (int)frequency;
+    this.Frequency = frequency;
+    this.Name = name ?? throw new ArgumentNullException(nameof(name));
 
-            InitializeSensorAdapter();
-        }
+    ModuleName = "Unknown"; // Default value before retrieving module info
+    IsLeftSock = false;     // Default to right sock until determined
+    InitializeSensorAdapter();
+}
 
-        private void InitializeSensorAdapter()
-        {
-            sensorAdapter = new SensorAdapter(Name); // Pass device Name as deviceId
+   private void InitializeSensorAdapter()
+{
+    sensorAdapter = new SensorAdapter(Name);
 
-            // Subscribe to events
-            sensorAdapter.RawDataReceived += OnRawDataReceived;
-            sensorAdapter.CoPUpdated += OnCoPUpdated;
+    // Subscribe to events
+    sensorAdapter.RawDataReceived += OnRawDataReceived;
+    sensorAdapter.CoPUpdated += OnCoPUpdated;
 
-            logger.Info($"SensorAdapter initialized for device {Name} on {path} with baud rate {baudRate}.");
-        }
-
+    sensorAdapter.ModuleInfoUpdated += (sender, moduleInfo) =>
+    {
+        ModuleName = moduleInfo.ModuleName;
+        IsLeftSock = moduleInfo.IsLeftSock;
+        logger.Info($"Device {ModuleName} updated: IsLeftSock={IsLeftSock}");
+    };
+}
         public void Connect()
+{
+    lock (_syncLock)
+    {
+        if (IsConnected)
         {
-            lock (_syncLock)
-            {
-                if (IsConnected)
-                {
-                    logger.Info($"Device {Name} on {path} is already connected.");
-                    return;
-                }
-
-                logger.Info($"Connecting to device {Name} on {path}...");
-                try
-                {
-                    sensorAdapter.Initialize(path, baudRate);
-                    IsConnected = true;
-                    logger.Info($"Device {Name} successfully connected on {path}.");
-                }
-                catch (Exception ex)
-                {
-                    logger.Error($"Failed to connect to device {Name} on {path}: {ex.Message}");
-                    IsConnected = false;
-                }
-            }
+            logger.Info($"Device {Name} on {path} is already connected.");
+            return;
         }
+
+        logger.Info($"Connecting to device {Name} on {path}...");
+        try
+        {
+            sensorAdapter.Initialize(path, baudRate);
+
+            // Retrieve module name
+            sensorAdapter.RetrieveModuleName();
+            while (!sensorAdapter.moduleNameRetrieved)
+            {
+                Thread.Sleep(500); // Wait for retrieval
+            }
+
+            // Persist module information
+            ModuleName = sensorAdapter.ModuleName;
+            IsLeftSock = int.TryParse(ModuleName, out int moduleNumber) && moduleNumber % 2 != 0;
+
+            logger.Info($"Device {ModuleName} is a {(IsLeftSock ? "Left" : "Right")} sock.");
+            IsConnected = true;
+        }
+        catch (Exception ex)
+        {
+            logger.Error($"Failed to connect to device on {path}: {ex.Message}");
+            IsConnected = false;
+        }
+    }
+}
+
+
 
         public void Start()
         {
@@ -134,27 +162,25 @@ namespace DAid.Servers
             }
         }
 
-        public void Calibrate()
+        public bool Calibrate()
+{    try
+    {
+        bool success = sensorAdapter.Calibrate();
+        if (success)
         {
-            lock (_syncLock)
-            {
-                if (!IsConnected)
-                {
-                    logger.Warn($"Cannot calibrate device {Name} because it is not connected.");
-                    return;
-                }
-
-                logger.Info($"Starting calibration for device {Name}...");
-                if (sensorAdapter.Calibrate())
-                {
-                    logger.Info($"Calibration completed successfully for device {Name}.");
-                }
-                else
-                {
-                    logger.Warn($"Calibration failed for device {Name}.");
-                }
-            }
+            return true;
         }
+        else
+        {
+            return false;
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[Device {Name}]: Error during calibration: {ex.Message}");
+        return false;
+    }
+}
 
         private void OnRawDataReceived(object sender, string rawData)
         {
@@ -162,11 +188,21 @@ namespace DAid.Servers
             Task.Run(() => RawDataReceived?.Invoke(this, rawData));
         }
 
-        private void OnCoPUpdated(object sender, (double CoPX, double CoPY, double[] Pressures) copData)
-        {
-            // Trigger CoPUpdated event for this device
-            CoPUpdated?.Invoke(this, copData);
-        }
+       private void OnCoPUpdated(object sender, (double CoPX, double CoPY, double[] Pressures) copData)
+{
+    if (sender == sensorAdapter)
+    {
+        string sockType = IsLeftSock ? "Left Sock" : "Right Sock";
+
+        // Forward the CoP data with device name
+        CoPUpdated?.Invoke(this, (Name, copData.CoPX, copData.CoPY, copData.Pressures));
+    }
+    else
+    {
+        Console.WriteLine("[Device]: CoP update received from an unknown source.");
+    }
+}
+
 
         public double[] GetSensorPressures()
         {

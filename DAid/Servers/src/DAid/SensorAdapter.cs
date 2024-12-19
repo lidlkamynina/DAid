@@ -15,10 +15,14 @@ public class SensorAdapter
 
     private readonly byte[] buffer = new byte[1024];
     private string moduleName = "Unknown";
+    public string ModuleName => moduleName; 
     private int bufferPos = 0;
 
     private const int DefaultBaudRate = 92600;
-    private readonly int[] SensorPositions = { 30, 32, 38, 40 };
+    private readonly int[] RightSensorPositions = { 30, 32, 38, 40 };
+    private readonly int[] LeftSensorPositions = { 32, 30, 40, 38 };
+    private int[] SensorPositions;
+
     private readonly double[] XPositions = { 6.0, -6.0, 6.0, -6.0 };
     private readonly double[] YPositions = { 2.0, 2.0, -2.0, -2.0 };
 
@@ -28,7 +32,9 @@ public class SensorAdapter
     private readonly object syncLock = new object();
     public string DeviceId { get; } 
 
-    private bool moduleNameRetrieved = false;
+    public bool moduleNameRetrieved = false;
+    
+    public event EventHandler<(string ModuleName, bool IsLeftSock)> ModuleInfoUpdated;
 
     public event EventHandler<string> RawDataReceived;
     public event EventHandler<(double CoPX, double CoPY, double[] Pressures)> CoPUpdated;
@@ -36,6 +42,7 @@ public class SensorAdapter
       public SensorAdapter(string deviceId)
     {
         DeviceId = deviceId ?? throw new ArgumentNullException(nameof(deviceId));
+        SensorPositions = RightSensorPositions;
     }
     public void Initialize(string comPort, int baudRate = DefaultBaudRate)
     {
@@ -71,7 +78,6 @@ public class SensorAdapter
         try
         {
             var ports = SerialPort.GetPortNames().ToList();
-            Console.WriteLine($"[SensorAdapter]: Available ports: {string.Join(", ", ports)}");
             return ports;
         }
         catch (Exception ex)
@@ -135,37 +141,42 @@ public class SensorAdapter
     }
 
     public bool Calibrate()
+{
+    double[] sumValues = new double[SensorPositions.Length];
+    int sampleCount = 0; // Declare sampleCount
+    DateTime startTime = DateTime.Now;
+    while ((DateTime.Now - startTime).TotalSeconds < 10)
     {
-        double[] sumValues = new double[SensorPositions.Length];
-        int sampleCount = 0;
-        DateTime startTime = DateTime.Now;
-
-        while ((DateTime.Now - startTime).TotalSeconds < 10)
+        lock (syncLock)
         {
-            lock (syncLock)
+            // Validate that all sensor resistances are greater than 0
+            if (sensorResistance.All(r => r > 0))
             {
-                if (sensorResistance.All(r => r > 0))
+                for (int i = 0; i < SensorPositions.Length; i++)
                 {
-                    for (int i = 0; i < SensorPositions.Length; i++)
-                    {
-                        sumValues[i] += 1.0 / sensorResistance[i];
-                    }
-                    sampleCount++;
+                    sumValues[i] += 1.0 / sensorResistance[i];
                 }
+                sampleCount++; // Increment sampleCount for valid samples
             }
-            Thread.Sleep(100);
         }
-        if (sampleCount > 0)
-        {
-            for (int i = 0; i < SensorPositions.Length; i++)
-            {
-                sensorOffsets[i] = sumValues[i] / sampleCount;
-                Console.WriteLine($"[Calibration]: Sensor {i + 1} Offset: {sensorOffsets[i]:F2}");
-            }
-            return true;
-        }
-        return false;
+        Thread.Sleep(100); // Wait for the next sample
     }
+    if (sampleCount > 0)
+    {
+        for (int i = 0; i < SensorPositions.Length; i++)
+        {
+            sensorOffsets[i] = sumValues[i] / sampleCount;
+            Console.WriteLine($"[Calibration]: Sensor {i + 1} Offset: {sensorOffsets[i]:F2}");
+        }
+        Console.WriteLine("[Calibration]: Calibration completed successfully.");
+        return true;
+    }
+
+    Console.WriteLine("[Calibration]: Calibration failed. No valid samples collected.");
+    return false;
+}
+
+
 
     private void SendCommand(string command)
     {
@@ -176,7 +187,6 @@ public class SensorAdapter
                 if (serialPort?.IsOpen == true)
                 {
                     serialPort.WriteLine(command + "\r");
-                    Console.WriteLine($"[SensorAdapter {DeviceId}]: Command sent: {command}");
                 }
             }
             catch (Exception ex)
@@ -187,71 +197,71 @@ public class SensorAdapter
     }
 
 
-private void RetrieveModuleName()
+public void RetrieveModuleName()
 {
     if (moduleNameRetrieved) return;
 
-        lock (syncLock)
-        {
-
-    try
+    lock (syncLock)
     {
-        Console.WriteLine("[SensorAdapter]: Retrieving module name...");
-        serialPort.DiscardInBuffer(); // Clear input buffer
-        SendCommand("BTS6?");
-        Thread.Sleep(1000); // Allow sufficient time for response
-
-        int bytesToRead = serialPort.BytesToRead;
-        if (bytesToRead > 0)
+        try
         {
-            byte[] incomingData = new byte[bytesToRead];
-            serialPort.Read(incomingData, 0, bytesToRead);
-            // Convert raw hex to ASCII, filtering out non-printable characters
-            string response = Encoding.ASCII.GetString(incomingData).Trim();
-            // Search for the line containing the module name
-            foreach (var line in response.Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries))
+            serialPort.DiscardInBuffer();
+            SendCommand("BTS6?");
+            Thread.Sleep(1000);
+
+            int bytesToRead = serialPort.BytesToRead;
+            if (bytesToRead > 0)
             {
-                if (line.IndexOf("Register 6 value:", StringComparison.OrdinalIgnoreCase) >= 0)
+                byte[] incomingData = new byte[bytesToRead];
+                serialPort.Read(incomingData, 0, bytesToRead);
+
+                string response = Encoding.ASCII.GetString(incomingData).Trim();
+                foreach (var line in response.Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    // Extract the module name after the colon
-                    int index = line.IndexOf(':');
-                    if (index != -1 && index + 1 < line.Length)
+                    if (line.IndexOf("Register 6 value:", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        string moduleValue = line.Substring(index + 1).Trim();
-                        if (int.TryParse(moduleValue, out int moduleNumber))
+                        int index = line.IndexOf(':');
+                        if (index != -1 && index + 1 < line.Length)
                         {
-                            moduleName = moduleNumber.ToString();
-                            Console.WriteLine($"[SensorAdapter {DeviceId}]: Module name retrieved: {moduleName}");
-                            CheckLeftOrRight(moduleNumber);
+                            string moduleValue = line.Substring(index + 1).Trim();
+                            if (int.TryParse(moduleValue, out int moduleNumber))
+                            {
+                                moduleName = moduleValue;
+                                moduleNameRetrieved = true;
+
+                                bool isLeftSock = moduleNumber % 2 != 0;
+                                SensorPositions = isLeftSock ? LeftSensorPositions : RightSensorPositions;
+
+                                // Emit the event to notify listeners
+                                ModuleInfoUpdated?.Invoke(this, (moduleName, isLeftSock));
+                                return;
+                            }
                         }
-                        return; // Exit after processing
                     }
                 }
             }
         }
-        else
+        catch (Exception ex)
         {
-            Console.WriteLine("[SensorAdapter]: No data received for module name.");
+            Console.WriteLine($"[SensorAdapter]: Error retrieving module name: {ex.Message}");
         }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"[SensorAdapter]: Error retrieving module name: {ex.Message}");
-    }
 }
-}
+
 
  private void CheckLeftOrRight(int moduleNumber)
 {
     if (moduleNumber % 2 == 0)
     {
-        Console.WriteLine("[SensorAdapter]: This module corresponds to: Right");
+        SensorPositions = RightSensorPositions; // Use normal sensor order
     }
     else
     {
-        Console.WriteLine("[SensorAdapter]: This module corresponds to: Left");
+        SensorPositions = LeftSensorPositions; // Reverse sensor order for left sock
     }
 }
+
+public event EventHandler<string> ModuleNameRetrieved; // Event to notify when the module name is retrieved
 
 private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
 {
@@ -262,10 +272,16 @@ private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         serialPort.Read(incomingData, 0, bytesToRead);
         RawDataReceived?.Invoke(this, BitConverter.ToString(incomingData));
         ProcessIncomingData(incomingData);
+
         if (!moduleNameRetrieved)
         {
             RetrieveModuleName();
-            moduleNameRetrieved = true; 
+
+            if (moduleName != "Unknown") // Ensure the module name was successfully retrieved
+            {
+                moduleNameRetrieved = true;
+                ModuleNameRetrieved?.Invoke(this, moduleName); // Notify listeners
+            }
         }
     }
     catch (Exception ex)
@@ -273,6 +289,7 @@ private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         Console.WriteLine($"[SensorAdapter]: Error receiving data: {ex.Message}");
     }
 }
+
 
     private void ProcessIncomingData(byte[] incomingData)
     {

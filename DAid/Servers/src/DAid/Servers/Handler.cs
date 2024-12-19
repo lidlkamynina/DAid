@@ -101,23 +101,24 @@ namespace DAid.Servers
         /// Stops the handler and disconnects clients.
         /// </summary>
         public void Stop()
+{
+    lock (syncLock)
+    {
+        Console.WriteLine("[Handler]: Stopping handler.");
+        logger.Info("[Handler]: Stopping handler.");
+
+        foreach (var device in devices.Keys)
         {
-            lock (syncLock)
-            {
-                Console.WriteLine("[Handler]: Stopping handler.");
-                logger.Info("[Handler]: Stopping handler.");
-
-                foreach (var device in devices.Keys)
-                {
-                    device.RawDataReceived -= OnRawDataReceived;
-                    device.CoPUpdated -= OnCoPUpdated;
-                }
-
-                devices.Clear();
-                logger.Info("[Handler]: Handler stopped and devices cleared.");
-                Console.WriteLine("[Handler]: Handler stopped and devices cleared.");
-            }
+            device.RawDataReceived -= OnRawDataReceived;
+            device.CoPUpdated -= OnCoPUpdated; // Unsubscribe from CoP updates
         }
+
+        devices.Clear();
+        logger.Info("[Handler]: Handler stopped and devices cleared.");
+        Console.WriteLine("[Handler]: Handler stopped and devices cleared.");
+    }
+}
+
 
         /// <summary>
         /// Handles raw data received from devices.
@@ -133,17 +134,25 @@ namespace DAid.Servers
         /// <summary>
         /// Handles CoP and pressure data updates from devices.
         /// </summary>
-        private void OnCoPUpdated(object sender, (double CoPX, double CoPY, double[] Pressures) copData)
+        private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double CoPY, double[] Pressures) copData)
+{
+    if (sender is Device device)
+    {
+        lock (syncLock)
         {
-            if (sender is Device device)
-            {
-                lock (syncLock)
-                {
-                    string pressures = string.Join(", ", copData.Pressures.Select(p => p.ToString("F2")));
-                    Console.WriteLine($"[Handler]: CoP from device {device.Name} -> X: {copData.CoPX:F2}, Y: {copData.CoPY:F2}, Pressures: {pressures}");
-                }
-            }
+            string pressures = string.Join(", ", copData.Pressures.Select(p => p.ToString("F2")));
+            string sockType = device.IsLeftSock ? "Left Sock" : "Right Sock";
+
+            Console.WriteLine($"[Handler]: {sockType} - Device {copData.DeviceName} -> CoP: X={copData.CoPX:F2}, Y={copData.CoPY:F2}, Pressures: {pressures}");
         }
+    }
+    else
+    {
+        Console.WriteLine("[Handler]: CoP update received from an unknown source.");
+    }
+}
+
+
 
         /// <summary>
         /// Prepares the response buffer with device information.
@@ -176,16 +185,24 @@ namespace DAid.Servers
         /// Registers devices with internal caches and connects them.
         /// </summary>
         private void RegisterDevices(IEnumerable<Device> devicesToRegister)
+{
+    foreach (var device in devicesToRegister)
+    {
+        if (!devices.ContainsKey(device))
         {
-            foreach (var device in devicesToRegister)
-            {
-                if (!devices.ContainsKey(device))
-                {
-                    devices[device] = new Cache(0, new byte[0]);
-                    Console.WriteLine($"[Handler]: Registering and connecting device {device.Name} at {device.Path}");
-                    device.Connect();
-                }
-            }
+            devices[device] = new Cache(0, new byte[0]);
+            Console.WriteLine($"[Handler]: Registering and connecting device at {device.Path}");
+
+            device.Connect();
+
+            // Subscribe to raw data and CoP updates
+            device.RawDataReceived += OnRawDataReceived;
+            device.CoPUpdated += OnCoPUpdated;
+
+            // Log device information after connection
+            Console.WriteLine($"[Handler]: Device {device.ModuleName} connected as {(device.IsLeftSock ? "Left" : "Right")} Sock.");
         }
+    }
+}
     }
 }

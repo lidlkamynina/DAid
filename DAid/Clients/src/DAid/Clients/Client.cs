@@ -64,12 +64,25 @@ namespace DAid.Clients
             }
         }
 
-        private async Task HandleConnectCommandAsync(CancellationToken cancellationToken)
+      private async Task HandleConnectCommandAsync(CancellationToken cancellationToken)
+{
+    Console.WriteLine("[Client]: Requesting available COM ports from the server...");
+
+    // Call the server's HandleConnectCommandAsync and handle the received COM ports
+    await _server.HandleConnectCommandAsync(
+        cancellationToken,
+        async ports =>
         {
-            Console.WriteLine("Connecting to the server...");
-            await _server.HandleConnectCommandAsync(cancellationToken); // Explicitly call HandleConnectCommandAsync
-            Console.WriteLine("Connection completed. Use 'calibrate' to start calibration.");
-        }
+            // Print the available COM ports to the console
+            Console.WriteLine("[Client]: Available COM ports:");
+            foreach (var port in ports)
+            {
+                Console.WriteLine($"- {port}");
+            }
+            await Task.CompletedTask; // Ensures the delegate matches the signature
+        });
+}
+
 
         private void HandleCalibrateCommand()
         {
@@ -79,8 +92,8 @@ namespace DAid.Clients
                 return;
             }
 
-            Console.WriteLine("Calibrating sensors...");
-            _server.HandleCalibrateCommand(); // Call calibration method from Server
+            Console.WriteLine("Requesting server to calibrate connected devices...");
+            _server.HandleCalibrateCommand();
             _isCalibrated = true;
 
             Console.WriteLine("Calibration completed. Use 'start' to begin visualization.");
@@ -139,7 +152,7 @@ namespace DAid.Clients
 
         private void SubscribeToDeviceUpdates()
         {
-            var activeDevices = _server.Manager.GetAllDevices();
+            var activeDevices = _server.Manager.GetConnectedDevices();
 
             if (!activeDevices.Any())
             {
@@ -149,21 +162,43 @@ namespace DAid.Clients
 
             foreach (var device in activeDevices)
             {
-                device.CoPUpdated -= OnCoPUpdated; // Avoid duplicate subscriptions
+                device.CoPUpdated -= OnCoPUpdated;
                 device.CoPUpdated += OnCoPUpdated;
 
                 Console.WriteLine($"[Client]: Subscribed to CoP updates for Device: {device.Name}");
             }
         }
 
-        private void OnCoPUpdated(object sender, (double CoPX, double CoPY, double[] Pressures) copData)
-        {
-            if (_visualizationWindow == null || _visualizationWindow.IsDisposed) return;
+        private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double CoPY, double[] Pressures) copData)
+{
+    if (_visualizationWindow == null || _visualizationWindow.IsDisposed) return;
 
-            _visualizationWindow.Invoke(new Action(() =>
-            {
-                _visualizationWindow.UpdateVisualization(copData.CoPX, copData.CoPY, copData.Pressures);
-            }));
+    if (sender is Device device)
+    {
+        if (device.IsLeftSock) // Assuming Device has an IsLeftSock property
+        {
+            _visualizationWindow.UpdateVisualization(
+                xLeft: copData.CoPX,
+                yLeft: copData.CoPY,
+                pressuresLeft: copData.Pressures,
+                xRight: 0,
+                yRight: 0,
+                pressuresRight: Array.Empty<double>()
+            );
         }
+        else
+        {
+            _visualizationWindow.UpdateVisualization(
+                xLeft: 0,
+                yLeft: 0,
+                pressuresLeft: Array.Empty<double>(),
+                xRight: copData.CoPX,
+                yRight: copData.CoPY,
+                pressuresRight: copData.Pressures
+            );
+        }
+    }
+}
+
     }
 }

@@ -48,40 +48,47 @@ namespace DAid.Servers
         /// <summary>
         /// Connects to a specified device and adds it to the list of active devices.
         /// </summary>
-        public Device Connect(string path)
+       /// <summary>
+/// Connects to a specified device and adds it to the list of active devices.
+/// </summary>
+public Device Connect(string path)
+{
+    lock (syncLock)
+    {
+        if (devices.TryGetValue(path, out var device))
         {
-            lock (syncLock)
+            try
             {
-                if (devices.TryGetValue(path, out var device))
+                device.Connect();
+                if (!activeDevices.Contains(device))
                 {
-                    try
-                    {
-                        device.Connect();
-                        if (!activeDevices.Contains(device))
-                        {
-                            activeDevices.Add(device);
-                            logger.Info($"[Manager]: Device {device.Name} on {device.Path} connected and added to active devices.");
-                        }
-                        else
-                        {
-                            logger.Info($"[Manager]: Device {device.Name} on {device.Path} is already active.");
-                        }
-
-                        return device;
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.Warn($"[Manager]: Failed to connect to device {device.Name}: {ex.Message}");
-                    }
+                    activeDevices.Add(device);
+                    logger.Info($"[Manager]: Device {device.Name} on {device.Path} connected and added to active devices.");
                 }
                 else
                 {
-                    logger.Warn($"[Manager]: No device found at path {path}.");
+                    logger.Info($"[Manager]: Device {device.Name} on {device.Path} is already active.");
                 }
 
-                return null;
+                // Log whether the device is a left or right sock
+                string sockType = device.IsLeftSock ? "Left Sock" : "Right Sock";
+                logger.Info($"[Manager]: Device {device.Name} identified as {sockType}.");
+
+                return device;
+            }
+            catch (Exception ex)
+            {
+                logger.Warn($"[Manager]: Failed to connect to device {device.Name}: {ex.Message}");
             }
         }
+        else
+        {
+            logger.Warn($"[Manager]: No device found at path {path}.");
+        }
+        return null;
+    }
+}
+
 
         /// <summary>
         /// Retrieves the last connected device (backward compatibility).
