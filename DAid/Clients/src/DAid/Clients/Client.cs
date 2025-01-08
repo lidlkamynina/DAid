@@ -120,18 +120,24 @@ namespace DAid.Clients
         }
 
         private void HandleStopCommand()
-        {
-            if (!_isVisualizing)
-            {
-                Console.WriteLine("Visualization is not running.");
-                return;
-            }
+{
+    if (!_isVisualizing)
+    {
+        Console.WriteLine("[Client]: Visualization is not running.");
+        return;
+    }
 
-            Console.WriteLine("Stopping visualization...");
-            CloseVisualizationWindow();
-            _isVisualizing = false;
-        }
+    Console.WriteLine("[Client]: Stopping visualization and data streams...");
+    
+    // Stop the data streams for all connected devices through the server
+    _server.StopDataStream();
 
+    // Close the visualization window
+    CloseVisualizationWindow();
+    _isVisualizing = false;
+
+    Console.WriteLine("[Client]: Visualization and data streams stopped.");
+}
         private void OpenVisualizationWindow()
         {
             if (_visualizationWindow == null || _visualizationWindow.IsDisposed)

@@ -143,7 +143,7 @@ public class SensorAdapter
     public bool Calibrate()
 {
     double[] sumValues = new double[SensorPositions.Length];
-    int sampleCount = 0; // Declare sampleCount
+    int sampleCount = 0; 
     DateTime startTime = DateTime.Now;
     while ((DateTime.Now - startTime).TotalSeconds < 10)
     {
@@ -159,7 +159,7 @@ public class SensorAdapter
                 sampleCount++; // Increment sampleCount for valid samples
             }
         }
-        Thread.Sleep(100); // Wait for the next sample
+        Thread.Sleep(100); 
     }
     if (sampleCount > 0)
     {
@@ -231,8 +231,6 @@ public void RetrieveModuleName()
 
                                 bool isLeftSock = moduleNumber % 2 != 0;
                                 SensorPositions = isLeftSock ? LeftSensorPositions : RightSensorPositions;
-
-                                // Emit the event to notify listeners
                                 ModuleInfoUpdated?.Invoke(this, (moduleName, isLeftSock));
                                 return;
                             }
@@ -253,7 +251,7 @@ public void RetrieveModuleName()
 {
     if (moduleNumber % 2 == 0)
     {
-        SensorPositions = RightSensorPositions; // Use normal sensor order
+        SensorPositions = RightSensorPositions; 
     }
     else
     {
