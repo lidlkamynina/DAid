@@ -192,46 +192,46 @@ namespace DAid.Servers
         }
 
         private void StartLogging(CancellationToken cancellationToken)
+{
+    const int expectedIntervalMs = 1000; // Expected interval between data points in milliseconds
+    DateTime? lastTimestamp = null;
+
+    // Update log file path for .txt file
+    logFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{Name}_LogWithTimescale_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+    File.AppendAllText(logFilePath, "Timestamp\tRawData\n");
+
+    Task.Run(async () =>
+    {
+        while (!cancellationToken.IsCancellationRequested)
         {
-            const int expectedIntervalMs = 1000; // Expected interval between data points in milliseconds
-            DateTime? lastTimestamp = null;
-
-            // log file path
-            logFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{Name}_LogWithTimescale_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
-            File.AppendAllText(logFilePath, "Timestamp,RawData\n");
-
-            Task.Run(async () =>
+            while (logQueue.TryDequeue(out string logEntry))
             {
-                while (!cancellationToken.IsCancellationRequested)
+                string[] parts = logEntry.Split(',');
+                if (parts.Length < 2) continue;
+
+                DateTime currentTimestamp = DateTime.Parse(parts[0], CultureInfo.InvariantCulture);
+                string rawData = parts[1];
+
+                if (lastTimestamp.HasValue && (currentTimestamp - lastTimestamp.Value).TotalMilliseconds > expectedIntervalMs)
                 {
-                    while (logQueue.TryDequeue(out string logEntry))
+                    DateTime gapStart = lastTimestamp.Value.AddMilliseconds(expectedIntervalMs);
+                    while (gapStart < currentTimestamp)
                     {
-                        string[] parts = logEntry.Split(',');
-                        if (parts.Length < 2) continue;
-
-                        DateTime currentTimestamp = DateTime.Parse(parts[0], CultureInfo.InvariantCulture);
-                        string rawData = parts[1];
-
-                        if (lastTimestamp.HasValue && (currentTimestamp - lastTimestamp.Value).TotalMilliseconds > expectedIntervalMs)
-                        {
-                            DateTime gapStart = lastTimestamp.Value.AddMilliseconds(expectedIntervalMs);
-                            while (gapStart < currentTimestamp)
-                            {
-                                string placeholder = $"{gapStart:yyyy-MM-dd HH:mm:ss},NO DATA\n";
-                                File.AppendAllText(logFilePath, placeholder);
-                                gapStart = gapStart.AddMilliseconds(expectedIntervalMs);
-                            }
-                        }
-
-                        string currentLog = $"{currentTimestamp:yyyy-MM-dd HH:mm:ss},{rawData}\n";
-                        File.AppendAllText(logFilePath, currentLog);
-                        lastTimestamp = currentTimestamp;
+                        string placeholder = $"{gapStart:yyyy-MM-dd HH:mm:ss}\tNO DATA\n";
+                        File.AppendAllText(logFilePath, placeholder);
+                        gapStart = gapStart.AddMilliseconds(expectedIntervalMs);
                     }
-
-                    await Task.Delay(100);
                 }
-            }, cancellationToken);
+
+                string currentLog = $"{currentTimestamp:yyyy-MM-dd HH:mm:ss}\t{rawData}\n";
+                File.AppendAllText(logFilePath, currentLog);
+                lastTimestamp = currentTimestamp;
+            }
+
+            await Task.Delay(100);
         }
+    }, cancellationToken);
+}
 
         private void StopLogging()
         {

@@ -132,43 +132,43 @@ public class SensorAdapter
         }
     }
 
-    public double[] GetSensorPressures()
-    {
-        lock (syncLock)
-        {
-            return (double[])sensorResistance.Clone();
-        }
-    }
-
-    public bool Calibrate()
+public double[] GetSensorPressures()
 {
-    double[] sumValues = new double[SensorPositions.Length];
-    int sampleCount = 0; 
+    lock (syncLock)
+    {
+        return (double[])sensorResistance.Clone();
+    }
+}
+
+private (double x0, double y0) calibrationOffsets = (0, 0);
+
+public bool Calibrate()
+{
+    double totalX = 0, totalY = 0;
+    int sampleCount = 0;
     DateTime startTime = DateTime.Now;
-    while ((DateTime.Now - startTime).TotalSeconds < 10)
+
+    while ((DateTime.Now - startTime).TotalSeconds < 5)
     {
         lock (syncLock)
         {
-            // Validate that all sensor resistances are greater than 0
-            if (sensorResistance.All(r => r > 0))
+            double totalPressure = sensorResistance.Sum();
+            if (totalPressure > 0 && sensorResistance.All(r => r > 0))
             {
-                for (int i = 0; i < SensorPositions.Length; i++)
-                {
-                    sumValues[i] += 1.0 / sensorResistance[i];
-                }
-                sampleCount++; // Increment sampleCount for valid samples
+                double copX = sensorResistance.Zip(XPositions, (p, x) => p * x).Sum() / totalPressure;
+                double copY = sensorResistance.Zip(YPositions, (p, y) => p * y).Sum() / totalPressure;
+
+                totalX += copX;
+                totalY += copY;
+                sampleCount++;
             }
         }
-        Thread.Sleep(100); 
+        Thread.Sleep(100); // Collect data every 100 ms
     }
+
     if (sampleCount > 0)
     {
-        for (int i = 0; i < SensorPositions.Length; i++)
-        {
-            sensorOffsets[i] = sumValues[i] / sampleCount;
-            Console.WriteLine($"[Calibration]: Sensor {i + 1} Offset: {sensorOffsets[i]:F2}");
-        }
-        Console.WriteLine("[Calibration]: Calibration completed successfully.");
+        calibrationOffsets = (totalX / sampleCount, totalY / sampleCount);
         return true;
     }
 
@@ -176,7 +176,30 @@ public class SensorAdapter
     return false;
 }
 
+private double[] MovingAverageFilter(double[] rawData, int windowSize)
+{
+    double[] filteredData = new double[rawData.Length];
+    int halfWindowSize = windowSize / 2;
 
+    for (int i = 0; i < rawData.Length; i++)
+    {
+        double sum = 0;
+        int count = 0;
+
+        for (int j = i - halfWindowSize; j <= i + halfWindowSize; j++)
+        {
+            if (j >= 0 && j < rawData.Length)
+            {
+                sum += rawData[j];
+                count++;
+            }
+        }
+
+        filteredData[i] = sum / count;
+    }
+
+    return filteredData;
+}
 
     private void SendCommand(string command)
     {
@@ -350,25 +373,30 @@ private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         }
     }
 
-    private void CalculateAndNotifyCoP()
+  private void CalculateAndNotifyCoP()
+{
+    lock (syncLock)
     {
-        lock (syncLock)
+        double totalPressure = sensorResistance.Sum();
+
+        if (totalPressure <= 0)
         {
-            double totalPressure = sensorResistance.Sum();
-
-            if (totalPressure <= 0)
-            {
-                Console.WriteLine("[SensorAdapter]: Total pressure is zero. CoP set to (0, 0).");
-                Task.Run(() => CoPUpdated?.Invoke(this, (0, 0, sensorResistance)));
-                return;
-            }
-
-            double copX = sensorResistance.Zip(XPositions, (p, x) => p * x).Sum() / totalPressure;
-            double copY = sensorResistance.Zip(YPositions, (p, y) => p * y).Sum() / totalPressure;
-
-            Task.Run(() => CoPUpdated?.Invoke(this, (copX, copY, sensorResistance)));
+            Console.WriteLine("[SensorAdapter]: Total pressure is zero. CoP set to (0, 0).");
+            Task.Run(() => CoPUpdated?.Invoke(this, (0, 0, sensorResistance)));
+            return;
         }
+
+        double copX = sensorResistance.Zip(XPositions, (p, x) => p * x).Sum() / totalPressure;
+        double copY = sensorResistance.Zip(YPositions, (p, y) => p * y).Sum() / totalPressure;
+
+        // Adjust CoP using calibration offsets
+        double adjustedCoPX = copX - calibrationOffsets.x0;
+        double adjustedCoPY = copY - calibrationOffsets.y0;
+
+        Task.Run(() => CoPUpdated?.Invoke(this, (adjustedCoPX, adjustedCoPY, sensorResistance)));
     }
+}
+
 
     private byte CalculateChecksum(byte[] data, int length)
     {
