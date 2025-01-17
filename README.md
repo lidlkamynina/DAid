@@ -1,6 +1,6 @@
 # DAid
 
-Connects to sensors and distributes their data over TCP/IP allowing connection to incompatible devices, data distribution to multiple clients and aggregated csv logging.
+Connects to sensors and distributes their processed data allowing connection to incompatible devices, data distribution and aggregated txt logging.
 
 ## Installation
 
