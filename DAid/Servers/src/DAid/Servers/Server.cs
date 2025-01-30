@@ -170,16 +170,16 @@ namespace DAid.Servers
 
                         if (calibrationSuccessful)
                         {
-                            Console.WriteLine($"[Server]: Calibration completed successfully for device {device.Name}.");
+                            Console.WriteLine($"[Server]: Calibration completed successfully for device {device.ModuleName}.");
                         }
                         else
                         {
-                            Console.WriteLine($"[Server]: Calibration failed for device {device.Name}. No valid samples collected.");
+                            Console.WriteLine($"[Server]: Calibration failed for device {device.ModuleName}. No valid samples collected.");
                         }
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"[Server]: Calibration failed for device {device.Name}. Error: {ex.Message}");
+                        Console.WriteLine($"[Server]: Calibration failed for device {device.ModuleName}. Error: {ex.Message}");
                     }
                 }
             }
@@ -210,7 +210,7 @@ namespace DAid.Servers
 
             foreach (var device in connectedDevices)
             {
-                Console.WriteLine($"[Server]: Starting data stream for device {device.Name}...");
+                Console.WriteLine($"[Server]: Starting data stream for device {device.ModuleName}...");
                 device.Start();
             }
         }
@@ -234,11 +234,11 @@ namespace DAid.Servers
                     try
                     {
                         device.Stop();
-                        Console.WriteLine($"[Server]: Data stream stopped for device {device.Name}.");
+                        Console.WriteLine($"[Server]: Data stream stopped for device {device.ModuleName}.");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"[Server]: Failed to stop data stream for device {device.Name}. Error: {ex.Message}");
+                        Console.WriteLine($"[Server]: Failed to stop data stream for device {device.ModuleName}. Error: {ex.Message}");
                     }
                 }
 
@@ -252,7 +252,7 @@ namespace DAid.Servers
             if (sender is Device device)
             {
                 string sockType = device.IsLeftSock ? "Left Sock" : "Right Sock";
-                Console.WriteLine($"[Server]: {sockType} CoP for {copData.DeviceName} -> X={copData.CoPX:F2}, Y={copData.CoPY:F2}, Pressures: {string.Join(", ", copData.Pressures.Select(p => p.ToString("F2")))}");
+                //Console.WriteLine($"[Server]: {sockType} CoP for {copData.DeviceName} -> X={copData.CoPX:F2}, Y={copData.CoPY:F2}, Pressures: {string.Join(", ", copData.Pressures.Select(p => p.ToString("F2")))}");
             }
             else
             {

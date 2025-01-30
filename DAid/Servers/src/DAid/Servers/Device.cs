@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Linq;
 using NLog;
+using System.Text;
 
 namespace DAid.Servers
 {
@@ -191,48 +192,112 @@ namespace DAid.Servers
             }
         }
 
-        private void StartLogging(CancellationToken cancellationToken)
+private void StartLogging(CancellationToken cancellationToken)
 {
-    const int expectedIntervalMs = 1000; // Expected interval between data points in milliseconds
+    const int expectedIntervalMs = 1000;
     DateTime? lastTimestamp = null;
 
-    // Update log file path for .txt file
-    logFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{Name}_LogWithTimescale_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
-    File.AppendAllText(logFilePath, "Timestamp\tRawData\n");
+    var logBuffer = new StringBuilder();
+    logFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{Name}_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+
+    try
+    {
+        logBuffer.AppendLine("Timestamp\tBattery\tTime_ms\tQ0\tQ1\tQ2\tQ3\tAcc_X\tAcc_Y\tAcc_Z\tSensor1\tSensor2\tSensor3\tSensor4\tSensor5\tSensor6\tSensor7\tSensor8");
+        File.AppendAllText(logFilePath, logBuffer.ToString());
+        logBuffer.Clear();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error initializing log file: {ex.Message}");
+        return;
+    }
 
     Task.Run(async () =>
     {
-        while (!cancellationToken.IsCancellationRequested)
+        try
         {
-            while (logQueue.TryDequeue(out string logEntry))
+            while (!cancellationToken.IsCancellationRequested)
             {
-                string[] parts = logEntry.Split(',');
-                if (parts.Length < 2) continue;
-
-                DateTime currentTimestamp = DateTime.Parse(parts[0], CultureInfo.InvariantCulture);
-                string rawData = parts[1];
-
-                if (lastTimestamp.HasValue && (currentTimestamp - lastTimestamp.Value).TotalMilliseconds > expectedIntervalMs)
+                while (logQueue.TryDequeue(out string logEntry))
                 {
-                    DateTime gapStart = lastTimestamp.Value.AddMilliseconds(expectedIntervalMs);
-                    while (gapStart < currentTimestamp)
+
+                    string[] parts = logEntry.Split(',');
+                    if (parts.Length < 2)
                     {
-                        string placeholder = $"{gapStart:yyyy-MM-dd HH:mm:ss}\tNO DATA\n";
-                        File.AppendAllText(logFilePath, placeholder);
-                        gapStart = gapStart.AddMilliseconds(expectedIntervalMs);
+                        Console.WriteLine($"Malformed log entry: {logEntry}. Skipping...");
+                        continue;
+                    }
+
+                    if (!DateTime.TryParse(parts[0], CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime currentTimestamp))
+                    {
+                        continue;
+                    }
+
+                    byte[] rawData;
+                    try
+                    {
+                        rawData = parts[1].Split('-').Select(hex => Convert.ToByte(hex, 16)).ToArray();
+                    }
+                    catch (Exception ex)
+                    {
+                        continue;
+                    }
+
+                    if (rawData.Length < 47 || rawData[0] != 0xF0 || rawData[46] != 0x55)
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        byte battery = rawData[2];
+                        uint timeMs = BitConverter.ToUInt32(rawData, 3);
+                        uint q0 = BitConverter.ToUInt32(rawData, 7);
+                        uint q1 = BitConverter.ToUInt32(rawData, 11);
+                        uint q2 = BitConverter.ToUInt32(rawData, 15);
+                        uint q3 = BitConverter.ToUInt32(rawData, 19);
+                        short accX = BitConverter.ToInt16(rawData, 23);
+                        short accY = BitConverter.ToInt16(rawData, 25);
+                        short accZ = BitConverter.ToInt16(rawData, 27);
+                        short sensor1 = BitConverter.ToInt16(rawData, 29);
+                        short sensor2 = BitConverter.ToInt16(rawData, 31);
+                        short sensor3 = BitConverter.ToInt16(rawData, 33);
+                        short sensor4 = BitConverter.ToInt16(rawData, 35);
+                        short sensor5 = BitConverter.ToInt16(rawData, 37);
+                        short sensor6 = BitConverter.ToInt16(rawData, 39);
+                        short sensor7 = BitConverter.ToInt16(rawData, 41);
+                        short sensor8 = BitConverter.ToInt16(rawData, 43);
+
+                        logBuffer.AppendLine($"{currentTimestamp:yyyy-MM-dd HH:mm:ss}\t{battery}\t{timeMs}\t{q0}\t{q1}\t{q2}\t{q3}\t{accX}\t{accY}\t{accZ}\t{sensor1}\t{sensor2}\t{sensor3}\t{sensor4}\t{sensor5}\t{sensor6}\t{sensor7}\t{sensor8}");
+                        lastTimestamp = currentTimestamp;
+                    }
+                    catch (Exception ex)
+                    {
+                        continue;
                     }
                 }
 
-                string currentLog = $"{currentTimestamp:yyyy-MM-dd HH:mm:ss}\t{rawData}\n";
-                File.AppendAllText(logFilePath, currentLog);
-                lastTimestamp = currentTimestamp;
-            }
+                if (logBuffer.Length > 0)
+                {
+                    try
+                    {
+                        File.AppendAllText(logFilePath, logBuffer.ToString());
+                        logBuffer.Clear();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error writing to log file: {ex.Message}");
+                    }
+                }
 
-            await Task.Delay(100);
+                await Task.Delay(100);
+            }
+        }
+        catch (Exception ex)
+        {
         }
     }, cancellationToken);
 }
-
         private void StopLogging()
         {
             isLogging = false;

@@ -52,8 +52,6 @@ namespace DAid.Clients
                 copYLeft = yLeft;
                 sensorPressuresLeft = pressuresLeft;
                 lastLeftDataUpdate = DateTime.Now;
-
-                Console.WriteLine($"[Left Sock]: CoP X = {copXLeft:F2}, CoP Y = {copYLeft:F2}");
             }
 
             // Update right sock data
@@ -63,8 +61,6 @@ namespace DAid.Clients
                 copYRight = yRight;
                 sensorPressuresRight = pressuresRight;
                 lastRightDataUpdate = DateTime.Now;
-
-                Console.WriteLine($"[Right Sock]: CoP X = {copXRight:F2}, CoP Y = {copYRight:F2}");
             }
 
             Invalidate(); // Always trigger a repaint
