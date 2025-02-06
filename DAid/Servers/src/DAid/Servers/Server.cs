@@ -195,7 +195,7 @@ namespace DAid.Servers
         /// <summary>
         /// Starts data acquisition for all connected devices.
         /// </summary>
-        private void StartDataStream()
+        public void StartDataStream()
         {
             lock (syncLock)
             {
