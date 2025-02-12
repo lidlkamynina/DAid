@@ -15,8 +15,6 @@ namespace DAid.Clients
 
         private double _copXLeft = 0, _copYLeft = 0;
         private double _copXRight = 0, _copYRight = 0;
-        int setCount = 0;
-
         public Client(Server server)
         {
             _server = server ?? throw new ArgumentNullException(nameof(server));
@@ -117,158 +115,211 @@ private async Task HandleStartCommand()
     SubscribeToDeviceUpdates();
     _isVisualizing = true;
 
-    var firstExercise = ExerciseList.Exercises.FirstOrDefault(e => e.ExerciseID == 1);
-    if (firstExercise == null)
+    var exercises = ExerciseList.Exercises;
+    bool firstTwoExercisesCompletedOnce = false; 
+
+    for (int i = 0; i < exercises.Count; i++)
     {
-        Console.WriteLine("Error: First exercise not found!");
-        return;
+        var exercise = exercises[i];
+        if (exercise.ExerciseID == 1 || exercise.ExerciseID == 2)
+        {
+            await RunExerciseAsync(exercise).ConfigureAwait(false); 
+            if (exercise.ExerciseID == 2 && !firstTwoExercisesCompletedOnce)
+            {
+                firstTwoExercisesCompletedOnce = true;
+
+                Console.WriteLine("Repeating Single-Leg Stance - Right Leg...");
+                await RunExerciseAsync(exercises.First(e => e.ExerciseID == 1)).ConfigureAwait(false);
+
+                Console.WriteLine("Repeating Single-Leg Stance - Left Leg...");
+                await RunExerciseAsync(exercises.First(e => e.ExerciseID == 2)).ConfigureAwait(false);
+            }
+
+            continue; 
+        }
+
+        await RunExerciseAsync(exercise).ConfigureAwait(false);
     }
 
-    await RunExerciseAsync(firstExercise);
+    Console.WriteLine("All exercises completed! Well done.");
+    _isVisualizing = false;
 }
 
 
-private async Task RunExerciseAsync(ExerciseData exercise)
+private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise at a time
 {
-    DateTime startTime = DateTime.Now;
-    DateTime outOfZoneTime = DateTime.MinValue;
-    bool lostBalance = false;
-    DateTime lastRedZoneWarningTime = DateTime.MinValue;
-    bool wasInGreenZone = false;
-    bool wasInRedZone = false;
-    bool wasOutOfZone = false;
-    int lastZone = 0; 
-
     Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.Timing} seconds...");
 
-    while ((DateTime.Now - startTime).TotalSeconds < exercise.Timing)
+    DateTime exerciseStartTime = DateTime.Now;
+    int phaseIndex = 0;
+    int previousZoneLeft = -1;
+    int previousZoneRight = -1;
+    int feedbackLeft = -1;
+    int feedbackRight = -1;
+
+    while ((DateTime.Now - exerciseStartTime).TotalSeconds < exercise.Timing)
     {
-        if (_visualizationWindow == null || _visualizationWindow.IsDisposed) break;
+        var phase = exercise.ZoneSequence[phaseIndex];
 
-        double copX = 0, copY = 0;
-        if (exercise.LegsUsed.Contains("right"))
+        Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.duration} sec");
+
+        DateTime phaseStartTime = DateTime.Now;
+        bool lostBalance = false;
+        DateTime outOfZoneTimeLeft = DateTime.MinValue;
+        DateTime outOfZoneTimeRight = DateTime.MinValue;
+        int currentZoneLeft = -1, currentZoneRight = -1;
+
+        while ((DateTime.Now - phaseStartTime).TotalSeconds < phase.duration &&
+               (DateTime.Now - exerciseStartTime).TotalSeconds < exercise.Timing)
         {
-            copX = _copXRight;
-            copY = _copYRight;
-        }
-        else if (exercise.LegsUsed.Contains("left"))
-        {
-            copX = _copXLeft;
-            copY = _copYLeft;
-        }
-        else if (exercise.LegsUsed.Contains("both"))
-        {
-            copX = (_copXLeft + _copXRight) / 2; 
-            copY = (_copYLeft + _copYRight) / 2;
+            double copXLeft = _copXLeft, copYLeft = _copYLeft;
+            double copXRight = _copXRight, copYRight = _copYRight;
+
+            if (exercise.LegsUsed == "right")
+            {
+                currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+                currentZoneLeft = -1; // No tracking for left foot
+            }
+            else if (exercise.LegsUsed == "left")
+            {
+                currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+                currentZoneRight = -1; // No tracking for right foot
+            }
+            else if (exercise.LegsUsed == "both")
+            {
+                currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+                currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+            }
+            if (currentZoneLeft != previousZoneLeft && currentZoneLeft != -1)
+            {
+                Console.WriteLine($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
+                previousZoneLeft = currentZoneLeft;
+                feedbackLeft = currentZoneLeft;
+            }
+            if (currentZoneRight != previousZoneRight && currentZoneRight != -1)
+            {
+                Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {currentZoneRight}");
+                previousZoneRight = currentZoneRight;
+                feedbackRight = currentZoneRight;
+            }
+            if (currentZoneLeft == 1 || currentZoneRight == 1)
+            {
+                outOfZoneTimeLeft = DateTime.MinValue;
+                outOfZoneTimeRight = DateTime.MinValue;
+            }
+            else
+            {
+                if (currentZoneLeft != -1 && outOfZoneTimeLeft == DateTime.MinValue)
+                {
+                    outOfZoneTimeLeft = DateTime.Now;
+                }
+                if (currentZoneRight != -1 && outOfZoneTimeRight == DateTime.MinValue)
+                {
+                    outOfZoneTimeRight = DateTime.Now;
+                }
+                bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
+                                          ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 2);
+                bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
+                                           ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 2);
+
+                if (leftFootOutTooLong || rightFootOutTooLong)
+                {
+                    lostBalance = true;
+                    break;
+                }
+            }
         }
 
-        // Determine primary zones (Green and Red)
-        bool isGreenZone = exercise.IsInGreenZone(copX, copY);
-        bool isRedZone = exercise.IsInRedZone(copX, copY);
-        bool isOutOfZone = !isGreenZone && !isRedZone;
+        if (lostBalance)
+        {
+            Console.WriteLine("You lost balance, restarting exercise...");
+            if (exercise.LegsUsed == "both" || exercise.LegsUsed == "left")
+            {
+                if (previousZoneLeft != 7)
+                {
+                    SendFeedback(7, "Left");
+                    previousZoneLeft = 7;
+                }
+            }
+            if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
+            {
+                if (previousZoneRight != 7)
+                {
+                    SendFeedback(7, "Right");
+                    previousZoneRight = 7;
+                }
+            }
 
-        // Determine additional position zones (3, 4, 5, 6)
-        int positionZone = 0;
-        if (copX > 0 && copY > 0)
-        {
-            positionZone = 3; // Front Right
+            await Task.Delay(5000).ConfigureAwait(false);
+            exerciseStartTime = DateTime.Now;
+            continue;
         }
-        else if (copX < 0 && copY > 0)
+
+        phaseIndex++;
+        if (phaseIndex >= exercise.ZoneSequence.Count)
         {
-            positionZone = 4; // Front Left
-        }
-        else if (copX > 0 && copY < 0)
-        {
-            positionZone = 5; // Back Right
-        }
-        else if (copX < 0 && copY < 0)
-        {
-            positionZone = 6; // Back Left
-        }
-        if (isGreenZone && lastZone != 1)
-        {
-            Console.WriteLine("Zone 1 (Green)");
-            lastZone = 1;
-            wasInGreenZone = true;
-            wasInRedZone = false;
-            wasOutOfZone = false;
-        }
-        else if (isRedZone && !wasInRedZone)
-        {
-            Console.WriteLine("Zone 2 (Red Zone)");
-            if (positionZone > 0)
-            {
-                Console.WriteLine($"Zone {positionZone}");
-            }
-            wasInRedZone = true;
-            wasOutOfZone = false;
-            lastZone = 2;
-        }
-        else if (isOutOfZone && !wasOutOfZone)
-        {
-            Console.WriteLine("Out of Zone");
-            if (positionZone > 0)
-            {
-                Console.WriteLine($"Zone {positionZone}");
-            }
-            wasOutOfZone = true;
-            wasInRedZone = false;
-            lastZone = 0;
-        }
-        if (isGreenZone)
-        {
-            outOfZoneTime = DateTime.MinValue;
-        }
-        else
-        {
-            if (outOfZoneTime == DateTime.MinValue)
-            {
-                outOfZoneTime = DateTime.Now;
-            }
-            else if ((DateTime.Now - outOfZoneTime).TotalSeconds >= 4)
-            {
-                lostBalance = true;
-                break;
-            }
+            phaseIndex = 0;
         }
     }
 
-    if (lostBalance)
+    Console.WriteLine($"[Exercise]: {exercise.Name} fully completed.");
+
+    //send final feedback only for the used foot
+    if (exercise.LegsUsed == "both" || exercise.LegsUsed == "left")
     {
-        Console.WriteLine("You lost balance, exercise restarts in 5 seconds...");
-        Thread.Sleep(5000);
-        await RunExerciseAsync(exercise);
+        if (feedbackLeft != -1) SendFeedback(feedbackLeft, "Left");
     }
-    else
+    if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
     {
-        Console.WriteLine("Good work! Now is a pause for 15 seconds.");
-        Thread.Sleep(15000);
-
-        if (exercise.ExerciseID == 2 && setCount == 0)
-        {
-            setCount++; // Marks that the first set of exercises has been done once
-            var firstExercise = ExerciseList.Exercises.FirstOrDefault(e => e.ExerciseID == 1);
-            if (firstExercise != null)
-            {
-                await RunExerciseAsync(firstExercise);
-            }
-            return;
-        }
-
-        int nextExerciseID = exercise.ExerciseID + 1;
-        var nextExercise = ExerciseList.Exercises.FirstOrDefault(e => e.ExerciseID == nextExerciseID);
-        if (nextExercise != null)
-        {
-            await RunExerciseAsync(nextExercise);
-        }
-        else
-        {
-            Console.WriteLine("All exercises completed! Well done.");
-            _isVisualizing = false;
-        }
+        if (feedbackRight != -1) SendFeedback(feedbackRight, "Right");
     }
 }
 
+
+private void SendFeedback(int feedbackCode, string foot) //for HMD
+{
+    Console.WriteLine($"[Feedback]: Sending code {feedbackCode} for {foot} foot");
+    // Implement feedback sending logic,send to HMD
+}
+
+private int Feedback(double copX, double copY,  //calculates the zone/feedback
+                          (double Min, double Max) greenZoneX, (double Min, double Max) greenZoneY, 
+                          (double Min, double Max) redZoneX, (double Min, double Max) redZoneY)
+{
+    bool isInGreenZone = copX >= greenZoneX.Min && copX <= greenZoneX.Max &&
+                         copY >= greenZoneY.Min && copY <= greenZoneY.Max;
+    
+    if (isInGreenZone)
+    {
+        return 1; //Green Zone
+    }
+
+    bool isInRedZone = copX >= redZoneX.Min && copX <= redZoneX.Max &&
+                       copY >= redZoneY.Min && copY <= redZoneY.Max;
+    if (isInRedZone)
+    {
+        return 2; //Red Zone
+    }
+
+    if (copX > 0 && copY > 0)
+    {
+        return 3; //Front Right
+    }
+    else if (copX < 0 && copY > 0)
+    {
+        return 4; //Front Left
+    }
+    else if (copX > 0 && copY < 0)
+    {
+        return 5; //Back Right
+    }
+    else if (copX < 0 && copY < 0)
+    {
+        return 6; //Back Left
+    }
+
+    return 0; 
+}
         private void HandleStopCommand()
         {
             if (!_isVisualizing)

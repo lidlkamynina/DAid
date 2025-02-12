@@ -381,7 +381,7 @@ private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
 
         if (totalPressure <= 0)
         {
-            Console.WriteLine("[SensorAdapter]: Total pressure is zero. CoP set to (0, 0).");
+           // Console.WriteLine("[SensorAdapter]: Total pressure is zero. CoP set to (0, 0).");
             Task.Run(() => CoPUpdated?.Invoke(this, (0, 0, sensorResistance)));
             return;
         }
