@@ -20,7 +20,7 @@ public class SensorAdapter
     private int bufferPos = 0;
 
     private const int DefaultBaudRate = 92600;
-    private readonly int[] RightSensorPositions = { 30, 42, 38, 40 };
+    private readonly int[] RightSensorPositions = { 30, 42, 38, 40 }; //30,32,38,40
     private readonly int[] LeftSensorPositions = { 32, 30, 40, 38 };
     private int[] SensorPositions;
 

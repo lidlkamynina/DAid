@@ -5,7 +5,6 @@ using DAid.Servers;
 using System.Collections.Generic;
 using System.Linq;
 
-
 namespace DAid.Clients
 {
     public class Client
@@ -17,6 +16,9 @@ namespace DAid.Clients
 
         private double _copXLeft = 0, _copYLeft = 0;
         private double _copXRight = 0, _copYRight = 0;
+        private ExerciseData _currentExercise;
+        private int _currentPhase;
+
         public Client(Server server)
         {
             _server = server ?? throw new ArgumentNullException(nameof(server));
@@ -111,7 +113,6 @@ private async Task HandleStartCommand()
         Console.WriteLine("Visualization is already running.");
         return;
     }
-
     _server.StartDataStream();
     OpenVisualizationWindow();
     SubscribeToDeviceUpdates();
@@ -119,8 +120,6 @@ private async Task HandleStartCommand()
 
     var exercises = ExerciseList.Exercises;
     var completedExerciseSets = new HashSet<int>();
-
-    // repeating exercise groups after left and right
     var repeatSet = new Dictionary<int, List<int>>
     {
         { 2, new List<int> { 1, 2 } },  // Repeat 1 & 2 after 2
@@ -132,15 +131,30 @@ private async Task HandleStartCommand()
     for (int i = 0; i < exercises.Count; i++)
     {
         var exercise = exercises[i];
+         if (!completedExerciseSets.Contains(exercise.ExerciseID))
+         {
+              if (exercise.IntroTime > 0)
+            {
+                await Task.Delay(2000).ConfigureAwait(false);
+                Console.WriteLine($"[Intro]: Waiting {exercise.IntroTime} sec...");
+                await Task.Delay(exercise.IntroTime * 1000).ConfigureAwait(false);
+            }
 
+            if (exercise.DemoTime > 0)
+            {
+                Console.WriteLine($"[Demo]: Showing {exercise.DemoTime} sec...");
+                await Task.Delay(exercise.DemoTime * 1000).ConfigureAwait(false);
+            }
+         }
+         if (exercise.PreparationCop > 0)
+            {
+                await CheckPreparationCop(exercise.PreparationCop);
+            }
         await RunExerciseAsync(exercise).ConfigureAwait(false);
-
-        // If the exercise is the last in its repeat group and hasn't been repeated yet
         if (repeatSet.TryGetValue(exercise.ExerciseID, out var repeatExercises) && !completedExerciseSets.Contains(exercise.ExerciseID))
         {
             completedExerciseSets.Add(exercise.ExerciseID);
             Console.WriteLine($"Repeating Exercises: {string.Join(", ", repeatExercises)}...");
-
             foreach (var repeatID in repeatExercises)
             {
                 var repeatExercise = exercises.FirstOrDefault(e => e.ExerciseID == repeatID);
@@ -151,11 +165,41 @@ private async Task HandleStartCommand()
             }
         }
     }
-
-    Console.WriteLine("All exercises completed! Well done.");
+    Console.WriteLine("All exercises completed!");
     _isVisualizing = false;
 }
+private async Task CheckPreparationCop(int duration)
+{
+    Console.WriteLine($"[Preparation CoP]: Checking for {duration} sec...");
+    DateTime startTime = DateTime.Now;
+    while (true) 
+    {
+        bool leftFootValid, rightFootValid;
+        (double Min, double Max) copRangeX = (-2.0, 2.0);
+        (double Min, double Max) copRangeY = (-2.0, 2.0);
 
+        double copXLeft = _copXLeft, copYLeft = _copYLeft;
+        double copXRight = _copXRight, copYRight = _copYRight;
+
+        leftFootValid = copXLeft >= copRangeX.Min && copXLeft <= copRangeX.Max &&
+                        copYLeft >= copRangeY.Min && copYLeft <= copRangeY.Max;
+        rightFootValid = copXRight >= copRangeX.Min && copXRight <= copRangeX.Max &&
+                         copYRight >= copRangeY.Min && copYRight <= copRangeY.Max;
+        if (leftFootValid && rightFootValid)
+        {
+            if ((DateTime.Now - startTime).TotalSeconds >= duration)
+            {
+                Console.WriteLine("[Preparation CoP]: Feet correctly positioned for the required time. ");
+                return;
+            }
+        }
+        else
+        {
+            startTime = DateTime.Now; // Reset timer if feet move out of position
+        }
+        await Task.Delay(1000).ConfigureAwait(false); 
+    }
+}
 
 
 private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise at a time
@@ -273,6 +317,12 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
             phaseIndex = 0;
         }
     }
+        Console.WriteLine("[Client]: Put leg down");
+        await Task.Delay(exercise.Release*1000);
+        if (exercise.LegsUsed != "both"){
+        Console.WriteLine("[Client]: Running switch");
+        await Task.Delay(exercise.Switch*1000);
+        }
 
     Console.WriteLine($"[Exercise]: {exercise.Name} fully completed.");
 
@@ -387,6 +437,11 @@ private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double
 
     if (sender is Device device)
     {
+         if ((_currentExercise?.ExerciseID == 5 || _currentExercise?.ExerciseID == 6) && _currentPhase == 8)
+        {
+            Console.WriteLine($"[Client]: Skipping CoP check for Exercise {_currentExercise.ExerciseID}, Phase 8.");
+            return; 
+        }
         if (device.IsLeftSock)
         {
             _copXLeft = copData.CoPX;
