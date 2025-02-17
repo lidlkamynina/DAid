@@ -2,7 +2,9 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DAid.Servers;
+using System.Collections.Generic;
 using System.Linq;
+
 
 namespace DAid.Clients
 {
@@ -116,34 +118,44 @@ private async Task HandleStartCommand()
     _isVisualizing = true;
 
     var exercises = ExerciseList.Exercises;
-    bool firstTwoExercisesCompletedOnce = false; 
+    var completedExerciseSets = new HashSet<int>();
+
+    // repeating exercise groups after left and right
+    var repeatSet = new Dictionary<int, List<int>>
+    {
+        { 2, new List<int> { 1, 2 } },  // Repeat 1 & 2 after 2
+        { 6, new List<int> { 5, 6 } },  // Repeat 5 & 6 after 6
+        { 8, new List<int> { 7, 8 } },  // Repeat 7 & 8 after 8
+        { 10, new List<int> { 9, 10 } } // Repeat 9 & 10 after 10
+    };
 
     for (int i = 0; i < exercises.Count; i++)
     {
         var exercise = exercises[i];
-        if (exercise.ExerciseID == 1 || exercise.ExerciseID == 2)
-        {
-            await RunExerciseAsync(exercise).ConfigureAwait(false); 
-            if (exercise.ExerciseID == 2 && !firstTwoExercisesCompletedOnce)
-            {
-                firstTwoExercisesCompletedOnce = true;
-
-                Console.WriteLine("Repeating Single-Leg Stance - Right Leg...");
-                await RunExerciseAsync(exercises.First(e => e.ExerciseID == 1)).ConfigureAwait(false);
-
-                Console.WriteLine("Repeating Single-Leg Stance - Left Leg...");
-                await RunExerciseAsync(exercises.First(e => e.ExerciseID == 2)).ConfigureAwait(false);
-            }
-
-            continue; 
-        }
 
         await RunExerciseAsync(exercise).ConfigureAwait(false);
+
+        // If the exercise is the last in its repeat group and hasn't been repeated yet
+        if (repeatSet.TryGetValue(exercise.ExerciseID, out var repeatExercises) && !completedExerciseSets.Contains(exercise.ExerciseID))
+        {
+            completedExerciseSets.Add(exercise.ExerciseID);
+            Console.WriteLine($"Repeating Exercises: {string.Join(", ", repeatExercises)}...");
+
+            foreach (var repeatID in repeatExercises)
+            {
+                var repeatExercise = exercises.FirstOrDefault(e => e.ExerciseID == repeatID);
+                if (repeatExercise != null)
+                {
+                    await RunExerciseAsync(repeatExercise).ConfigureAwait(false);
+                }
+            }
+        }
     }
 
     Console.WriteLine("All exercises completed! Well done.");
     _isVisualizing = false;
 }
+
 
 
 private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise at a time
@@ -301,21 +313,21 @@ private int Feedback(double copX, double copY,  //calculates the zone/feedback
         return 2; //Red Zone
     }
 
-    if (copX > 0 && copY > 0)
+    if (copX < 0)
     {
-        return 3; //Front Right
+        return 3; //Back
     }
-    else if (copX < 0 && copY > 0)
+    else if (copX > 0)
     {
-        return 4; //Front Left
+        return 4; //Front 
     }
-    else if (copX > 0 && copY < 0)
+    else if (copY > 0)
     {
-        return 5; //Back Right
+        return 5; //Right
     }
-    else if (copX < 0 && copY < 0)
+    else if (copY < 0)
     {
-        return 6; //Back Left
+        return 6; //Left
     }
 
     return 0; 
