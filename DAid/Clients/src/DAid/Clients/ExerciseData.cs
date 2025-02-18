@@ -61,7 +61,7 @@ public static class ExerciseList
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (30, (-1.0, 1.0), (-1.0, 1.0), (-2.0, -1.0), (-6.0, -1.1)),
+                (30, (-1.0, 1.00), (-1.0, 1.0), (-2.0, -1.0), (-6.0, -1.1)),
             }
         ),
         new ExerciseData( 
