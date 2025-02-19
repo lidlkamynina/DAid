@@ -66,21 +66,20 @@ namespace DAid.Clients
             var graphics = e.Graphics;
             graphics.Clear(Color.White);
 
-            // Determine if left and right data is still valid
             bool hasLeftData = (DateTime.Now - lastLeftDataUpdate).TotalMilliseconds < DataTimeoutMilliseconds;
             bool hasRightData = (DateTime.Now - lastRightDataUpdate).TotalMilliseconds < DataTimeoutMilliseconds;
+            Console.WriteLine($"[Debug]:Pressures: {string.Join(", ", sensorPressuresLeft)}");
 
-            // Draw left sock visualization
-            if (hasLeftData)
-                DrawSockVisualization(graphics, copXLeft, copYLeft, sensorPressuresLeft, SockSpacing / 2, false);
-            else
-                DrawNoDataMessage(graphics, SockSpacing / 2);
 
-            // Draw right sock visualization
-            if (hasRightData)
-                DrawSockVisualization(graphics, copXRight, copYRight, sensorPressuresRight, SockSpacing + SockSpacing / 2, true);
-            else
-                DrawNoDataMessage(graphics, SockSpacing + SockSpacing / 2);
+     if (hasLeftData)
+    DrawSockVisualization(graphics, copXLeft, copYLeft, sensorPressuresLeft.Select(p => p * 10).ToArray(), SockSpacing / 2, false);
+else
+    DrawNoDataMessage(graphics, SockSpacing / 2);
+
+if (hasRightData)
+    DrawSockVisualization(graphics, copXRight, copYRight, sensorPressuresRight.Select(p => p * 10).ToArray(), SockSpacing + SockSpacing / 2, true);
+else
+    DrawNoDataMessage(graphics, SockSpacing + SockSpacing / 2);
         }
 
         private void DrawSockVisualization(Graphics graphics, double copX, double copY, double[] pressures, int xOffset, bool isRightSock)

@@ -133,22 +133,22 @@ private async Task HandleStartCommand()
         var exercise = exercises[i];
          if (!completedExerciseSets.Contains(exercise.ExerciseID))
          {
-              if (exercise.IntroTime > 0)
+              if (exercise.Intro > 0)
             {
                 await Task.Delay(2000).ConfigureAwait(false);
-                Console.WriteLine($"[Intro]: Waiting {exercise.IntroTime} sec...");
-                await Task.Delay(exercise.IntroTime * 1000).ConfigureAwait(false);
+                Console.WriteLine($"[Intro]: Waiting {exercise.Intro} sec...");
+                await Task.Delay(exercise.Intro * 1000).ConfigureAwait(false);
             }
 
-            if (exercise.DemoTime > 0)
+            if (exercise.Demo > 0)
             {
-                Console.WriteLine($"[Demo]: Showing {exercise.DemoTime} sec...");
-                await Task.Delay(exercise.DemoTime * 1000).ConfigureAwait(false);
+                Console.WriteLine($"[Demo]: Showing {exercise.Demo} sec...");
+                await Task.Delay(exercise.Demo * 1000).ConfigureAwait(false);
             }
          }
          if (exercise.PreparationCop > 0)
             {
-                await CheckPreparationCop(exercise.PreparationCop);
+                await CheckPreparationCop(exercise.PreparationCop, exercise.LegsUsed);
             }
         await RunExerciseAsync(exercise).ConfigureAwait(false);
         if (repeatSet.TryGetValue(exercise.ExerciseID, out var repeatExercises) && !completedExerciseSets.Contains(exercise.ExerciseID))
@@ -168,43 +168,60 @@ private async Task HandleStartCommand()
     Console.WriteLine("All exercises completed!");
     _isVisualizing = false;
 }
-private async Task CheckPreparationCop(int duration)
+private async Task CheckPreparationCop(int duration, string activeLeg)
 {
-    Console.WriteLine($"[Preparation CoP]: Checking for {duration} sec...");
+    Console.WriteLine($"[Preparation CoP]: Checking for {duration} sec (Active Leg: {activeLeg})...");
     DateTime startTime = DateTime.Now;
+    
     while (true) 
     {
-        bool leftFootValid, rightFootValid;
+        bool isFootValid = false;
         (double Min, double Max) copRangeX = (-2.0, 2.0);
         (double Min, double Max) copRangeY = (-2.0, 2.0);
 
         double copXLeft = _copXLeft, copYLeft = _copYLeft;
         double copXRight = _copXRight, copYRight = _copYRight;
 
-        leftFootValid = copXLeft >= copRangeX.Min && copXLeft <= copRangeX.Max &&
-                        copYLeft >= copRangeY.Min && copYLeft <= copRangeY.Max;
-        rightFootValid = copXRight >= copRangeX.Min && copXRight <= copRangeX.Max &&
-                         copYRight >= copRangeY.Min && copYRight <= copRangeY.Max;
-        if (leftFootValid && rightFootValid)
+        if (activeLeg == "left")
+        {
+            isFootValid = copXLeft >= copRangeX.Min && copXLeft <= copRangeX.Max &&
+                          copYLeft >= copRangeY.Min && copYLeft <= copRangeY.Max;
+        }
+        else if (activeLeg == "right")
+        {
+            isFootValid = copXRight >= copRangeX.Min && copXRight <= copRangeX.Max &&
+                          copYRight >= copRangeY.Min && copYRight <= copRangeY.Max;
+        }
+        else if (activeLeg == "both") 
+        {
+            isFootValid = (copXLeft >= copRangeX.Min && copXLeft <= copRangeX.Max &&
+                           copYLeft >= copRangeY.Min && copYLeft <= copRangeY.Max) &&
+                          (copXRight >= copRangeX.Min && copXRight <= copRangeX.Max &&
+                           copYRight >= copRangeY.Min && copYRight <= copRangeY.Max);
+        }
+
+        if (isFootValid)
         {
             if ((DateTime.Now - startTime).TotalSeconds >= duration)
             {
-                Console.WriteLine("[Preparation CoP]: Feet correctly positioned for the required time. ");
+                Console.WriteLine($"[Preparation CoP]: {activeLeg} foot correctly positioned for the required time.");
                 return;
             }
         }
         else
         {
-            startTime = DateTime.Now; // Reset timer if feet move out of position
+            startTime = DateTime.Now; 
         }
+
         await Task.Delay(1000).ConfigureAwait(false); 
     }
 }
 
 
+
 private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise at a time
 {
-    Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.Timing} seconds...");
+    Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
 
     DateTime exerciseStartTime = DateTime.Now;
     int phaseIndex = 0;
@@ -213,11 +230,11 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
     int feedbackLeft = -1;
     int feedbackRight = -1;
 
-    while ((DateTime.Now - exerciseStartTime).TotalSeconds < exercise.Timing)
+    while ((DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
     {
         var phase = exercise.ZoneSequence[phaseIndex];
 
-        Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.duration} sec");
+        Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
 
         DateTime phaseStartTime = DateTime.Now;
         bool lostBalance = false;
@@ -225,8 +242,8 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
         DateTime outOfZoneTimeRight = DateTime.MinValue;
         int currentZoneLeft = -1, currentZoneRight = -1;
 
-        while ((DateTime.Now - phaseStartTime).TotalSeconds < phase.duration &&
-               (DateTime.Now - exerciseStartTime).TotalSeconds < exercise.Timing)
+        while ((DateTime.Now - phaseStartTime).TotalSeconds < phase.Duration &&
+               (DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
         {
             double copXLeft = _copXLeft, copYLeft = _copYLeft;
             double copXRight = _copXRight, copYRight = _copYRight;
@@ -338,11 +355,18 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
 }
 
 
-private void SendFeedback(int feedbackCode, string foot) //for HMD
-{
-    Console.WriteLine($"[Feedback]: Sending code {feedbackCode} for {foot} foot");
-    // Implement feedback sending logic,send to HMD
-}
+private void SendFeedback(int feedbackCode, string foot)
+        {
+            Console.WriteLine($"[Feedback]: Sending code {feedbackCode} for {foot} foot");
+            //var feedbackMessage = new FeedbackMessage
+           // {
+            //    MessageType = "Feedback",
+           //     ExerciseID = currentExerciseID,
+            //    Foot = foot,
+           //     Zone = feedbackCode
+            //};
+            //SendDataToHMD(feedbackMessage);
+        }
 
 private int Feedback(double copX, double copY,  //calculates the zone/feedback
                           (double Min, double Max) greenZoneX, (double Min, double Max) greenZoneY, 

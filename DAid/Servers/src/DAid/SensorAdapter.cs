@@ -20,12 +20,11 @@ public class SensorAdapter
     private int bufferPos = 0;
 
     private const int DefaultBaudRate = 92600;
-    private readonly int[] RightSensorPositions = { 30, 42, 38, 40 }; //30,32,38,40
-    private readonly int[] LeftSensorPositions = { 32, 30, 40, 38 };
-    private int[] SensorPositions;
-
-    private readonly double[] XPositions = { 6.0, -6.0, 6.0, -6.0 };
-    private readonly double[] YPositions = { 2.0, 2.0, -2.0, -2.0 };
+    private readonly int[] RightSensorPositions = { 30, 42, 38, 44 }; //30,32,38,40
+    private readonly int[] LeftSensorPositions = { 32, 42, 40, 38 }; //32, 30, 40, 38
+    private int[] SensorPositions;    
+    private readonly double[] XPositions = { 3.0, -3.0, 3.0, -3.0 };
+    private readonly double[] YPositions = { 6.0, 6.0, -6.0, -6.0 };
 
     private double[] sensorResistance = new double[4];
     private double[] sensorOffsets = new double[4];
@@ -156,6 +155,8 @@ public double[] GetSensorPressures()
 
 private (double x0, double y0) calibrationOffsets = (0, 0);
 
+
+
 public bool Calibrate()
 {
     double maxPressure = double.MinValue, minPressure = double.MaxValue;
@@ -170,6 +171,8 @@ public bool Calibrate()
         lock (syncLock)
         {
             double totalPressure = sensorResistance.Sum();
+            Console.WriteLine($"total pressure: {totalPressure}");
+
 
             if (totalPressure > 0 && sensorResistance.All(r => r > 0))
             {
@@ -185,23 +188,16 @@ public bool Calibrate()
             }
         }
 
-        Thread.Sleep(100); // Collect data every 100ms
+        Thread.Sleep(100);
     }
-
-    // Compute Pressure Range
     double pressureRange = maxPressure - minPressure;
-
-    // Ensure valid calibration
     if (pressureRange <= 0 || sampleCount == 0)
     {
         Console.WriteLine("[Calibration]: Calibration failed. Invalid pressure range.");
         return false;
     }
-
-    // Compute the average CoP offsets
     calibrationOffsets = (totalX / sampleCount, totalY / sampleCount);
 
-    // Store Pressure Min/Max values for later normalization
     minPressureStored = minPressure;
     maxPressureStored = maxPressure;
 
@@ -209,7 +205,6 @@ public bool Calibrate()
 
     return true;
 }
-
 
 private double[] MovingAverageFilter(double[] rawData, int windowSize)
 {
@@ -219,22 +214,26 @@ private double[] MovingAverageFilter(double[] rawData, int windowSize)
     for (int i = 0; i < rawData.Length; i++)
     {
         double sum = 0;
+        double weightSum = 0;
         int count = 0;
 
         for (int j = i - halfWindowSize; j <= i + halfWindowSize; j++)
         {
             if (j >= 0 && j < rawData.Length)
             {
-                sum += rawData[j];
+                double weight = 1.0 / (Math.Abs(i - j) + 1); // Closer values have higher weight
+                sum += rawData[j] * weight;
+                weightSum += weight;
                 count++;
             }
         }
 
-        filteredData[i] = sum / count;
+        filteredData[i] = sum / weightSum;
     }
 
     return filteredData;
 }
+
 
     private void SendCommand(string command)
     {
@@ -394,52 +393,47 @@ private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         return calculatedChecksum == receivedChecksum && packet[PacketLength - 1] == StopByte;
     }
 
-    private void ExtractSensorValues(byte[] packet)
+private void ExtractSensorValues(byte[] packet)
 {
     lock (syncLock)
     {
+        double[] rawSensorValues = new double[sensorResistance.Length];
+
         for (int i = 0; i < SensorPositions.Length; i++)
         {
             int pos = SensorPositions[i];
             int rawValue = (packet[pos] << 8) | packet[pos + 1];
-            if (rawValue > 0)
-            {
-                double calculatedValue = rawValue;
-                sensorResistance[i] = 1.0 / calculatedValue; 
-            }
-            else
-            {
-                sensorResistance[i] = 0.0; 
-            }
+            rawSensorValues[i] = rawValue > 0 ? (1.0 / rawValue) : 0.0;
         }
+        sensorResistance = MovingAverageFilter(rawSensorValues, 4);
     }
 }
+
+
 private void CalculateAndNotifyCoP()
 {
     lock (syncLock)
     {
-        double totalPressure = sensorResistance.Sum();
+        double totalPressure = sensorResistance.Sum(); 
+        double[] adjustedXPositions = SensorPositions == LeftSensorPositions 
+            ? XPositions.Select(x => -x).ToArray()  
+            : XPositions;
 
         if (totalPressure <= 0)
         {
+            Console.WriteLine("[CoP]: No valid pressure detected, CoP remains at (0,0).");
             Task.Run(() => CoPUpdated?.Invoke(this, (0, 0, sensorResistance)));
             return;
         }
-        double Pnormal = (totalPressure - minPressureStored) / (maxPressureStored - minPressureStored);
-        double[] adjustedXPositions = SensorPositions == LeftSensorPositions 
-            ? XPositions.Select(x => -x).ToArray()  // Flip X for right foot
-            : XPositions;
-        // Compute CoP using only relevant sensors
-        double copX = sensorResistance.Zip(XPositions, (p, x) => (p * x)).Sum() / totalPressure;
-        double copY = sensorResistance.Zip(YPositions, (p, y) => (p * y)).Sum() / totalPressure;
+        double CoPX = sensorResistance.Zip(adjustedXPositions, (p, x) => p * x).Sum() / totalPressure;
+        double CoPY = sensorResistance.Zip(YPositions, (p, y) => p * y).Sum() / totalPressure;
+        CoPX -= calibrationOffsets.x0;
+        CoPY -= calibrationOffsets.y0;
 
-        // Adjust CoP using calibration offsets
-        double adjustedCoPX = copX - calibrationOffsets.x0;
-        double adjustedCoPY = copY - calibrationOffsets.y0;
-        Task.Run(() => CoPUpdated?.Invoke(this, (adjustedCoPX, adjustedCoPY, sensorResistance)));
+        // Invoke CoP update event
+        Task.Run(() => CoPUpdated?.Invoke(this, (CoPX, CoPY, sensorResistance)));
     }
 }
-
 
     private byte CalculateChecksum(byte[] data, int length)
     {
