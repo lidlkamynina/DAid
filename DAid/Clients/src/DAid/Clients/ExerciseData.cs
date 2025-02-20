@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class ExerciseData
 {
-    public int ExerciseID { get; set; }
+    public int RepetitionID { get; set; }
     public string Name { get; set; }
     public string LegsUsed { get; set; }
     public int Intro { get; set; }
@@ -15,7 +15,7 @@ public class ExerciseData
     public int Sets { get; private set; }
     public List<ZoneSequenceItem> ZoneSequence { get; set; }
 
-    public ExerciseData(int exerciseID,
+    public ExerciseData(int repetitionID,
                         string name,
                         string legsUsed,
                         int intro,
@@ -27,7 +27,7 @@ public class ExerciseData
                         int sets,
                         List<(int duration, (double, double) greenZoneX, (double, double) greenZoneY, (double, double) redZoneX, (double, double) redZoneY)> zoneSequence)
     {
-        ExerciseID = exerciseID;
+        RepetitionID = repetitionID;
         Name = name;
         LegsUsed = legsUsed;
         Intro = intro;
@@ -65,7 +65,7 @@ public static class ExerciseList
     public static List<ExerciseData> Exercises = new List<ExerciseData>
     {
         new ExerciseData( 
-            exerciseID: 1,
+            repetitionID: 1, //repetitions
             name: "Single-Leg Stance - Right Leg",
             legsUsed: "right",
             intro: 1,
@@ -81,7 +81,7 @@ public static class ExerciseList
             }
         ),
         new ExerciseData( 
-            exerciseID: 2,
+            repetitionID: 2,
             name: "Single-Leg Stance - Left Leg",
             legsUsed: "left",
             intro: 0,
@@ -97,7 +97,7 @@ public static class ExerciseList
             }
         ),
         new ExerciseData( 
-            exerciseID: 3,
+            repetitionID: 3,
             name: "Squats With Toe Rise",
             legsUsed: "both",
             intro: 1,
@@ -109,14 +109,14 @@ public static class ExerciseList
             sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, -1.0), (-4.0, -2.0)), 
-                (1, (-1.0, 1.0), (-1.0, 1.0), (1.0, 2.0), (1.0, 4.0)),
-                (2, (0.0, 1.5), (-4.5, 4.5), (-1.0, 0.0), (-6.0, -4.5)),
-                (2, (0.0, 1.5), (-4.5, 4.5), (1.5, 2.0), (4.5, 6.0))
+                (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 2.0)), 
+                (3, (0.0, 1.0), (-4.0, 4.0), (-1.5, 2.0), (-6.0, 6.0)),
+                (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 2.0)),
+                (1, (0.5, 1.9), (1.0, 5.9), (-2.0, 2.0), (0.0, 6.0))
             }
         ),
          new ExerciseData( 
-            exerciseID: 4,
+            repetitionID: 4,
             name: "Vertical Jumps",
             legsUsed: "both",
             intro: 1,
@@ -134,7 +134,7 @@ public static class ExerciseList
             }
         ),
         new ExerciseData( 
-            exerciseID: 5,
+            repetitionID: 5,
             name: "Squats Walking Lunges - Right Leg",
             legsUsed: "right",
             intro: 1,
@@ -152,7 +152,7 @@ public static class ExerciseList
             }
         ),
         new ExerciseData( 
-            exerciseID: 6,
+            repetitionID: 6,
             name: "Squats Walking Lunges - Left Leg",
             legsUsed: "left",
             intro: 0,
@@ -170,7 +170,7 @@ public static class ExerciseList
             }
         ),
         new ExerciseData( 
-            exerciseID: 7,
+            repetitionID: 7,
             name: "Jumping - Lateral Jumps Right",
             legsUsed: "right",
             intro: 1,
@@ -188,7 +188,7 @@ public static class ExerciseList
             }
         ),
         new ExerciseData( 
-            exerciseID: 8,
+            repetitionID: 8,
             name: "Jumping - Lateral Jumps Left",
             legsUsed: "left",
             intro: 0,
@@ -206,7 +206,7 @@ public static class ExerciseList
             }
         ),
         new ExerciseData( 
-            exerciseID: 9,
+            repetitionID: 9,
             name: "Squats - One-leg Squats Right",
             legsUsed: "right",
             intro: 1,
@@ -224,7 +224,7 @@ public static class ExerciseList
             }
         ),
         new ExerciseData( 
-            exerciseID: 10,
+            repetitionID: 10,
             name: "Squats - One-leg Squats Left",
             legsUsed: "left",
             intro: 0,
@@ -242,7 +242,7 @@ public static class ExerciseList
             }
         ),
     new ExerciseData( 
-            exerciseID: 11,
+            repetitionID: 11,
             name: "Jumping - Box Jumps",
             legsUsed: "both",
             intro: 1,

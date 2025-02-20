@@ -23,7 +23,7 @@ public class SensorAdapter
     private readonly int[] RightSensorPositions = { 30, 42, 38, 44 }; //30,32,38,40
     private readonly int[] LeftSensorPositions = { 32, 42, 40, 38 }; //32, 30, 40, 38
     private int[] SensorPositions;    
-    private readonly double[] XPositions = { 3.0, -3.0, 3.0, -3.0 };
+    private readonly double[] XPositions = { -3.0, 3.0, -3.0, 3.0 };
     private readonly double[] YPositions = { 6.0, 6.0, -6.0, -6.0 };
 
     private double[] sensorResistance = new double[4];
@@ -171,7 +171,7 @@ public bool Calibrate()
         lock (syncLock)
         {
             double totalPressure = sensorResistance.Sum();
-            Console.WriteLine($"total pressure: {totalPressure}");
+            //Console.WriteLine($"total pressure: {totalPressure}");
 
 
             if (totalPressure > 0 && sensorResistance.All(r => r > 0))
@@ -316,7 +316,7 @@ public void RetrieveModuleName()
     }
 }
 
-public event EventHandler<string> ModuleNameRetrieved; // Event to notify when the module name is retrieved
+public event EventHandler<string> ModuleNameRetrieved; 
 
 private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
 {
@@ -332,7 +332,7 @@ private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
             RetrieveModuleName();
 
-            if (moduleName != "Unknown") // Ensure the module name was successfully retrieved
+            if (moduleName != "Unknown") 
             {
                 moduleNameRetrieved = true;
                 ModuleNameRetrieved?.Invoke(this, moduleName); // Notify listeners
@@ -368,6 +368,7 @@ private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
                 {
                     byte[] packet = new byte[PacketLength];
                     Array.Copy(buffer, startIndex, packet, 0, PacketLength);
+                    //Console.WriteLine($"[SensorAdapter]: Extracted Packet (HEX): {BitConverter.ToString(packet).Replace("-", " ")}");
 
                     if (ValidatePacket(packet)) //print out in console the raw data
                     {
@@ -416,7 +417,7 @@ private void CalculateAndNotifyCoP()
     {
         double totalPressure = sensorResistance.Sum(); 
         double[] adjustedXPositions = SensorPositions == LeftSensorPositions 
-            ? XPositions.Select(x => -x).ToArray()  
+            ? XPositions.Select(x =>-x).ToArray()  
             : XPositions;
 
         if (totalPressure <= 0)
