@@ -416,7 +416,7 @@ private void CalculateAndNotifyCoP()
     lock (syncLock)
     {
         double totalPressure = sensorResistance.Sum(); 
-        double[] adjustedXPositions = SensorPositions == LeftSensorPositions 
+        double[] adjustedXPositions = SensorPositions == RightSensorPositions 
             ? XPositions.Select(x =>-x).ToArray()  
             : XPositions;
 

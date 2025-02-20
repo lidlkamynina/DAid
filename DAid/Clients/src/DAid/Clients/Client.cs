@@ -123,8 +123,6 @@ private async Task HandleStartCommand()
     var repeatSet = new Dictionary<int, List<int>>
     {
         { 2, new List<int> { 1, 2 } },  // Repeat 1 & 2 after 2
-        { 6, new List<int> { 5, 6 } },  // Repeat 5 & 6 after 6
-        { 8, new List<int> { 7, 8 } },  // Repeat 7 & 8 after 8
         { 10, new List<int> { 9, 10 } } // Repeat 9 & 10 after 10
     };
 
@@ -216,9 +214,6 @@ private async Task CheckPreparationCop(int duration, string activeLeg)
         await Task.Delay(1000).ConfigureAwait(false); 
     }
 }
-
-
-
 private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise at a time
 {
     Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
@@ -260,6 +255,11 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
             }
             else if (exercise.LegsUsed == "both") 
             {
+                if (exercise.RepetitionID == 5 || exercise.RepetitionID == 6 ){
+                    if (phaseIndex == 2 || phaseIndex == 3){
+                        currentZonesLeft = AddCopLeft(exercise, phaseIndex);
+                    }
+                }
                 currentZonesLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
                 currentZonesRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
             }
@@ -372,7 +372,29 @@ if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
     }
 }
 }
+private List<int> AddCopLeft(ExerciseData exercise, int phaseIndex)
+{
+    var adjustedZones = new List<int>();
+    (int, (double, double), (double, double), (double, double), (double, double)) phaseData;
 
+    if (exercise.RepetitionID == 5 && phaseIndex == 2)
+    {
+        phaseData = (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 6.0));
+    }
+    else if (exercise.RepetitionID == 5 && phaseIndex == 3)
+    {
+        phaseData = (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-5.0, 5.0));
+    }
+    else if (exercise.RepetitionID == 6 && phaseIndex == 2)
+    {
+        phaseData = (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 6.0));
+    }
+    else if (exercise.RepetitionID == 6 && phaseIndex == 3)
+    {
+        phaseData = (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 6.0));
+    }
+    return adjustedZones;
+}
 
 private void SendFeedback(int feedbackCode, string foot)
         {

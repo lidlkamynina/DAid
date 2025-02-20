@@ -128,15 +128,15 @@ public static class ExerciseList
             sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (2, (-1.5, 1.0), (-5.0, 5.0), (-2.0, 1.5), (-6.0, 6.0)),
-                (2, (-1.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0))
+                (2, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
+                (2, (-1.5, 1.0), (-2.0, 2.0), (-2.0, 1.5), (-5.0, 5.0)),
+                (2, (-1.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0)) //not checking cop here, during jump
             }
         ),
         new ExerciseData( 
             repetitionID: 5,
-            name: "Squats Walking Lunges - Right Leg",
-            legsUsed: "right",
+            name: "Squats Walking Lunges - Both Leg",
+            legsUsed: "both",
             intro: 1,
             demo: 3,
             preparationCop: 3,
@@ -147,66 +147,31 @@ public static class ExerciseList
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
                 (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (2, (-1.0, 1.0), (-4.0, 4.0), (-1.0, 1.5), (-5.0, 5.0)),
-                (8, (-1.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0))
+                (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-5.0, 5.0)), //right leg,  left leg (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 6.0))
+                (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 6.0)), // right leg, left leg (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-5.0, 5.0))
+                (8, (-1.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0)) //no COP check
             }
         ),
         new ExerciseData( 
             repetitionID: 6,
-            name: "Squats Walking Lunges - Left Leg",
-            legsUsed: "left",
-            intro: 0,
-            demo: 0,
-            preparationCop: 0,
-            timingCop: 50,
-            release: 2,
-            switchDelay: 3,
-            sets: 1,
-            zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
-            {
-               (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (2, (1.0, 2.0), (-1.5, 1.5), (0.0, 1.0), (-2.0, 2.0)),
-                (8, (-1.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0))
-            }
-        ),
-        new ExerciseData( 
-            repetitionID: 7,
-            name: "Jumping - Lateral Jumps Right",
-            legsUsed: "right",
+            name: "Jumping - Lateral Jumps Both",
+            legsUsed: "both",
             intro: 1,
             demo: 3,
             preparationCop: 3,
             timingCop: 60,
             release: 2,
             switchDelay: 3,
-            sets: 1,
+            sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
                 (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (2, (-1.0, 1.0), (-1.0, 1.0), (-1.8, 1.2), (-6.0, 2.0)),
-                (2, (-1.0, 1.0), (-1.0, 1.0), (-1.2, 1.8), (-6.0, 2.0))
+                (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 6.0)), //right leg, left leg (2, (-1.0, 1.0), (-5.0, 5.0), (-1.5, 1.5), (-6.0, 6.0))
+                (2, (-1.0, 1.0), (-5.0, 5.0), (-1.5, 1.5), (-6.0, 6.0)) // right leg, left leg (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 6.0))
             }
         ),
         new ExerciseData( 
-            repetitionID: 8,
-            name: "Jumping - Lateral Jumps Left",
-            legsUsed: "left",
-            intro: 0,
-            demo: 0,
-            preparationCop: 0,
-            timingCop: 60,
-            release: 2,
-            switchDelay: 3,
-            sets: 1,
-            zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
-            {
-                (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (2, (-1.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0)),
-                (2, (-1.5, 1.0), (-5.0, 5.0), (-2.0, 1.5), (-6.0, 6.0))
-            }
-        ),
-        new ExerciseData( 
-            repetitionID: 9,
+            repetitionID: 7,
             name: "Squats - One-leg Squats Right",
             legsUsed: "right",
             intro: 1,
@@ -224,7 +189,7 @@ public static class ExerciseList
             }
         ),
         new ExerciseData( 
-            repetitionID: 10,
+            repetitionID: 8,
             name: "Squats - One-leg Squats Left",
             legsUsed: "left",
             intro: 0,
@@ -242,7 +207,7 @@ public static class ExerciseList
             }
         ),
     new ExerciseData( 
-            repetitionID: 11,
+            repetitionID: 9,
             name: "Jumping - Box Jumps",
             legsUsed: "both",
             intro: 1,
