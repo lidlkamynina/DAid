@@ -11,7 +11,6 @@ public class ExerciseData
     public int PreparationCop { get; set; }
     public int TimingCop { get; set; }
     public int Release { get; set; }
-    public int Switch { get; set; }
     public int Sets { get; private set; }
     public List<ZoneSequenceItem> ZoneSequence { get; set; }
 
@@ -23,7 +22,6 @@ public class ExerciseData
                         int preparationCop,
                         int timingCop,
                         int release,
-                        int switchDelay,
                         int sets,
                         List<(int duration, (double, double) greenZoneX, (double, double) greenZoneY, (double, double) redZoneX, (double, double) redZoneY)> zoneSequence)
     {
@@ -35,7 +33,6 @@ public class ExerciseData
         PreparationCop = preparationCop;
         TimingCop = timingCop;
         Release = release;
-        Switch = switchDelay;
         Sets = sets > 0 ? sets : 1;
         ZoneSequence = new List<ZoneSequenceItem>();
         foreach (var item in zoneSequence)
@@ -73,7 +70,6 @@ public static class ExerciseList
             preparationCop: 3,
             timingCop: 30,
             release: 3,
-            switchDelay: 3,
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
@@ -86,10 +82,9 @@ public static class ExerciseList
             legsUsed: "left",
             intro: 0,
             demo: 0,
-            preparationCop: 0,
+            preparationCop: 3,
             timingCop: 30,
             release: 3,
-            switchDelay: 3,
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
@@ -105,14 +100,13 @@ public static class ExerciseList
             preparationCop: 3,
             timingCop: 30,
             release: 2,
-            switchDelay: 3,
             sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 2.0)), 
                 (3, (0.0, 1.0), (-4.0, 4.0), (-1.5, 2.0), (-6.0, 6.0)),
                 (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 2.0)),
-                (1, (0.5, 1.9), (1.0, 5.9), (-2.0, 2.0), (0.0, 6.0))
+                (1, (0.5, 1.9), (1.0, 5.9), (-2.0, 2.0), (0.0, 6.0)),
+                (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 2.0))
             }
         ),
          new ExerciseData( 
@@ -124,7 +118,6 @@ public static class ExerciseList
             preparationCop: 3,
             timingCop: 30,
             release: 2,
-            switchDelay: 3,
             sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
@@ -142,7 +135,6 @@ public static class ExerciseList
             preparationCop: 3,
             timingCop: 50,
             release: 2,
-            switchDelay: 3,
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
@@ -161,7 +153,6 @@ public static class ExerciseList
             preparationCop: 3,
             timingCop: 60,
             release: 2,
-            switchDelay: 3,
             sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
@@ -179,7 +170,6 @@ public static class ExerciseList
             preparationCop: 3,
             timingCop: 60,
             release: 2,
-            switchDelay: 3,
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
@@ -197,7 +187,6 @@ public static class ExerciseList
             preparationCop: 0,
             timingCop: 60,
             release: 2,
-            switchDelay: 3,
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
@@ -215,7 +204,6 @@ public static class ExerciseList
             preparationCop: 3,
             timingCop: 30,
             release: 2,
-            switchDelay: 3,
             sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {

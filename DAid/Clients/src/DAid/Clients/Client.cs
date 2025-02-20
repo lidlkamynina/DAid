@@ -342,10 +342,6 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
     }
         Console.WriteLine("[Client]: Put leg down");
         await Task.Delay(exercise.Release*1000);
-        if (exercise.LegsUsed != "both"){
-        Console.WriteLine("[Client]: Running switch");
-        await Task.Delay(exercise.Switch*1000);
-        }
 
     Console.WriteLine($"[Exercise]: {exercise.Name} fully completed.");
 
