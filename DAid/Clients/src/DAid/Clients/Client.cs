@@ -128,29 +128,30 @@ private async Task HandleStartCommand()
 
     for (int i = 0; i < exercises.Count; i++)
     {
-        var exercise = exercises[i];
-         if (!completedExerciseSets.Contains(exercise.RepetitionID))
-         {
-              if (exercise.Intro > 0)
-            {
-                await Task.Delay(2000).ConfigureAwait(false);
-                Console.WriteLine($"[Intro]: Waiting {exercise.Intro} sec...");
-                await Task.Delay(exercise.Intro * 1000).ConfigureAwait(false);
-            }
-
+        var exercise = exercises[i];     
+        if (exercise.Intro > 0)
+        {
+            await Task.Delay(2000).ConfigureAwait(false);
+            Console.WriteLine($"[Intro]: Waiting {exercise.Intro} sec...");
+            await Task.Delay(exercise.Intro * 1000).ConfigureAwait(false);
             if (exercise.Demo > 0)
             {
                 Console.WriteLine($"[Demo]: Showing {exercise.Demo} sec...");
                 await Task.Delay(exercise.Demo * 1000).ConfigureAwait(false);
+        }
             }
-         }
-         if (exercise.PreparationCop > 0)
+
+             for (int setNumber = 1; setNumber <= exercise.Sets; setNumber++)  // ✅ Loop through all sets of this exercise
+        {
+                if (exercise.PreparationCop > 0) await CheckPreparationCop(exercise.PreparationCop, exercise.LegsUsed).ConfigureAwait(false);
+
+                if (!completedExerciseSets.Contains(exercise.RepetitionID))
             {
-                await CheckPreparationCop(exercise.PreparationCop, exercise.LegsUsed);
-            }
+         }
         await RunExerciseAsync(exercise).ConfigureAwait(false);
         if (repeatSet.TryGetValue(exercise.RepetitionID, out var repeatExercises) && !completedExerciseSets.Contains(exercise.RepetitionID))
         {
+            await CheckPreparationCop(exercise.PreparationCop, exercise.LegsUsed);
             completedExerciseSets.Add(exercise.RepetitionID);
             Console.WriteLine($"Repeating Exercises: {string.Join(", ", repeatExercises)}...");
             foreach (var repeatID in repeatExercises)
@@ -163,8 +164,8 @@ private async Task HandleStartCommand()
             }
         }
     }
-    Console.WriteLine("All exercises completed!");
     _isVisualizing = false;
+}
 }
 private async Task CheckPreparationCop(int duration, string activeLeg)
 {
@@ -202,7 +203,6 @@ private async Task CheckPreparationCop(int duration, string activeLeg)
         {
             if ((DateTime.Now - startTime).TotalSeconds >= duration)
             {
-                Console.WriteLine($"[Preparation CoP]: {activeLeg} foot correctly positioned for the required time.");
                 return;
             }
         }
@@ -268,7 +268,7 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
                 if (!previousZonesLeft.Contains(zone) && zone != 1 && zone != 7) // Ignore 1 (Green) and 7 (Balance Lost)
                 {
                     //Console.WriteLine($"[Exercise]: Left Foot Changed to Zone {zone}");
-                    SendFeedback(zone, "Left");
+                    SendFeedback(new List<int> { zone }, "Left");
                 }
             }
             foreach (int zone in currentZonesRight)
@@ -276,12 +276,11 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
                 if (!previousZonesRight.Contains(zone) && zone != 1 && zone != 7)
                 {
                     //Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {zone}");
-                    SendFeedback(zone, "Right");
+                    SendFeedback(new List<int> { zone }, "Right");
                 }
             }
             previousZonesLeft = new List<int>(currentZonesLeft);
             previousZonesRight = new List<int>(currentZonesRight);
-
             // Check for Green Zone reset
             if (currentZonesLeft.Contains(1) || currentZonesRight.Contains(1))
             {
@@ -319,14 +318,14 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
             {
                 if (!previousZonesLeft.Contains(7))
                 {
-                    SendFeedback(7, "Left");
+                    SendFeedback(new List<int> { 7 }, "Left");
                 }
             }
             if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
             {
                 if (!previousZonesRight.Contains(7))
                 {
-                    SendFeedback(7, "Right");
+                    SendFeedback(new List<int> { 7 }, "Right");
                 }
             }
             await Task.Delay(5000).ConfigureAwait(false);
@@ -342,29 +341,27 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
     }
         Console.WriteLine("[Client]: Put leg down");
         await Task.Delay(exercise.Release*1000);
-
-    Console.WriteLine($"[Exercise]: {exercise.Name} fully completed.");
-
     // Send final feedback only for the used foot
 if (exercise.LegsUsed == "both" || exercise.LegsUsed == "left")
 {
-    foreach (int feedback in previousZonesLeft)
+   var leftFeedbacks = previousZonesLeft
+        .Where(feedback => feedback != 1 && feedback != 7) // Ignore green zone & balance lost
+        .ToList();
+
+    if (leftFeedbacks.Any())
     {
-        if (feedback != 1 && feedback != 7) 
-        {
-            SendFeedback(feedback, "Left");
-        }
+        SendFeedback(leftFeedbacks, "Left");
     }
 }
-
 if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
 {
-    foreach (int feedback in previousZonesRight)
+    var rightFeedbacks = previousZonesRight
+        .Where(feedback => feedback != 1 && feedback != 7)
+        .ToList();
+
+    if (rightFeedbacks.Any())
     {
-        if (feedback != 1 && feedback != 7) 
-        {
-            SendFeedback(feedback, "Right");
-        }
+        SendFeedback(rightFeedbacks, "Right");
     }
 }
 }
@@ -392,55 +389,12 @@ private List<int> AddCopLeft(ExerciseData exercise, int phaseIndex)
     return adjustedZones;
 }
 
-private void SendFeedback(int feedbackCode, string foot)
-        {
-            Console.WriteLine($"[Feedback]: Sending code {feedbackCode} for {foot} foot");
-            //var feedbackMessage = new FeedbackMessage
-           // {
-            //    MessageType = "Feedback",
-           //     RepetitionID = currentRepetitionID,
-            //    Foot = foot,
-           //     Zone = feedbackCode
-            //};
-            //SendDataToHMD(feedbackMessage);
-        }
-
-private List<int> Feedback(double copX, double copY,  
-                          (double Min, double Max) greenZoneX, (double Min, double Max) greenZoneY, 
-                          (double Min, double Max) redZoneX, (double Min, double Max) redZoneY)
+private void SendFeedback(List<int> feedbackCodes, string foot)
 {
-    List<int> feedbacks = new List<int>();
+    if (feedbackCodes == null || !feedbackCodes.Any()) return; 
 
-    // Green Zone takes priority and should return immediately
-    bool isInGreenZone = copX >= greenZoneX.Min && copX <= greenZoneX.Max &&
-                         copY >= greenZoneY.Min && copY <= greenZoneY.Max;
-    if (isInGreenZone)
-    {
-        return new List<int> { 1 }; 
-    }
-    bool isInRedZone = copX >= redZoneX.Min && copX <= redZoneX.Max &&
-                       copY >= redZoneY.Min && copY <= redZoneY.Max;
-    if (isInRedZone)
-    {
-        feedbacks.Add(2); // Red Zone
-    }
-    if (copX < 0)
-    {
-        feedbacks.Add(3); // Back
-    }
-    if (copX > 0)
-    {
-        feedbacks.Add(4); // Front 
-    }
-    if (copY > 0)
-    {
-        feedbacks.Add(5); // Right
-    }
-    if (copY < 0)
-    {
-        feedbacks.Add(6); // Left
-    }
-    return feedbacks.Count > 0 ? feedbacks : new List<int> { 0 };
+    string feedbackMessage = string.Join(", ", feedbackCodes);
+    Console.WriteLine($"[Feedback]: Sending codes [{feedbackMessage}] for {foot} foot");
 }
         private void HandleStopCommand()
         {

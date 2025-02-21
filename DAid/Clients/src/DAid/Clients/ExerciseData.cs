@@ -135,7 +135,7 @@ public static class ExerciseList
             preparationCop: 3,
             timingCop: 50,
             release: 2,
-            sets: 1,
+            sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
                 (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
@@ -184,7 +184,7 @@ public static class ExerciseList
             legsUsed: "left",
             intro: 0,
             demo: 0,
-            preparationCop: 0,
+            preparationCop: 3,
             timingCop: 60,
             release: 2,
             sets: 1,
