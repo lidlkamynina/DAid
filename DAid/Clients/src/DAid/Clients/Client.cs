@@ -365,6 +365,31 @@ if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
     }
 }
 }
+
+private List<int> Feedback(double copX, double copY,  
+                          (double Min, double Max) greenZoneX, (double Min, double Max) greenZoneY, 
+                          (double Min, double Max) redZoneX, (double Min, double Max) redZoneY)
+{
+    List<int> feedbacks = new List<int>();
+
+    if (copX >= greenZoneX.Min && copX <= greenZoneX.Max &&
+        copY >= greenZoneY.Min && copY <= greenZoneY.Max)
+    {
+        return new List<int> { 1 }; // Green Zone
+    }
+
+    if (copX >= redZoneX.Min && copX <= redZoneX.Max &&
+        copY >= redZoneY.Min && copY <= redZoneY.Max)
+    {
+        feedbacks.Add(2); // Red Zone
+    }
+    if (copX < 0) feedbacks.Add(3); // Back
+    if (copX > 0) feedbacks.Add(4); // Front
+    if (copY > 0) feedbacks.Add(5); // Right
+    if (copY < 0) feedbacks.Add(6); // Left
+
+    return feedbacks.Count > 0 ? feedbacks : new List<int> { 0 };
+}
 private List<int> AddCopLeft(ExerciseData exercise, int phaseIndex)
 {
     var adjustedZones = new List<int>();
@@ -394,8 +419,7 @@ private void SendFeedback(List<int> feedbackCodes, string foot)
     if (feedbackCodes == null || !feedbackCodes.Any()) return; 
 
     string feedbackMessage = string.Join(", ", feedbackCodes);
-    Console.WriteLine($"[Feedback]: Sending codes [{feedbackMessage}] for {foot} foot");
-}
+} 
         private void HandleStopCommand()
         {
             if (!_isVisualizing)
