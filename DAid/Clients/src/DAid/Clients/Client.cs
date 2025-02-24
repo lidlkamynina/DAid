@@ -15,28 +15,36 @@ namespace DAid.Clients
 {
     public class Client
     {
-
         string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
-        string guipath = "D:/GitHub/MRFoot-CGUI/Clientgui/bin/Debug/clientgui.exe"; // change as needed, need to run once gui alone
-        string portFilePath = "D:/GitHub/MRFoot-CGUI/Clientgui/bin/Debug/selected_ports.txt"; // change as needed, creates the files itself
-        private Process _hmdProcess;
+        string guipath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/clientgui.exe"; // change as needed, need to run once gui alone
+        string portFilePath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/selected_ports.txt"; // change as needed
 
+        private Process _hmdProcess;
         private readonly Server _server;
         private VisualizationWindow _visualizationWindow;
         private bool _isCalibrated = false;
         private bool _isVisualizing = false;
 
+        private bool _bypassHMD = false; // New bypass flag
+
+        // Internal sensor values (CoP)
         private double _copXLeft = 0, _copYLeft = 0;
         private double _copXRight = 0, _copYRight = 0;
-        private ExerciseData _currentExercise;
+
+private ExerciseData _currentExercise;
         private int _currentPhase;
+        
+
         private TcpClient _hmdClient;
         private NetworkStream _hmdStream;
 
         private TcpClient _guiClient;
         private NetworkStream _guiStream;
-        private int currentExerciseID = 0;
 
+        // New flag for exercise active state.
+
+        // To store current exercise ID for feedback messages.
+        private int currentExerciseID = 0;
 
         public Client(Server server)
         {
@@ -45,15 +53,16 @@ namespace DAid.Clients
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            Console.WriteLine("Client started. Enter commands: connect, calibrate, start, stop, exit");
+            Console.WriteLine("Client started. Enter commands: connect, calibrate, start, stop, hmd, gui, exit");
             OpenGUI();
+            _bypassHMD = true; // Bypass HMD connection for now
 
             while (!cancellationToken.IsCancellationRequested)
             {
                 Console.Write("> ");
                 string command = Console.ReadLine()?.Trim().ToLower();
-
-                if (string.IsNullOrWhiteSpace(command)) continue;
+                if (string.IsNullOrWhiteSpace(command))
+                    continue;
 
                 if (command == "exit")
                 {
@@ -74,7 +83,7 @@ namespace DAid.Clients
                             HandleCalibrateCommand();
                             break;
                         case "start":
-                            await HandleStartCommand(); //maybe remove await? 
+                            await HandleStartCommand();
                             break;
                         case "stop":
                             HandleStopCommand();
@@ -83,7 +92,7 @@ namespace DAid.Clients
                             HandleExitCommand();
                             break;
                         default:
-                            Console.WriteLine("Unknown command. Valid commands: connect, calibrate, start, stop, exit.");
+                            Console.WriteLine("Unknown command. Valid commands: connect, calibrate, start, stop, hmd, exit.");
                             break;
                     }
                 }
@@ -93,6 +102,7 @@ namespace DAid.Clients
                 }
             }
         }
+
         private void HandleExitCommand()
         {
             Console.WriteLine("Stopping client...");
@@ -139,6 +149,7 @@ namespace DAid.Clients
             Console.WriteLine("[Client]: HandleConnectCommandAsync completed.");
             File.Delete(portFilePath);
         }
+
         private async Task ListenForPortFileAsync(string filePath)
         {
             Console.WriteLine($"[Client]: Waiting for file '{filePath}'...");
@@ -157,41 +168,44 @@ namespace DAid.Clients
             }
             Console.WriteLine("Requesting server to calibrate connected devices...");
             SendMessageToGUI("Requesting server to calibrate connected devices...");
+            Console.WriteLine("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
+             SendMessageToGUI("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
+            
             _server.HandleCalibrateCommand();
             _isCalibrated = true;
             Console.WriteLine("Calibration completed. Use 'start' to begin visualization.");
         }
 
-private async Task HandleStartCommand()
-{
-    if (!_isCalibrated)
-    {
-        Console.WriteLine("Calibration is required before starting visualization. Use 'calibrate' first.");
-        SendMessageToGUI("Calibration is required before starting visualization. Use 'calibrate' first.");
-        return;
-    }
+        private async Task HandleStartCommand()
+        {
+            if (!_isCalibrated)
+            {
+                Console.WriteLine("Calibration is required before starting visualization. Use 'calibrate' first.");
+                SendMessageToGUI("Calibration is required before starting visualization. Use 'calibrate' first.");
+                return;
+            }
+            if (_isVisualizing)
+            {
+                Console.WriteLine("Visualization is already running.");
+                SendMessageToGUI("Visualization is already running.");
+                return;
+            }
+            _server.StartDataStream();
+            OpenVisualizationWindow();
+            ConnectToHMD("127.0.0.1", 9001);
+            SubscribeToDeviceUpdates();
+            _isVisualizing = true;
 
-    if (_isVisualizing)
-    {
-        Console.WriteLine("Visualization is already running.");
-        SendMessageToGUI("Visualization is already running.");
-        return;
-    }
-    _server.StartDataStream();
-    OpenVisualizationWindow();
-    ConnectToHMD("127.0.0.1", 9001);
-    SubscribeToDeviceUpdates();
-    _isVisualizing = true;
-
-    var exercises = ExerciseList.Exercises;
-    var completedExerciseSets = new HashSet<int>();
-    var repeatSet = new Dictionary<int, List<int>>
+            var exercises = ExerciseList.Exercises;
+            var completedExerciseSets = new HashSet<int>();
+            // repeating exercise groups after left and right
+            var repeatSet = new Dictionary<int, List<int>>
     {
         { 2, new List<int> { 1, 2 } },  // Repeat 1 & 2 after 2
         { 10, new List<int> { 9, 10 } } // Repeat 9 & 10 after 10
     };
 
-    for (int i = 0; i < exercises.Count; i++)
+ for (int i = 0; i < exercises.Count; i++)
     {
         var exercise = exercises[i];
         int count = 0;
@@ -244,7 +258,8 @@ private async Task HandleStartCommand()
     Console.WriteLine("All exercises completed!");
     _isVisualizing = false;
 }
-private async Task CheckPreparationCop(int duration, string activeLeg)
+
+    private async Task CheckPreparationCop(int duration, string activeLeg)
 {
     Console.WriteLine($"[Preparation CoP]: Checking for {duration} sec (Active Leg: {activeLeg})...");
     DateTime startTime = DateTime.Now;
@@ -280,6 +295,7 @@ private async Task CheckPreparationCop(int duration, string activeLeg)
         {
             if ((DateTime.Now - startTime).TotalSeconds >= duration)
             {
+                Console.WriteLine($"[Preparation CoP]: {activeLeg} foot correctly positioned for the required time.");
                 return;
             }
         }
@@ -291,165 +307,166 @@ private async Task CheckPreparationCop(int duration, string activeLeg)
         await Task.Delay(1000).ConfigureAwait(false); 
     }
 }
-private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise at a time
-{
-    if (exercise.RepetitionID == 1 || exercise.RepetitionID == 2 ){
-                await Task.Delay(3000).ConfigureAwait(false);  // shows exercise  text for 3 seconds so both client and hmd wait
-    }
-    Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
-    SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
-    DateTime exerciseStartTime = DateTime.Now;
-    int phaseIndex = 0;
-    List<int> previousZonesLeft = new List<int>();
-    List<int> previousZonesRight = new List<int>();
-
-    while ((DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
-    {
-        var phase = exercise.ZoneSequence[phaseIndex];
-
-        Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
-
-        DateTime phaseStartTime = DateTime.Now;
-        bool lostBalance = false;
-         DateTime outOfZoneTimeLeft = DateTime.MinValue;
-        DateTime outOfZoneTimeRight = DateTime.MinValue;
-
-        List<int> currentZonesLeft = new List<int>();
-        List<int> currentZonesRight = new List<int>();
-
-        while ((DateTime.Now - phaseStartTime).TotalSeconds < phase.Duration &&
-               (DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
+        private async Task RunExerciseAsync(ExerciseData exercise)
         {
-            double copXLeft = _copXLeft, copYLeft = _copYLeft;
-            double copXRight = _copXRight, copYRight = _copYRight;
-            currentZonesLeft.Clear();
-            currentZonesRight.Clear();
+            if (exercise.RepetitionID == 1 || exercise.RepetitionID == 2 ){
+                await Task.Delay(3000).ConfigureAwait(false);  // shows exercise  text for 3 seconds so both client and hmd wait
+            }
+            Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
+            SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
+            DateTime exerciseStartTime = DateTime.Now;
+            int phaseIndex = 0;
+            List<int> previousZonesLeft = new List<int>();
+            List<int> previousZonesRight = new List<int>();
 
-            if (exercise.LegsUsed == "right")
+            while ((DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
             {
-                currentZonesRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-            }
-            else if (exercise.LegsUsed == "left")
-            {
-                currentZonesLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-            }
-            else if (exercise.LegsUsed == "both") 
-            {
-                if (exercise.RepetitionID == 5 || exercise.RepetitionID == 6 ){
-                    if (phaseIndex == 2 || phaseIndex == 3){
-                        currentZonesLeft = AddCopLeft(exercise, phaseIndex);
-                    }
-                }
-                currentZonesLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-                currentZonesRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-            }
-            foreach (int zone in currentZonesLeft)  // Send feedback for left foot
-            {
-                if (!previousZonesLeft.Contains(zone) && zone != 1 && zone != 7) // Ignore 1 (Green) and 7 (Balance Lost)
+                var phase = exercise.ZoneSequence[phaseIndex];
+
+                Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
+
+                DateTime phaseStartTime = DateTime.Now;
+                bool lostBalance = false;
+                DateTime outOfZoneTimeLeft = DateTime.MinValue;
+                DateTime outOfZoneTimeRight = DateTime.MinValue;
+            List<int> currentZonesLeft = new List<int>();
+       List<int> currentZonesRight = new List<int>();
+
+                while ((DateTime.Now - phaseStartTime).TotalSeconds < phase.Duration &&
+                       (DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
                 {
-                    Console.WriteLine($"[Exercise]: Left Foot Changed to Zone {zone}");
-                    SendMessageToGUI($"[Exercise]: Left Foot Changed to Zone {zone}");
-                    SendFeedback(new List<int> { zone }, "Left");
-                }
-            }
-            foreach (int zone in currentZonesRight)
-            {
-                 if (!previousZonesRight.Contains(zone) && zone != 1 && zone != 7){
-                        Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {zone}"); //fix the printout
-                        SendMessageToGUI($"[Exercise]: Right Foot Changed to Zone {zone}");
+                    double copXLeft = _copXLeft, copYLeft = _copYLeft;
+                    double copXRight = _copXRight, copYRight = _copYRight;
+                                currentZonesLeft.Clear();
+             currentZonesRight.Clear();
+
+                    if (exercise.LegsUsed == "right")
+                    {
+                        currentZonesRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+
+                    }
+                    else if (exercise.LegsUsed == "left")
+                    {
+                        currentZonesLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+
+                    }
+                    else if (exercise.LegsUsed == "both")
+                    {
+                        if (exercise.RepetitionID == 5 || exercise.RepetitionID == 6 ){
+    if (phaseIndex == 2 || phaseIndex == 3){
+        currentZonesLeft = AddCopLeft(exercise, phaseIndex);
+    }
+                        currentZonesLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+                        currentZonesRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+                    }
+                    foreach (int zone in currentZonesLeft)
+                    {
+                        if (!previousZonesLeft.Contains(zone) && zone != 1 && zone != 7){
+                            Console.WriteLine($"[Exercise]: Left Foot Changed to Zone {zone}");
+                            SendMessageToGUI($"[Exercise]: Left Foot Changed to Zone {zone}");
+                            SendFeedback(new List<int> { zone }, "Left");
+                        }
+
+                    }
+                    foreach (int zone in currentZonesRight)
+                    {
+                         if (!previousZonesRight.Contains(zone) && zone != 1 && zone != 7){
+                        Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {currentZonesRight}");
+                        SendMessageToGUI($"[Exercise]: Right Foot Changed to Zone {currentZonesRight}");
+
                         SendFeedback(new List<int> { zone }, "Right");
                         }
-            }
-            previousZonesLeft = new List<int>(currentZonesLeft);
-            previousZonesRight = new List<int>(currentZonesRight);
-            // Check for Green Zone reset
-            if (currentZonesLeft.Contains(1) || currentZonesRight.Contains(1))
-            {
-                //Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {zone}");
-                outOfZoneTimeLeft = DateTime.MinValue;
-                outOfZoneTimeRight = DateTime.MinValue;
-            }
-            else
-            {
-                if (currentZonesLeft.Count > 0 && outOfZoneTimeLeft == DateTime.MinValue)
-                {
-                    outOfZoneTimeLeft = DateTime.Now;
-                }
-                if (currentZonesRight.Count > 0 && outOfZoneTimeRight == DateTime.MinValue)
-                {
-                    outOfZoneTimeRight = DateTime.Now;
+                    }
+                              previousZonesLeft = new List<int>(currentZonesLeft);
+          previousZonesRight = new List<int>(currentZonesRight);
+                     if (currentZonesLeft.Contains(1) || currentZonesRight.Contains(1))
+                        {
+                            //Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {zone}");
+                            outOfZoneTimeLeft = DateTime.MinValue;
+                            outOfZoneTimeRight = DateTime.MinValue;
+                        }
+                    else
+                        {
+                            if (currentZonesLeft.Count > 0 && outOfZoneTimeLeft == DateTime.MinValue)
+                            {
+                                outOfZoneTimeLeft = DateTime.Now;
+                            }
+                            if (currentZonesRight.Count > 0 && outOfZoneTimeRight == DateTime.MinValue)
+                            {
+                                outOfZoneTimeRight = DateTime.Now;
+                            }
+                        bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
+                                                  ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 4);
+                        bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
+                                                   ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 4);
+
+                        if (leftFootOutTooLong || rightFootOutTooLong)
+                        {
+                            lostBalance = true;
+                            break;
+                        }
+                    }
                 }
 
-                bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
-                                          ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 2);
-                bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
-                                           ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 2);
-
-                if (leftFootOutTooLong || rightFootOutTooLong)
-                {
-                    lostBalance = true;
-                    break;
-                }
-            }
-        }
                 if (lostBalance)
-        {
-            Console.WriteLine("You lost balance, restarting exercise...");
-            SendMessageToGUI("You lost balance, restarting exercise...");
-            if (exercise.LegsUsed == "both" || exercise.LegsUsed == "left")
-            {
-                if (!previousZonesLeft.Contains(7))
                 {
-                    SendFeedback(new List<int> { 7 }, "Left");
+                    Console.WriteLine("You lost balance, restarting exercise...");
+                    SendMessageToGUI("You lost balance, restarting exercise...");
+                    if (exercise.LegsUsed == "both" || exercise.LegsUsed == "left")
+                    {
+                        if (!previousZonesLeft.Contains(7))
+                            {
+                                SendFeedback(new List<int> { 7 }, "Left");
+                            }
+                    }
+                    if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
+                    {
+                        if (!previousZonesRight.Contains(7))
+                            {
+                                SendFeedback(new List<int> { 7 }, "Right");
+                            }
+                    }
+                    await Task.Delay(5000).ConfigureAwait(false);
+                    exerciseStartTime = DateTime.Now;
+                    continue;
+                }
+                phaseIndex++;
+                if (phaseIndex >= exercise.ZoneSequence.Count)
+                {
+                    phaseIndex = 0;
                 }
             }
-            if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
-            {
-                if (!previousZonesRight.Contains(7))
-                {
-                    SendFeedback(new List<int> { 7 }, "Right");
-                }
-            }
-            await Task.Delay(5000).ConfigureAwait(false);
-            exerciseStartTime = DateTime.Now;
-            continue;
-        }
-
-        phaseIndex++;
-        if (phaseIndex >= exercise.ZoneSequence.Count)
-        {
-            phaseIndex = 0;
-        }
-    }
-        Console.WriteLine("[Client]: Put leg down");
-        SendMessageToGUI("[Client]: Put leg down");
+           Console.WriteLine("[Client]: Put leg down");
+           SendMessageToGUI("[Client]: Put leg down");
+           
         await Task.Delay(exercise.Release*1000);
-    // Send final feedback only for the used foot
-if (exercise.LegsUsed == "both" || exercise.LegsUsed == "left")
-{
-   var leftFeedbacks = previousZonesLeft
-        .Where(feedback => feedback != 1 && feedback != 7) // Ignore green zone & balance lost
-        .ToList();
 
-    if (leftFeedbacks.Any())
-    {
-        SendFeedback(leftFeedbacks, "Left");
-    }
-}
-if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
-{
-    var rightFeedbacks = previousZonesRight
-        .Where(feedback => feedback != 1 && feedback != 7)
-        .ToList();
+                if (exercise.LegsUsed == "both" || exercise.LegsUsed == "left")
+                {
+                var leftFeedbacks = previousZonesLeft
+                        .Where(feedback => feedback != 1 && feedback != 7) // Ignore green zone & balance lost
+                        .ToList();
 
-    if (rightFeedbacks.Any())
-    {
-        SendFeedback(rightFeedbacks, "Right");
-    }
-}
-}
+                    if (leftFeedbacks.Any())
+                    {
+                        SendFeedback(leftFeedbacks, "Left");
+                    }
+                }
+                if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
+                {
+                    var rightFeedbacks = previousZonesRight
+                        .Where(feedback => feedback != 1 && feedback != 7)
+                        .ToList();
 
-private List<int> Feedback(double copX, double copY,  
+                    if (rightFeedbacks.Any())
+                    {
+                        SendFeedback(rightFeedbacks, "Right");
+                    }
+                }
+            }
+        }
+
+        private List<int> Feedback(double copX, double copY,  
                           (double Min, double Max) greenZoneX, (double Min, double Max) greenZoneY, 
                           (double Min, double Max) redZoneX, (double Min, double Max) redZoneY)
 {
@@ -473,36 +490,33 @@ private List<int> Feedback(double copX, double copY,
 
     return feedbacks.Count > 0 ? feedbacks : new List<int> { 0 };
 }
-private List<int> AddCopLeft(ExerciseData exercise, int phaseIndex)
-{
-    var adjustedZones = new List<int>();
-    (int, (double, double), (double, double), (double, double), (double, double)) phaseData;
 
-    if (exercise.RepetitionID == 5 && phaseIndex == 2)
-    {
-        phaseData = (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 6.0));
-    }
-    else if (exercise.RepetitionID == 5 && phaseIndex == 3)
-    {
-        phaseData = (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-5.0, 5.0));
-    }
-    else if (exercise.RepetitionID == 6 && phaseIndex == 2)
-    {
-        phaseData = (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 6.0));
-    }
-    else if (exercise.RepetitionID == 6 && phaseIndex == 3)
-    {
-        phaseData = (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 6.0));
-    }
-    return adjustedZones;
-}
+                private List<int> AddCopLeft(ExerciseData exercise, int phaseIndex) //manually added cop zones for exercises 5&6, for lead/back leg
+                {
+                    var adjustedZones = new List<int>();
+                    (int, (double, double), (double, double), (double, double), (double, double)) phaseData;
 
-private void SendFeedback(int feedbackCode, string foot)
-{
-    if (feedbackCode == null || !feedbackCodes.Any()) return; 
-
-    //string feedbackMessage = string.Join(", ", feedbackCodes);
-    var feedbackMessage = new FeedbackMessage
+                    if (exercise.RepetitionID == 5 && phaseIndex == 2)
+                    {
+                        phaseData = (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 6.0));
+                    }
+                    else if (exercise.RepetitionID == 5 && phaseIndex == 3)
+                    {
+                        phaseData = (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-5.0, 5.0));
+                    }
+                    else if (exercise.RepetitionID == 6 && phaseIndex == 2)
+                    {
+                        phaseData = (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 6.0));
+                    }
+                    else if (exercise.RepetitionID == 6 && phaseIndex == 3)
+                    {
+                        phaseData = (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 6.0));
+                    }
+                    return adjustedZones;
+                }
+        private void SendFeedback(List<int> feedbackCodes, string foot)
+        {
+            var feedbackMessage = new FeedbackMessage
             {
                 MessageType = "Feedback",
                 RepetitionID = currentExerciseID,
@@ -510,8 +524,9 @@ private void SendFeedback(int feedbackCode, string foot)
                 Zone = feedbackCodes
             };
             SendDataToHMD(feedbackMessage);
-} 
-private void SendExerciseConfiguration(ExerciseData exercise)
+        }
+
+        private void SendExerciseConfiguration(ExerciseData exercise)
         {
             Console.WriteLine($"[Feedback]: Sending exercise configuration for exercise {exercise.RepetitionID}");
             var configMessage = new ExerciseConfigMessage
@@ -528,10 +543,9 @@ private void SendExerciseConfiguration(ExerciseData exercise)
                 Sets = exercise.Sets,
                 ZoneSequence = exercise.ZoneSequence
             };
-            SendDataToHMD(configMessage);
-            
-            
+            SendDataToHMD(configMessage); 
         }
+
         private void HandleStopCommand()
         {
             if (!_isVisualizing)
@@ -547,31 +561,6 @@ private void SendExerciseConfiguration(ExerciseData exercise)
             Console.WriteLine("[Client]: Visualization and data streams stopped.");
         }
 
-        private void OpenVisualizationWindow()
-        {
-            if (_visualizationWindow == null || _visualizationWindow.IsDisposed)
-            {
-                Thread visualizationThread = new Thread(() =>
-                {
-                    _visualizationWindow = new VisualizationWindow();
-                    System.Windows.Forms.Application.Run(_visualizationWindow);
-
-                });
-                visualizationThread.SetApartmentState(ApartmentState.STA);
-                visualizationThread.IsBackground = true;
-                visualizationThread.Start();
-            }
-        }
-
-        private void CloseVisualizationWindow()
-        {
-            if (_visualizationWindow != null && !_visualizationWindow.IsDisposed)
-            {
-                _visualizationWindow.Invoke(new Action(() => _visualizationWindow.Close()));
-                _visualizationWindow = null;
-            }
-        }
-
         private void SubscribeToDeviceUpdates()
         {
             var activeDevices = _server.Manager.GetConnectedDevices();
@@ -580,14 +569,14 @@ private void SendExerciseConfiguration(ExerciseData exercise)
                 Console.WriteLine("[Client]: No active devices to subscribe to.");
                 return;
             }
-
             foreach (var device in activeDevices)
             {
                 device.CoPUpdated -= OnCoPUpdated;
                 device.CoPUpdated += OnCoPUpdated;
             }
         }
-private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double CoPY, double[] Pressures) copData)
+
+       private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double CoPY, double[] Pressures) copData)
 {
     if (_visualizationWindow == null || _visualizationWindow.IsDisposed) return;
 
@@ -619,9 +608,40 @@ private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double
         );
     }
 }
-//################################### HMD ########################################
+
+        private void OpenVisualizationWindow()
+        {
+            if (_visualizationWindow == null || _visualizationWindow.IsDisposed)
+            {
+                Thread visualizationThread = new Thread(() =>
+                {
+                    _visualizationWindow = new VisualizationWindow();
+                    System.Windows.Forms.Application.Run(_visualizationWindow);
+
+                });
+                visualizationThread.SetApartmentState(ApartmentState.STA);
+                visualizationThread.IsBackground = true;
+                visualizationThread.Start();
+            }
+        }
+
+        private void CloseVisualizationWindow()
+        {
+            if (_visualizationWindow != null && !_visualizationWindow.IsDisposed)
+            {
+                _visualizationWindow.Invoke(new Action(() => _visualizationWindow.Close()));
+                _visualizationWindow = null;
+            }
+        }
+
+        //################################### HMD ########################################
         private void HandleHMDCommand()
         {
+            if (_bypassHMD)
+            {
+                Console.WriteLine("HMD is bypassed. Commands disabled.");
+                return;
+            }
             Console.WriteLine("1. Connect to HMD\n2. Disconnect from HMD\n3. Exit HMD Menu");
             Console.Write("> ");
             string input = Console.ReadLine()?.Trim();
@@ -633,6 +653,11 @@ private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double
 
        private void ConnectToHMD(string ipAddress, int port)
 {
+    if (_bypassHMD)
+            {
+                Console.WriteLine("HMD bypassed. Not connecting.");
+                return;
+            }
     try
     {
         // Ensure HMD application is running
@@ -707,6 +732,11 @@ private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double
 
         private void DisconnectFromHMD()
         {
+            if (_bypassHMD)
+            {
+                Console.WriteLine("HMD bypassed. Not disconnecting.");
+                return;
+            }
             _hmdStream?.Close();
             _hmdClient?.Close();
             _hmdStream = null;
@@ -716,6 +746,11 @@ private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double
 
         private void CloseHMD()
 {
+    if (_bypassHMD)
+            {
+                Console.WriteLine("HMD bypassed. Not closing.");
+                return;
+            }
     try
     {
         if (_hmdProcess != null && !_hmdProcess.HasExited)
@@ -742,6 +777,11 @@ private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double
 
         private void SendDataToHMD(object data)
         {
+            if (_bypassHMD)
+            {
+                Console.WriteLine("HMD bypassed. Data not sent.");
+                return;
+            }
             try
             {
                 if(data != null){
