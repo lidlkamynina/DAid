@@ -10,6 +10,7 @@ namespace DAid.Servers
     {
         private readonly object syncLock = new object();
         public Manager Manager { get; }
+        private string[] ports;
         private bool isRunning;
         private bool isAcquiringData;
 
@@ -78,6 +79,18 @@ namespace DAid.Servers
                 sensorAdapters.Clear();
             }
         }
+        /// <summary>
+        /// Connects to a sensor by scanning available COM ports.
+        /// </summary>
+        public void HandlePortResponse(string port1, string port2)
+        {
+        // Store the ports in the class-level array
+        ports = new string[] { port1, port2 };
+        }
+        public string[] GetPorts()
+        {
+        return ports;
+        }
 
         /// <summary>
         /// Connects to a sensor by scanning available COM ports.
@@ -86,52 +99,46 @@ namespace DAid.Servers
         {
             Console.WriteLine("[Server]: Scanning available COM ports...");
             var ports = SensorAdapter.ScanPorts();
-
-            // Send the list of available COM ports to the client
-            await sendPortsToClient(ports);
-
             if (ports.Count == 0)
             {
                 Console.WriteLine("[Server]: No available COM ports.");
                 return;
             }
-
-            int deviceCount = 2; // Number of devices to connect
-            for (int i = 1; i <= deviceCount; i++)
-            {
-                Console.Write($"[Server]: Enter the COM port to connect to Device {i}: ");
-                string comPort = Console.ReadLine()?.Trim();
-
-                if (!ports.Contains(comPort))
-                {
-                    Console.WriteLine($"[Server]: Invalid COM port '{comPort}'. Skipping Device {i}.");
-                    continue;
-                }
-
-                // Check if this port is already connected
-                if (connectedDevices.Any(d => d.Path == comPort))
-                {
-                    Console.WriteLine($"[Server]: Device on {comPort} is already connected. Skipping.");
-                    continue;
-                }
-
-                var connectedDevice = Manager.Connect(comPort);
-                if (connectedDevice != null)
-                {
-                    connectedDevices.Add(connectedDevice);
-                    sensorAdapters.Add(connectedDevice.SensorAdapter);
-
-                    // Log whether the device is a left or right sock
-                    Console.WriteLine($"[Server]: Device {connectedDevice.ModuleName} is a {(connectedDevice.IsLeftSock ? "Left" : "Right")} Sock.");
-                }
-                else
-                {
-                    Console.WriteLine($"[Server]: Failed to connect to device on {comPort}.");
-                }
-            }
-
-            Console.WriteLine("[Server]: All devices connected. Waiting for further commands.");
+    Console.WriteLine("[Server]: Received COM ports: " + string.Join(", ", ports));
+    // Send the list of available COM ports to the client
+    await sendPortsToClient(ports.ToList());
+    string[] coms = GetPorts(); // Here you define the ports directly inside the method
+    // Loop through the provided ports to connect devices
+    for (int i = 0; i < coms.Length; i++)
+    {
+        string comPort = coms[i];
+        if (!SensorAdapter.ScanPorts().Contains(comPort))
+        {
+            Console.WriteLine($"[Server]: Invalid COM port '{comPort}'. Skipping Device {i + 1}.");
+            continue;
         }
+        // Check if this port is already connected
+        if (connectedDevices.Any(d => d.Path == comPort))
+        {
+            Console.WriteLine($"[Server]: Device on {comPort} is already connected. Skipping.");
+            continue;
+        }
+
+        var connectedDevice = Manager.Connect(comPort);
+        if (connectedDevice != null)
+        {
+            connectedDevices.Add(connectedDevice);
+            sensorAdapters.Add(connectedDevice.SensorAdapter);
+            // Log whether the device is a left or right sock
+            Console.WriteLine($"[Server]: Device {connectedDevice.ModuleName} is a {(connectedDevice.IsLeftSock ? "Left" : "Right")} Sock.");
+        }
+        else
+        {
+            Console.WriteLine($"[Server]: Failed to connect to device on {comPort}.");
+        }
+    }
+    Console.WriteLine("[Server]: All devices connected. Waiting for further commands.");
+}
 
         /// <summary>
         /// Handles the calibrate command.
@@ -166,7 +173,7 @@ namespace DAid.Servers
                 {
                     try
                     {
-                        bool calibrationSuccessful = device.Calibrate();
+                        bool calibrationSuccessful = device.Calibrate(device.IsLeftSock);
 
                         if (calibrationSuccessful)
                         {
