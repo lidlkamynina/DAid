@@ -355,8 +355,8 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
             foreach (int zone in currentZonesRight)
             {
                  if (!previousZonesRight.Contains(zone) && zone != 1 && zone != 7){
-                        Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {currentZonesRight}");
-                        SendMessageToGUI($"[Exercise]: Right Foot Changed to Zone {currentZonesRight}");
+                        Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {zone}"); //fix the printout
+                        SendMessageToGUI($"[Exercise]: Right Foot Changed to Zone {zone}");
                         SendFeedback(new List<int> { zone }, "Right");
                         }
             }
@@ -497,9 +497,9 @@ private List<int> AddCopLeft(ExerciseData exercise, int phaseIndex)
     return adjustedZones;
 }
 
-private void SendFeedback(List<int> feedbackCodes, string foot)
+private void SendFeedback(int feedbackCode, string foot)
 {
-    if (feedbackCodes == null || !feedbackCodes.Any()) return; 
+    if (feedbackCode == null || !feedbackCodes.Any()) return; 
 
     //string feedbackMessage = string.Join(", ", feedbackCodes);
     var feedbackMessage = new FeedbackMessage
