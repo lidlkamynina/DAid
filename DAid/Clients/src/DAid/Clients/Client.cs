@@ -207,12 +207,10 @@ private ExerciseData _currentExercise;
 
             for (int i = 0; i < exercises.Count; i++)
             {
-        var exercise = exercises[i];
-        int count = 0;
-            
-                
-        SendExerciseConfiguration(exercise);
-        if (i == 1 && count == 0)
+            var exercise = exercises[i];
+            int count = 0;        
+            SendExerciseConfiguration(exercise);
+            if (i == 1 && count == 0)
             {
                 count++;
                 Thread.Sleep(1000); // sends left leg stance for exercise 1 and delays so the client isnt ahead
@@ -236,8 +234,11 @@ private ExerciseData _currentExercise;
             {
                 await CheckPreparationCop(exercise.PreparationCop,exercise.LegsUsed);
             }
-            
-        await RunExerciseAsync(exercise).ConfigureAwait(false);
+            for (int set = 0; set < exercise.Sets; set++)
+            {
+            Console.WriteLine($"Starting set {set + 1} of exercise {exercise.RepetitionID}");
+            await RunExerciseAsync(exercise).ConfigureAwait(false);
+    }
         if (repeatSet.TryGetValue(exercise.RepetitionID, out var repeatExercises) && !completedExerciseSets.Contains(exercise.RepetitionID))
         {
             completedExerciseSets.Add(exercise.RepetitionID);
@@ -343,9 +344,9 @@ private ExerciseData _currentExercise;
                     if (exercise.LegsUsed == "right")
                     {
                         currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-                        if (previousZoneRight != currentZoneRight && currentZoneRight != 1 && currentZoneRight != 7){
+                        if (previousZoneRight != currentZoneRight && currentZoneRight != 7){
                         //(DateTime.Now - lastFeedbackTimeRight) > feedbackDebounce);
-                        Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {currentZoneRight}");
+                        //Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {currentZoneRight}");
                         SendMessageToGUI($"[Exercise]: Right Foot Changed to Zone {currentZoneRight}");
                         SendFeedback(currentZoneRight, "Right");
                         }
@@ -355,7 +356,7 @@ private ExerciseData _currentExercise;
                     {
                         currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
                         //Console.WriteLine($"[Debug]: currentZonesLeft: {string.Join(", ", currentZonesLeft)}");
-                        if (previousZoneLeft != currentZoneLeft && currentZoneLeft != 1 && currentZoneLeft != 7){
+                        if (previousZoneLeft != currentZoneLeft && currentZoneLeft != 7){
                         Console.WriteLine($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
                         SendMessageToGUI($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
                         SendFeedback(currentZoneLeft, "Left");
@@ -377,7 +378,7 @@ private ExerciseData _currentExercise;
                         currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
                         //Console.WriteLine($"[Debug]: currentZoneLeft: {string.Join(", ", currentZoneLeft)}");
                     }
-                        if (previousZoneLeft != currentZoneLeft && currentZoneLeft != 1 && currentZoneLeft != 7){
+                        if (previousZoneLeft != currentZoneLeft && currentZoneLeft != 7){
                             Console.WriteLine($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
                             SendMessageToGUI($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
                             SendFeedback(currentZoneLeft, "Left");
@@ -458,6 +459,7 @@ private ExerciseData _currentExercise;
                           (double Min, double Max) greenZoneX, (double Min, double Max) greenZoneY, 
                           (double Min, double Max) redZoneX, (double Min, double Max) redZoneY)
 {
+     //Console.WriteLine($"[Feedback Debug] Received GreenZone: X({greenZoneX.Min} to {greenZoneX.Max}), Y({greenZoneY.Min} to {greenZoneY.Max})");
     if (copX >= greenZoneX.Min && copX <= greenZoneX.Max &&
         copY >= greenZoneY.Min && copY <= greenZoneY.Max)
     {
@@ -467,13 +469,12 @@ private ExerciseData _currentExercise;
     if (copX >= redZoneX.Min && copX <= redZoneX.Max &&
         copY >= redZoneY.Min && copY <= redZoneY.Max)
     {
-        return 2; // Red Zone
-    }
     if (copX < 0) return 3; // Back
     if (copX > 0) return 4; // Front
     if (copY > 0) return 5; // Right
     if (copY < 0) return 6; // Left
-    return 0;
+    }
+    return 7 ;
 }
 
                 private (int duration, (double, double) greenZoneX, (double, double) greenZoneY, (double, double) redZoneX, (double, double) redZoneY) AddCopLeft(ExerciseData exercise, int phaseIndex)
@@ -503,7 +504,7 @@ private ExerciseData _currentExercise;
                 }
         private void SendFeedback(int feedbackCode, string foot)
         {
-            //Console.WriteLine($"[Feedback]: Received feedback codes for {foot} foot: {feedbackCode}");
+            Console.WriteLine($"[Feedback]: Received feedback codes for {foot} foot: {feedbackCode}");
             var feedbackMessage = new FeedbackMessage
             {
                 MessageType = "Feedback",
