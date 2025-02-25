@@ -65,15 +65,15 @@ public static class ExerciseList
             repetitionID: 1, //repetitions
             name: "Single-Leg Stance - Right Leg",
             legsUsed: "right",
-            intro: 1,
-            demo: 3,
+            intro: 4,
+            demo: 4,
             preparationCop: 3,
             timingCop: 30,
             release: 3,
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (30, (-1.0, 1.0), (-1.0, 1.0), (-2.0, -1.0), (-6.0, -1.1))
+                 (30, (-0.5, 0.1), (-0.2, 0.2), (-1.1, -1.0), (-0.5, -0.6))
             }
         ),
         new ExerciseData( 
@@ -88,7 +88,7 @@ public static class ExerciseList
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (30, (-1.0, 1.0), (-1.0, 1.0), (1.0, 2.0), (-6.0, -1.1))
+                (30, (-0.1, 0.1), (-0.2, 0.2), (-0.2, -0.3), (-0.3, -0.4))
             }
         ),
         new ExerciseData( 
@@ -103,10 +103,10 @@ public static class ExerciseList
             sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (2, (0.0, 1.0), (-4.0, 4.0), (-1.5, 2.0), (-6.0, 6.0)),
-                (2, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 2.0)),
-                (1, (0.5, 1.9), (1.0, 5.9), (-2.0, 2.0), (0.0, 6.0)), //no cop checking
-                (1, (0.5, 1.9), (1.0, 5.9), (-2.0, 2.0), (0.0, 6.0))
+                (3, (0.0, 1.0), (-4.0, 4.0), (-1.5, 2.0), (-6.0, 6.0)),
+                (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 2.0)),
+                (1, (0.5, 1.9), (1.0, 5.9), (-2.0, 2.0), (0.0, 6.0)),
+                (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 2.0))
             }
         ),
          new ExerciseData( 
@@ -123,7 +123,8 @@ public static class ExerciseList
             {
                 (2, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
                 (2, (-1.5, 1.0), (-2.0, 2.0), (-2.0, 1.5), (-5.0, 5.0)),
-                (2, (-1.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0)) //not checking cop here, during jump
+                (1, (-1.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0)), //not checking cop here, during jump
+                (1, (-1.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0))
             }
         ),
         new ExerciseData( 
