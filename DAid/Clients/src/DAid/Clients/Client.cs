@@ -397,19 +397,18 @@ private ExerciseData _currentExercise;
                         outOfZoneTimeRight = DateTime.Now;
                         }
                         bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
-                                                  ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 2);
+                                                  ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 3);
                         bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
-                                                   ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 2);
+                                                   ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 3);
 
                         if (leftFootOutTooLong || rightFootOutTooLong)
                         {
+                            Console.WriteLine("You lost balance, restarting exercise...");
+                            SendMessageToGUI("You lost balance, restarting exercise...");
                             lostBalance = true;
-                            break;
                         }
                         if (lostBalance)
                         {
-                        Console.WriteLine("You lost balance, restarting exercise...");
-                        SendMessageToGUI("You lost balance, restarting exercise...");
                         if (exercise.LegsUsed == "both" || exercise.LegsUsed == "left")
                         {
                         if (previousZoneLeft != 7)
@@ -423,13 +422,14 @@ private ExerciseData _currentExercise;
                         if (previousZoneRight != 7)
                             {
                                 SendFeedback( 7, "Right");
-                                previousZoneLeft = 7;
+                                previousZoneRight = 7;
                             }
                         }
-                        }
                     await Task.Delay(5000).ConfigureAwait(false);
+
                     exerciseStartTime = DateTime.Now;
                     continue;
+                    }
                 }
                 phaseIndex++;
                 if (phaseIndex >= exercise.ZoneSequence.Count)
