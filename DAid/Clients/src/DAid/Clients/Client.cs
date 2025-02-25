@@ -309,146 +309,159 @@ private ExerciseData _currentExercise;
     }
 }
         private async Task RunExerciseAsync(ExerciseData exercise)
+{
+    if (exercise.RepetitionID == 1 || exercise.RepetitionID == 2)
+    {
+        await Task.Delay(3000).ConfigureAwait(false);  // shows exercise text for 3 seconds so both client and HMD wait
+    }
+    Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
+    SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
+        DateTime exerciseStartTime = DateTime.Now;
+        int phaseIndex = 0;
+        int previousZoneLeft = -1, previousZoneRight = -1;
+        int feedbackLeft = -1, feedbackRight = -1;
+
+        while ((DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
         {
-            if (exercise.RepetitionID == 1 || exercise.RepetitionID == 2 ){
-                await Task.Delay(3000).ConfigureAwait(false);  // shows exercise  text for 3 seconds so both client and hmd wait
-            }
-            Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
-            SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
-            DateTime exerciseStartTime = DateTime.Now;
-            int phaseIndex = 0;
-            int previousZoneLeft = -1;
-            int previousZoneRight = -1;
-            int feedbackLeft = -1;
-            int feedbackRight = -1;
+            var phase = exercise.ZoneSequence[phaseIndex];
+            Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
 
-            while ((DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
+            DateTime phaseStartTime = DateTime.Now;
+            bool lostBalance = false;
+            DateTime outOfZoneTimeLeft = DateTime.MinValue;
+            DateTime outOfZoneTimeRight = DateTime.MinValue;
+            int currentZoneLeft = -1, currentZoneRight = -1;
+
+            while ((DateTime.Now - phaseStartTime).TotalSeconds < phase.Duration &&
+                   (DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
             {
-                var phase = exercise.ZoneSequence[phaseIndex];
+                double copXLeft = _copXLeft, copYLeft = _copYLeft;
+                double copXRight = _copXRight, copYRight = _copYRight;
 
-                Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
-
-                DateTime phaseStartTime = DateTime.Now;
-                bool lostBalance = false;
-                DateTime outOfZoneTimeLeft = DateTime.MinValue;
-                DateTime outOfZoneTimeRight = DateTime.MinValue;
-                int currentZoneLeft = -1;
-                int currentZoneRight = -1;
-
-                while ((DateTime.Now - phaseStartTime).TotalSeconds < phase.Duration &&
-                       (DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
+                if (exercise.LegsUsed == "right")
                 {
-                    double copXLeft = _copXLeft, copYLeft = _copYLeft;
-                    double copXRight = _copXRight, copYRight = _copYRight;
-
-                    if (exercise.LegsUsed == "right")
+                    currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+                    currentZoneLeft = -1;
+                }
+                else if (exercise.LegsUsed == "left")
+                {
+                    currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+                    currentZoneRight = -1;
+                }
+                else if (exercise.LegsUsed == "both")
+                {
+                    if (exercise.RepetitionID == 5 || exercise.RepetitionID == 6)
                     {
-                        currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-                        currentZoneLeft = -1; // No tracking for left foot
+                        if (phaseIndex == 2 || phaseIndex == 3)
+                        {
+                            var adjustedZonesLeft = AddCopLeft(exercise, phaseIndex);
+                            currentZoneLeft = Feedback(copXLeft, copYLeft,
+                                               adjustedZonesLeft.greenZoneX, adjustedZonesLeft.greenZoneY,
+                                               adjustedZonesLeft.redZoneX, adjustedZonesLeft.redZoneY);
+                        }
                     }
-                    else if (exercise.LegsUsed == "left")
+                    else
                     {
                         currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-                        currentZoneRight = -1; // No tracking for right foot
                     }
-
-                    else if (exercise.LegsUsed == "both")
-                    {
-                        if (exercise.RepetitionID == 5 || exercise.RepetitionID == 6 ){
-                    if (phaseIndex == 2 || phaseIndex == 3){
-                    var adjustedZonesLeft = AddCopLeft(exercise, phaseIndex);
-                    currentZoneLeft = Feedback(copXLeft, copYLeft,
-                                       adjustedZonesLeft.greenZoneX, adjustedZonesLeft.greenZoneY,
-                                       adjustedZonesLeft.redZoneX, adjustedZonesLeft.redZoneY);
-                            }}
-                    else{
-                        currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY );
-                        }
-                        currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-                        }
-                        //Console.WriteLine($"[Debug]: currentZoneLeft: {string.Join(", ", currentZoneLeft)}");
-                        if (currentZoneLeft != previousZoneLeft && currentZoneLeft > 0){
-                            Console.WriteLine($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
-                            SendMessageToGUI($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
-                            previousZoneLeft = currentZoneLeft;
-                            feedbackLeft = currentZoneLeft;
-                            SendFeedback(feedbackLeft, "Left");
-                        }
-                         if (currentZoneRight != previousZoneRight && currentZoneRight > 0){
-                        Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {currentZoneRight}");
-                        SendMessageToGUI($"[Exercise]: Right Foot Changed to Zone {currentZoneRight}");
-                        previousZoneRight = currentZoneRight;
-                        feedbackRight = currentZoneRight;
-                        SendFeedback(feedbackRight, "Right");
-                        }
-                        if (currentZoneLeft == 1 || currentZoneRight == 1)
-                        {
-                            outOfZoneTimeLeft = DateTime.MinValue;
-                            outOfZoneTimeRight = DateTime.MinValue;
-                        }
-                    else
-                        {
-                            if (currentZoneLeft == 0 && outOfZoneTimeLeft == DateTime.MinValue)
-                        {
-                            outOfZoneTimeLeft = DateTime.Now;
-                        }
-                        if (currentZoneRight == 0 && outOfZoneTimeRight == DateTime.MinValue)
-                        {
-                        outOfZoneTimeRight = DateTime.Now;
-                        }
-                        bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
-                                                  ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 3);
-                        bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
-                                                   ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 3);
-
-                        if (leftFootOutTooLong || rightFootOutTooLong)
-                        {
-                            Console.WriteLine("You lost balance, restarting exercise...");
-                            SendMessageToGUI("You lost balance, restarting exercise...");
-                            lostBalance = true;
-                        }
-                        if (lostBalance)
-                        {
-                        if (exercise.LegsUsed == "both" || exercise.LegsUsed == "left")
-                        {
-                        if (previousZoneLeft != 7)
-                            {
-                                SendFeedback( 7, "Left");
-                                previousZoneLeft = 7;
-                            }
-                        }
-                        if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
-                        {   
-                        if (previousZoneRight != 7)
-                            {
-                                SendFeedback( 7, "Right");
-                                previousZoneRight = 7;
-                            }
-                        }
-                    await Task.Delay(5000).ConfigureAwait(false);
-
-                    exerciseStartTime = DateTime.Now;
-                    continue;
-                    }
+                    currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
                 }
-                phaseIndex++;
-                if (phaseIndex >= exercise.ZoneSequence.Count)
+
+                if (currentZoneLeft != previousZoneLeft && currentZoneLeft > 0)
                 {
-                    phaseIndex = 0;
+                    Console.WriteLine($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
+                    SendMessageToGUI($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
+                    previousZoneLeft = currentZoneLeft;
+                    feedbackLeft = currentZoneLeft;
+                    SendFeedback(feedbackLeft, "Left");
+                }
+                if (currentZoneRight != previousZoneRight && currentZoneRight > 0)
+                {
+                    Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {currentZoneRight}");
+                    SendMessageToGUI($"[Exercise]: Right Foot Changed to Zone {currentZoneRight}");
+                    previousZoneRight = currentZoneRight;
+                    feedbackRight = currentZoneRight;
+                    SendFeedback(feedbackRight, "Right");
+                }
+                if (currentZoneLeft == 1 || currentZoneRight == 1)
+                {
+                    outOfZoneTimeLeft = DateTime.MinValue;
+                    outOfZoneTimeRight = DateTime.MinValue;
+                }
+                else
+                {
+                    if (currentZoneLeft == 0 && outOfZoneTimeLeft == DateTime.MinValue)
+                    {
+                        outOfZoneTimeLeft = DateTime.Now;
+                    }
+                    if (currentZoneRight == 0 && outOfZoneTimeRight == DateTime.MinValue)
+                    {
+                        outOfZoneTimeRight = DateTime.Now;
+                    }
+
+                    bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
+                                              ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 4);
+                    bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
+                                               ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 4);
+
+                    if (leftFootOutTooLong || rightFootOutTooLong)
+                    {
+                        lostBalance = true;
+                        break;
+                    }
                 }
             }
+            if (lostBalance)
+            {
+                Console.WriteLine("You lost balance, restarting exercise...");
+                SendMessageToGUI("You lost balance, restarting exercise...");
+
+                if (exercise.LegsUsed == "both" || exercise.LegsUsed == "left")
+                {
+                    if (previousZoneLeft != 7)
+                    {
+                        SendFeedback(7, "Left");
+                        previousZoneLeft = 7;
+                    }
+                }
+                if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
+                {
+                    if (previousZoneRight != 7)
+                    {
+                        SendFeedback(7, "Right");
+                        previousZoneRight = 7;
+                    }
+                }
+                Console.WriteLine("Pausing for 5 seconds before restarting...");
+                await Task.Delay(5000).ConfigureAwait(false);
+                phaseIndex = 0;
+                previousZoneLeft = -1;
+                previousZoneRight = -1;
+                feedbackLeft = -1;
+                feedbackRight = -1;
+                outOfZoneTimeLeft = DateTime.MinValue;
+                outOfZoneTimeRight = DateTime.MinValue;
+                lostBalance = false; // Reset flag
+                exerciseStartTime = DateTime.Now;
+                Console.WriteLine("Restarting exercise...");
+                continue;
             }
-           Console.WriteLine("[Client]: Put leg down");
-           SendMessageToGUI("[Client]: Put leg down");
-           
-        await Task.Delay(exercise.Release*1000);
+            phaseIndex++;
+            if (phaseIndex >= exercise.ZoneSequence.Count)
+            {
+                phaseIndex = 0; // Loop through multiple phases within 30 seconds
+            }
         }
+        Console.WriteLine("[Client]: Put leg down");
+        SendMessageToGUI("[Client]: Put leg down");
+        await Task.Delay(exercise.Release * 1000);
+}
+
 
         private int Feedback(double copX, double copY,  
                           (double Min, double Max) greenZoneX, (double Min, double Max) greenZoneY, 
                           (double Min, double Max) redZoneX, (double Min, double Max) redZoneY)
 {
-     //Console.WriteLine($"[Feedback Debug] Received GreenZone: X({greenZoneX.Min} to {greenZoneX.Max}), Y({greenZoneY.Min} to {greenZoneY.Max})");
     bool isInGreenZone = copX >= greenZoneX.Item1 && copX <= greenZoneX.Item2 &&
                                  copY >= greenZoneY.Item1 && copY <= greenZoneY.Item2;
     if (isInGreenZone)

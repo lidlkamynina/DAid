@@ -73,7 +73,7 @@ public static class ExerciseList
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                   (30, (-0.5, 0.5), (-0.7, 0.7), (-1.5, -0.5), (-4.0, 4.1))
+                   (30, (-0.5, 0.5), (-0.7, 0.7), (-1.5, 1.5), (-4.0, 4.1))
             }
         ),
         new ExerciseData( 
@@ -88,7 +88,7 @@ public static class ExerciseList
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                 (30, (0.5, -0.5), (-0.7, 0.7), (0.5, 1.5), (-4.0, 4.1))
+                 (30, (0.5, -0.5), (-0.7, 0.7), (-1.5, 1.5), (-4.0, 4.1))
             }
         ),
         new ExerciseData( 
