@@ -215,6 +215,7 @@ private ExerciseData _currentExercise;
                 count++;
                 Thread.Sleep(1000); // sends left leg stance for exercise 1 and delays so the client isnt ahead
             }
+            if (i == 3) Thread.Sleep(1000); // delay for exercise 3
          if (!completedExerciseSets.Contains(exercise.RepetitionID))
          {
               if (exercise.Intro > 0)
