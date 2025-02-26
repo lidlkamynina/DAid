@@ -230,12 +230,12 @@ private ExerciseData _currentExercise;
                 await Task.Delay(exercise.Demo * 1000).ConfigureAwait(false);
             }
          }
-         if (exercise.PreparationCop > 0)
+            for (int set = 0; set < exercise.Sets; set++)
+            {
+            if (exercise.PreparationCop > 0)
             {
                 await CheckPreparationCop(exercise.PreparationCop,exercise.LegsUsed);
             }
-            for (int set = 0; set < exercise.Sets; set++)
-            {
             Console.WriteLine($"Starting set {set + 1} of exercise {exercise.RepetitionID}");
             await RunExerciseAsync(exercise).ConfigureAwait(false);
     }
@@ -331,6 +331,17 @@ private ExerciseData _currentExercise;
             DateTime outOfZoneTimeLeft = DateTime.MinValue;
             DateTime outOfZoneTimeRight = DateTime.MinValue;
             int currentZoneLeft = -1, currentZoneRight = -1;
+            //noCOP check for phase in exercise/ moves to the next phase afterwards
+            if ((exercise.RepetitionID == 4 && phaseIndex == 2) ||  // Exercise 4, Phase 3 (Index 2)
+            (exercise.RepetitionID == 5 && phaseIndex == 3))    // Exercise 5, Phase 4 (Index 3)
+        {
+            Console.WriteLine($"[Phase {phaseIndex + 1}]: No CoP check, waiting for {phase.Duration} seconds...");
+            SendMessageToGUI($"[Phase {phaseIndex + 1}]: No CoP check, waiting...");
+
+            await Task.Delay(phase.Duration * 1000);
+            phaseIndex++; // Move to the next phase
+            continue;
+        }
 
             while ((DateTime.Now - phaseStartTime).TotalSeconds < phase.Duration &&
                    (DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
@@ -350,9 +361,9 @@ private ExerciseData _currentExercise;
                 }
                 else if (exercise.LegsUsed == "both")
                 {
-                    if (exercise.RepetitionID == 5 || exercise.RepetitionID == 6)
+                    if (exercise.RepetitionID == 4 || exercise.RepetitionID == 5)
                     {
-                        if (phaseIndex == 2 || phaseIndex == 3)
+                        if ((exercise.RepetitionID == 4 &&phaseIndex == 2) || (exercise.RepetitionID == 5 && phaseIndex == 3))
                         {
                             var adjustedZonesLeft = AddCopLeft(exercise, phaseIndex);
                             currentZoneLeft = Feedback(copXLeft, copYLeft,
