@@ -16,8 +16,8 @@ namespace DAid.Clients
     public class Client
     {
         string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
-        string guipath = "D:/GitHub/MRFoot-CGUI/Clientgui/bin/Debug/clientgui.exe"; // change as needed, need to run once gui alone
-        string portFilePath = "D:/GitHub/MRFoot-CGUI/Clientgui/bin/Debug/selected_ports.txt"; // change as needed
+        string guipath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/clientgui.exe"; // change as needed, need to run once gui alone
+        string portFilePath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/selected_ports.txt"; // change as needed
 
         private Process _hmdProcess;
         private readonly Server _server;
@@ -55,7 +55,7 @@ private ExerciseData _currentExercise;
         {
             Console.WriteLine("Client started. Enter commands: connect, calibrate, start, stop, hmd, gui, exit");
             OpenGUI(5555);
-            _bypassHMD = true; // Bypass HMD connection for now
+            _bypassHMD = false; // Bypass HMD connection for now
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -208,14 +208,19 @@ private ExerciseData _currentExercise;
             for (int i = 0; i < exercises.Count; i++)
             {
             var exercise = exercises[i];
-            int count = 0;        
+            int count = 0;   
+            int count1 = 0;       
             SendExerciseConfiguration(exercise);
             if (i == 1 && count == 0)
             {
                 count++;
                 Thread.Sleep(1000); // sends left leg stance for exercise 1 and delays so the client isnt ahead
             }
-            if (i == 3) Thread.Sleep(1000); // delay for exercise 3
+            if (i == 2 && count1 == 0)
+            {
+                count++;
+                Thread.Sleep(2000); // sends exercise 2 config for first time and having a delay
+            }
          if (!completedExerciseSets.Contains(exercise.RepetitionID))
          {
               if (exercise.Intro > 0)
@@ -705,7 +710,7 @@ private ExerciseData _currentExercise;
         }
 
         // Attempt to connect with retries
-        int retries = 4;
+        int retries = 10;
         int delay = 3000;
         for (int i = 0; i < retries; i++)
         {
