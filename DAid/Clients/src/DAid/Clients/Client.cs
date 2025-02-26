@@ -365,30 +365,17 @@ private ExerciseData _currentExercise;
                     {
                         if (phaseIndex == 1 || phaseIndex == 2)
                         {
-                            if (exercise.RepetitionID == 5 && phaseIndex == 1) {
-                                for (int i = 0; i<10; i++){
-                                    for (int j = 0; j<10; j++){
-                                        var adjustedZonesLeft = AddCopLeft(exercise, phaseIndex);
-                                        currentZoneLeft = Feedback(copXLeft, copYLeft,
-                                               adjustedZonesLeft.greenZoneX, adjustedZonesLeft.greenZoneY,
-                                               adjustedZonesLeft.redZoneX, adjustedZonesLeft.redZoneY);
-                                        currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-                                    }
-                                    phaseIndex++;
-                                }
-                            } else {
                             var adjustedZonesLeft = AddCopLeft(exercise, phaseIndex);
                                         currentZoneLeft = Feedback(copXLeft, copYLeft,
                                                adjustedZonesLeft.greenZoneX, adjustedZonesLeft.greenZoneY,
                                                adjustedZonesLeft.redZoneX, adjustedZonesLeft.redZoneY);
                             }
-                        }
                     }
                     else
                     {
                         currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-                        currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
                     }
+                    currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
                 }
 
                 if (currentZoneLeft != previousZoneLeft && currentZoneLeft > 0)
