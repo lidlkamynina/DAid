@@ -232,9 +232,9 @@ private ExerciseData _currentExercise;
                 await CheckPreparationCop(exercise.PreparationCop,exercise.LegsUsed);
             }
             Console.WriteLine($"Starting set {set + 1} of exercise {exercise.RepetitionID}");
-            if (exercise.RepetitionID == 5)
+            if (exercise.RepetitionID == 5 || exercise.RepetitionID == 6)
             {
-                await Run5Async(exercise).ConfigureAwait(false); //runs squats - walking lunges in a separate method
+                await Run5and6Async(exercise).ConfigureAwait(false); //runs squats - walking lunges and lateral jumps in a separate method
             }
             else
             {           
@@ -311,7 +311,7 @@ private ExerciseData _currentExercise;
     }
 }
 
-private async Task Run5Async(ExerciseData exercise) // runs 4th exercise squats - walking lunges
+private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exercises squats - walking lunges, lateral jumps
 {
     Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
     SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
@@ -328,7 +328,7 @@ private async Task Run5Async(ExerciseData exercise) // runs 4th exercise squats 
 
     while ((DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
     {
-        int phaseIndex;
+        int phaseIndex = -1;
         if (phase1Completed == 0)
         {
             phaseIndex = 0; 
@@ -337,7 +337,7 @@ private async Task Run5Async(ExerciseData exercise) // runs 4th exercise squats 
         {
             phaseIndex = (phaseRepeatCount % 2 == 0) ? 1 : 2; // Move between phase 2 and 3
         }
-        else
+        else if (exercise.ZoneSequence.Count == 4)
         {
             phaseIndex = 3; 
         }
@@ -374,6 +374,8 @@ private async Task Run5Async(ExerciseData exercise) // runs 4th exercise squats 
             }
             currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
 
+            if (exercise.RepetitionID == 6 && phaseIndex == 2){
+                currentZoneRight = -1;
             if (currentZoneLeft != previousZoneLeft && currentZoneLeft > 0)
             {
                 Console.WriteLine($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
@@ -382,6 +384,9 @@ private async Task Run5Async(ExerciseData exercise) // runs 4th exercise squats 
                 feedbackLeft = currentZoneLeft;
                 SendFeedback(feedbackLeft, "Left");
             }
+            }
+            if (exercise.RepetitionID == 6 && phaseIndex == 1){
+                currentZoneLeft = -1;
             if (currentZoneRight != previousZoneRight && currentZoneRight > 0)
             {
                 Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {currentZoneRight}");
@@ -389,6 +394,7 @@ private async Task Run5Async(ExerciseData exercise) // runs 4th exercise squats 
                 previousZoneRight = currentZoneRight;
                 feedbackRight = currentZoneRight;
                 SendFeedback(feedbackRight, "Right");
+            }
             }
             if (currentZoneLeft == 1 || currentZoneRight == 1)
             {
@@ -642,19 +648,19 @@ private async Task Run5Async(ExerciseData exercise) // runs 4th exercise squats 
                 (int, (double, double), (double, double), (double, double), (double, double)) phaseData;
                 if (exercise.RepetitionID == 5 && phaseIndex == 2)
                 {
-                    phaseData = (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 6.0));
+                    phaseData = (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 4.0));
                 }
                 else if (exercise.RepetitionID == 5 && phaseIndex == 3)
                 {
-                    phaseData = (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-5.0, 5.0));
+                    phaseData = (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-4.0, 4.0));
                 }
                 else if (exercise.RepetitionID == 6 && phaseIndex == 2)
                 {
-                    phaseData = (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 6.0));
+                    phaseData = (2, (-1.0, 1.0), (0.2, 1.9), (-1.5, 1.5), (0.0, 4.0));
                 }
                 else if (exercise.RepetitionID == 6 && phaseIndex == 3)
                 {
-                    phaseData = (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 6.0));
+                    phaseData = (2, (-1.0, 1.0), (0.2, 1.9), (-1.5, 1.5), (0.0, 4.0));
                 }
                 else
                 {
