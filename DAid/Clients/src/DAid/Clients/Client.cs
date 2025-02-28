@@ -206,7 +206,7 @@ private ExerciseData _currentExercise;
             };
             Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 2000 }, { 3, 2000 }  };
             for (int i = 0; i < exercises.Count; i++) {
-            var exercise = exercises[i]; 
+            var exercise = exercises[4]; 
             SendExerciseConfiguration(exercise);
             if (exerciseDelays.TryGetValue(i, out int delay)) Thread.Sleep(delay);
             Console.WriteLine("Sending delay");
@@ -374,7 +374,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
             }
             currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
 
-            if (exercise.RepetitionID == 6 && phaseIndex == 2){
+            if ((exercise.RepetitionID == 6 && phaseIndex == 2) || exercise.RepetitionID == 5){
                 currentZoneRight = -1;
             if (currentZoneLeft != previousZoneLeft && currentZoneLeft > 0)
             {
@@ -385,7 +385,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                 SendFeedback(feedbackLeft, "Left");
             }
             }
-            if (exercise.RepetitionID == 6 && phaseIndex == 1){
+            if ((exercise.RepetitionID == 6 && phaseIndex == 1) || exercise.RepetitionID == 5){
                 currentZoneLeft = -1;
             if (currentZoneRight != previousZoneRight && currentZoneRight > 0)
             {
