@@ -134,7 +134,7 @@ public static class ExerciseList
             intro: 1,
             demo: 3,
             preparationCop: 3,
-            timingCop: 50,
+            timingCop: 49,
             release: 2,
             sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
