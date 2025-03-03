@@ -202,7 +202,7 @@ private ExerciseData _currentExercise;
             var repeatSet = new Dictionary<int, List<int>>
             {
             { 2, new List<int> { 1, 2 } },  // Repeat 1 & 2 after 2
-            { 10, new List<int> { 9, 10 } } // Repeat 9 & 10 after 10
+            { 8, new List<int> { 7, 8 } } // Repeat 9 & 10 after 10
             };
             Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 2000 }, { 3, 2000 }  };
             for (int i = 0; i < exercises.Count; i++) {
@@ -376,7 +376,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
 
             if (currentZoneLeft != previousZoneLeft && currentZoneLeft > 0)
             {
-                if (exercise.RepetitionID == 6 && phaseIndex == 1){
+                if (exercise.RepetitionID == 6 && phaseIndex == 2){
                 currentZoneRight = -1;
             }
                 Console.WriteLine($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
@@ -386,7 +386,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                 SendFeedback(feedbackLeft, "Left");
             }
             if (currentZoneRight != previousZoneRight && currentZoneRight > 0){
-            if (exercise.RepetitionID == 6 && phaseIndex == 2){
+            if (exercise.RepetitionID == 6 && phaseIndex == 1){
                 currentZoneLeft = -1;
             }
                 Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {currentZoneRight}");
