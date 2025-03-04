@@ -16,8 +16,8 @@ namespace DAid.Clients
     public class Client
     {
         string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
-        string guipath = "D:/GitHub/MRFoot-CGUI/Clientgui/bin/Debug/clientgui.exe"; // change as needed, need to run once gui alone
-        string portFilePath = "D:/GitHub/MRFoot-CGUI/Clientgui/bin/Debug/selected_ports.txt"; // change as needed
+        string guipath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/clientgui.exe"; // change as needed, need to run once gui alone
+        string portFilePath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/selected_ports.txt"; // change as needed
 
         private Process _hmdProcess;
         private readonly Server _server;
@@ -205,9 +205,13 @@ private ExerciseData _currentExercise;
             { 8, new List<int> { 7, 8 } } // Repeat 9 & 10 after 10
             };
             Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 2000 }, { 3, 2000 }  };
-            for (int i = 0; i < exercises.Count; i++) {
+            for (int i = 6; i < exercises.Count; i++) {
             var exercise = exercises[i]; 
             SendExerciseConfiguration(exercise);
+            if(exercise == exercises[6]){
+                await Task.Delay(2500).ConfigureAwait(false);
+
+            }
             if (exerciseDelays.TryGetValue(i, out int delay)) Thread.Sleep(delay);
             Console.WriteLine("Sending delay");
          if (!completedExerciseSets.Contains(exercise.RepetitionID))
