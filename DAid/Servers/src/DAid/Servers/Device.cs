@@ -20,9 +20,9 @@ namespace DAid.Servers
         private readonly object _syncLock = new object();
         private readonly ConcurrentQueue<string> logQueue = new ConcurrentQueue<string>();
         private string logFilePath; // Path for the CSV log file
-        private CancellationTokenSource loggingCancellationTokenSource; // Added declaration
+        private CancellationTokenSource loggingCancellationTokenSource; 
 
-        private bool isLogging; // Flag to control logging state
+        private bool isLogging; 
 
         public event EventHandler<string> RawDataReceived;
         public event EventHandler<(string DeviceName, double CoPX, double CoPY, double[] Pressures)> CoPUpdated;
@@ -36,7 +36,6 @@ namespace DAid.Servers
         public float Frequency { get; private set; }
         public string Name { get; private set; }     // Device name for identification
 
-        // Expose the SensorAdapter as a read-only property
         public SensorAdapter SensorAdapter => sensorAdapter;
 
         public Device(string path, float frequency, string name)
@@ -46,7 +45,7 @@ namespace DAid.Servers
             this.Frequency = frequency;
             this.Name = name ?? throw new ArgumentNullException(nameof(name));
 
-            ModuleName = "Unknown"; // Default value before retrieving module info
+            ModuleName = "Unknown"; 
             IsLeftSock = false;     // Default to right sock until determined
             InitializeSensorAdapter();
         }
@@ -78,15 +77,11 @@ namespace DAid.Servers
                 try
                 {
                     sensorAdapter.Initialize(path, baudRate);
-
-                    // Retrieve module name
                     sensorAdapter.RetrieveModuleName();
                     while (!sensorAdapter.moduleNameRetrieved)
                     {
                         Thread.Sleep(500); // Wait for retrieval
                     }
-
-                    // Persist module information
                     ModuleName = sensorAdapter.ModuleName;
                     IsLeftSock = int.TryParse(ModuleName, out int moduleNumber) && moduleNumber % 2 != 0;
 
@@ -179,35 +174,46 @@ namespace DAid.Servers
         }
 
 private void StartLogging(CancellationToken cancellationToken)
-{
-    const int expectedIntervalMs = 1000;
-    DateTime? lastTimestamp = null;
+{ 
+    string logFilePath;
+        string activeLogFile = IsLeftSock ? "ActiveLogFile_Left.txt" : "ActiveLogFile_Right.txt"; // Pick correct file
 
-    var logBuffer = new StringBuilder();
-    logFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{Name}.txt");
-
-    // Check if the file exists before writing headers
-    if (!File.Exists(logFilePath))
+    try
     {
-        try
+        using (FileStream fs = new FileStream(activeLogFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+        using (StreamReader reader = new StreamReader(fs))
         {
-            logBuffer.AppendLine("Timestamp\tBattery\tTime_ms\tQ0\tQ1\tQ2\tQ3\tAcc_X\tAcc_Y\tAcc_Z\tSensor1\tSensor2\tSensor3\tSensor4\tSensor5\tSensor6\tSensor7\tSensor8");
-            File.AppendAllText(logFilePath, logBuffer.ToString());
-            logBuffer.Clear();
+            logFilePath = reader.ReadLine()?.Trim();
         }
-        catch (Exception ex)
+        if (string.IsNullOrWhiteSpace(logFilePath) || !File.Exists(logFilePath))
         {
-            Console.WriteLine($"Error initializing log file: {ex.Message}");
+            Console.WriteLine("Error: Log file path is missing or invalid.");
             return;
         }
     }
-    else
+    catch (Exception ex)
     {
-        string restartMessage = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}\tData receival has resumed.\n";
-        File.AppendAllText(logFilePath, restartMessage);
+        Console.WriteLine($"Error reading log file: {ex.Message}");
+        return;
     }
 
-    isLogging = true; 
+    DateTime? lastTimestamp = null;
+    var logBuffer = new StringBuilder();
+    try
+    {
+        using (FileStream fs = new FileStream(logFilePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+        using (StreamWriter writer = new StreamWriter(fs))
+        {
+            writer.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}\tData receival has resumed.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error writing restart message: {ex.Message}");
+        return;
+    }
+
+    isLogging = true;
 
     Task.Run(async () =>
     {
@@ -263,12 +269,15 @@ private void StartLogging(CancellationToken cancellationToken)
                         continue;
                     }
                 }
-
                 if (logBuffer.Length > 0)
                 {
                     try
                     {
-                        File.AppendAllText(logFilePath, logBuffer.ToString());
+                        using (FileStream fs = new FileStream(logFilePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+                        using (StreamWriter writer = new StreamWriter(fs))
+                        {
+                            writer.Write(logBuffer.ToString());
+                        }
                         logBuffer.Clear();
                     }
                     catch (Exception ex)
@@ -286,6 +295,7 @@ private void StartLogging(CancellationToken cancellationToken)
         }
     }, cancellationToken);
 }
+
 
  private void StopLogging()
 {

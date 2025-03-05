@@ -17,7 +17,7 @@ namespace DAid.Clients
     {
         string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
         string guipath = "D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
-        string portFilePath = "D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"
+        string portFilePath = "D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt" 
 
         private Process _hmdProcess;
         private readonly Server _server;
@@ -31,10 +31,9 @@ namespace DAid.Clients
         private double _copXLeft = 0, _copYLeft = 0;
         private double _copXRight = 0, _copYRight = 0;
 
-    private ExerciseData _currentExercise;
+        private ExerciseData _currentExercise;
         private int _currentPhase;
         
-
         private TcpClient _hmdClient;
         private NetworkStream _hmdStream;
 
@@ -194,10 +193,10 @@ namespace DAid.Clients
             var repeatSet = new Dictionary<int, List<int>>
             {
             { 2, new List<int> { 1, 2 } },  // Repeat 1 & 2 after 2
-            { 8, new List<int> { 7, 8 } } // Repeat 9 & 10 after 10
+            { 8, new List<int> { 7, 8 } } // Repeat 7 & 8 after 8
             };
             Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 2000 }, { 3, 2000 }  };
-            for (int i = 6; i < exercises.Count; i++) {
+            for (int i = 0; i < exercises.Count; i++) {
             var exercise = exercises[i]; 
             SendExerciseConfiguration(exercise);
             
@@ -966,15 +965,12 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                 break;
             }
             string response = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
-            Console.WriteLine($"[GUI]: {response}");
-
-            // Check for configuration message
             if (response.StartsWith("config:", StringComparison.OrdinalIgnoreCase))
             {
-                string configData = response.Substring("config:".Length);
-                Console.WriteLine($"[Client]: Received configuration: {configData}");
-                // Process the configuration data as needed, for example:
-                // ParseConfig(configData);
+                int userId = int.Parse(response.Substring("config:".Length).Split(',')[0]);
+                Console.WriteLine($"[Client]: Received user ID: {userId}");
+                CreateLogFiles(userId);
+
             }
             else if (response.ToLower() == "connect")
             {
@@ -1030,6 +1026,43 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
     }
     Console.WriteLine("[Client]: Stopped listening for GUI responses.");
 }
+       private void CreateLogFiles(int userId)
+{
+    try
+    {
+        CreateLogFile(userId, "Left");
+        CreateLogFile(userId, "Right");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error creating log files: {ex.Message}");
+    }
+}
+
+private void CreateLogFile(int userId, string sockType)
+{
+    int fileIndex = 1;
+    string baseFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"UserID_{userId}_{sockType}_{fileIndex}.txt");
+    string logFilePath = baseFilePath;
+    while (File.Exists(logFilePath))
+    {
+        fileIndex++;
+        logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"UserID_{userId}_{sockType}_{fileIndex}.txt");
+    }
+    using (FileStream fs = new FileStream(logFilePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+    using (StreamWriter writer = new StreamWriter(fs))
+    {
+        writer.WriteLine("Timestamp\tBattery\tTime_ms\tQ0\tQ1\tQ2\tQ3\tAcc_X\tAcc_Y\tAcc_Z\tSensor1\tSensor2\tSensor3\tSensor4\tSensor5\tSensor6\tSensor7\tSensor8");
+    }
+    string activeLogFile = $"ActiveLogFile_{sockType}.txt";
+    using (FileStream fs = new FileStream(activeLogFile, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+    using (StreamWriter writer = new StreamWriter(fs))
+    {
+        writer.WriteLine(logFilePath);
+    }
+    Console.WriteLine($"Log file created for {sockType} sock: {logFilePath}");
+}
+
 
 
         private void SendMessageToGUI(string message)

@@ -5,8 +5,12 @@
     "\\DAid\\Clients",
     "\\DAid\\Clients\\src",
     "\\DAid\\Clients\\src\\DAid",
-    "\\DAid\\Clients\\src\\DAid\\Clients"
+    "\\DAid\\Clients\\src\\DAid\\Clients",
+    "\\DAid\\Servers",
+    "\\DAid\\Servers\\src",
+    "\\DAid\\Servers\\src\\DAid",
+    "\\DAid\\Servers\\src\\DAid\\Servers"
   ],
-  "SelectedNode": "\\DAid\\Clients\\DAid.Clients.csproj",
+  "SelectedNode": "\\DAid\\Servers\\DAid.Servers.csproj",
   "PreviewInSolutionExplorer": false
 }
