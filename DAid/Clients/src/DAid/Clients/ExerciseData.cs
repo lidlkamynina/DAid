@@ -166,16 +166,16 @@ public static class ExerciseList
             repetitionID: 7,
             name: "Squats - One-leg Squats Right",
             legsUsed: "right",
-            intro: 1,
-            demo: 3,
+            intro: 0,
+            demo: 5,
             preparationCop: 3,
             timingCop: 50,
             release: 2,
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (2, (-1.5, 1.0), (-3.5, 3.5), (-2.0, 1.5), (-6.0, 6.0)),
+                //(1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)), // this is basically handled in prep, unecessary
+                (3, (-1.5, 1.0), (-3.5, 3.5), (-2.0, 1.5), (-6.0, 6.0)),
                 (2, (-1.0, 1.0), (-1.0, 1.0), (-2.0, -1.5), (-6.0, 6.0))
             }
         ),
@@ -191,7 +191,7 @@ public static class ExerciseList
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
+                //(1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
                 (2, (-1.5, 1.0), (-3.5, 3.5), (-2.0, 1.5), (-6.0, 6.0)),
                 (2, (-1.0, 1.0), (-1.0, 1.0), (-2.0, -1.5), (-6.0, 6.0))
             }
