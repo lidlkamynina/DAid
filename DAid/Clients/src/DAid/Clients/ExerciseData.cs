@@ -174,9 +174,8 @@ public static class ExerciseList
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                //(1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)), // this is basically handled in prep, unecessary
-                (3, (-1.5, 1.0), (-3.5, 3.5), (-2.0, 1.5), (-6.0, 6.0)),
-                (2, (-1.0, 1.0), (-1.0, 1.0), (-2.0, -1.5), (-6.0, 6.0))
+                (3, (-1.0, 0.8), (-1.5, 1.5), (-2.0, 1.2), (-3.0, 3.0)),
+                (2, (-0.8, 0.8), (-0.8, 0.8), (-1.5, 1.5), (-1.5, 1.5))
             }
         ),
         new ExerciseData( 
@@ -191,9 +190,8 @@ public static class ExerciseList
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                //(1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (2, (-1.5, 1.0), (-3.5, 3.5), (-2.0, 1.5), (-6.0, 6.0)),
-                (2, (-1.0, 1.0), (-1.0, 1.0), (-2.0, -1.5), (-6.0, 6.0))
+                (3, (-1.0, 0.8), (-1.5, 1.5), (-2.0, 1.2), (-3.0, 3.0)),
+                (2, (-0.8, 0.8), (-0.8, 0.8), (-1.5, 1.5), (-1.5, 1.5))
             }
         ),
     new ExerciseData( 
@@ -208,8 +206,8 @@ public static class ExerciseList
             sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (2, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (28, (-1.5, 1.5), (-3.0, 3.0), (-2.0, 2.0), (-4.5, 4.5))
+                (2, (-0.8, 0.8), (-0.8, 0.8), (-1.5, 1.5), (-1.5, 1.5)),
+                (28, (-1.5, 1.5), (-3.0, 3.0), (-2.0, 2.0), (-3.5, 3.5))
             }
         )
     };
