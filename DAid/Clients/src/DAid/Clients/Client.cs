@@ -212,6 +212,10 @@ private ExerciseData _currentExercise;
                 await Task.Delay(2500).ConfigureAwait(false);
 
             }
+            if(exercise == exercises[7]){
+                await Task.Delay(1000).ConfigureAwait(false);
+
+            }
             if (exerciseDelays.TryGetValue(i, out int delay)) Thread.Sleep(delay);
             Console.WriteLine("Sending delay");
          if (!completedExerciseSets.Contains(exercise.RepetitionID))
@@ -964,74 +968,84 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
 }
 
         private async Task ListenForGUIResponses()
+{
+    byte[] buffer = new byte[1024];
+    while (_guiClient?.Connected == true)
+    {
+        try
         {
-            byte[] buffer = new byte[1024];
-            while (_guiClient?.Connected == true)
+            int bytesRead = await _guiStream.ReadAsync(buffer, 0, buffer.Length);
+            if (bytesRead == 0)
             {
-                try
-                {
-                    int bytesRead = await _guiStream.ReadAsync(buffer, 0, buffer.Length);
-                    if (bytesRead == 0)
-                    {
-                        Console.WriteLine("[Client]: Connection closed by GUI.");
-                        break;
-                    }
-                    string response = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
-                    Console.WriteLine($"[GUI]: {response}");
-                    if (response.ToLower() == "connect")
-                    {
-                        Console.WriteLine("[Client]: Connect command received from GUI.");
-                        await HandleConnectCommandAsync(CancellationToken.None);
-                    }
-                    if (response.ToLower() == "calibrate")
-                    {
-                        Console.WriteLine("[Client]: Calibrate command received from GUI.");
-                        HandleCalibrateCommand();
-                    }
-                    if (response.ToLower() == "start")
-                    {
-                        Console.WriteLine("[Client]: Start command received from GUI.");
-                        await HandleStartCommand();
-                    }
-                    if (response.ToLower() == "stop")
-                    {
-                        HandleStopCommand();
-                        Console.WriteLine("[Client]: Stop command received from GUI.");
-                    }
-                    if (response.ToLower() == "hmd")
-                    {
-                        Console.WriteLine("[Client]: HMD command received from GUI.");
-                        HandleHMDCommand();
-                    }
-                    if (response.ToLower() == "1")
-                    {
-                        Console.WriteLine("[Client]: 1 command received from GUI.");
-                        ConnectToHMD("127.0.0.1", 9001);
-                    }
-                    if (response.ToLower() == "2")
-                    {
-                        Console.WriteLine("[Client]: 2 command received from GUI.");
-                        DisconnectFromHMD();
-                    }
-                    if (response.ToLower() == "exit")
-                    {
-                        Console.WriteLine("[Client]: Exit command received from GUI.");
-                        HandleExitCommand();
-                        Environment.Exit(0);
-                    }
-                    else
-                    {
-                        Console.WriteLine("[Client]: Unrecognized message from GUI.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error while listening for GUI responses: {ex.Message}");
-                    break;
-                }
+                Console.WriteLine("[Client]: Connection closed by GUI.");
+                break;
             }
-            Console.WriteLine("[Client]: Stopped listening for GUI responses.");
+            string response = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+            Console.WriteLine($"[GUI]: {response}");
+
+            // Check for configuration message
+            if (response.StartsWith("config:", StringComparison.OrdinalIgnoreCase))
+            {
+                string configData = response.Substring("config:".Length);
+                Console.WriteLine($"[Client]: Received configuration: {configData}");
+                // Process the configuration data as needed, for example:
+                // ParseConfig(configData);
+            }
+            else if (response.ToLower() == "connect")
+            {
+                Console.WriteLine("[Client]: Connect command received from GUI.");
+                await HandleConnectCommandAsync(CancellationToken.None);
+            }
+            else if (response.ToLower() == "calibrate")
+            {
+                Console.WriteLine("[Client]: Calibrate command received from GUI.");
+                HandleCalibrateCommand();
+            }
+            else if (response.ToLower() == "start")
+            {
+                Console.WriteLine("[Client]: Start command received from GUI.");
+                await HandleStartCommand();
+            }
+            else if (response.ToLower() == "stop")
+            {
+                Console.WriteLine("[Client]: Stop command received from GUI.");
+                HandleStopCommand();
+            }
+            else if (response.ToLower() == "hmd")
+            {
+                Console.WriteLine("[Client]: HMD command received from GUI.");
+                HandleHMDCommand();
+            }
+            else if (response.ToLower() == "1")
+            {
+                Console.WriteLine("[Client]: 1 command received from GUI.");
+                ConnectToHMD("127.0.0.1", 9001);
+            }
+            else if (response.ToLower() == "2")
+            {
+                Console.WriteLine("[Client]: 2 command received from GUI.");
+                DisconnectFromHMD();
+            }
+            else if (response.ToLower() == "exit")
+            {
+                Console.WriteLine("[Client]: Exit command received from GUI.");
+                HandleExitCommand();
+                Environment.Exit(0);
+            }
+            else
+            {
+                Console.WriteLine("[Client]: Unrecognized message from GUI.");
+            }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error while listening for GUI responses: {ex.Message}");
+            break;
+        }
+    }
+    Console.WriteLine("[Client]: Stopped listening for GUI responses.");
+}
+
 
         private void SendMessageToGUI(string message)
         {
