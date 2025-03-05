@@ -482,8 +482,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
             DateTime outOfZoneTimeRight = DateTime.MinValue;
             int currentZoneLeft = -1, currentZoneRight = -1;
             //noCOP check for phase in exercise/ moves to the next phase afterwards
-            if ((exercise.RepetitionID == 4 && phaseIndex == 2) ||  // Exercise 4, Phase 3 (Index 2)
-            (exercise.RepetitionID == 5 && phaseIndex == 3))    // Exercise 5, Phase 4 (Index 3)
+            if (exercise.RepetitionID == 4 && phaseIndex == 2)   // Exercise 5, Phase 4 (Index 3)
         {
             Console.WriteLine($"[Phase {phaseIndex + 1}]: No CoP check, waiting for {phase.Duration} seconds...");
             SendMessageToGUI($"[Phase {phaseIndex + 1}]: No CoP check, waiting...");
@@ -511,20 +510,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                 }
                 else if (exercise.LegsUsed == "both")
                 {
-                    if (exercise.RepetitionID == 6)
-                    {
-                        if (phaseIndex == 1 || phaseIndex == 2)
-                        {
-                            var adjustedZonesLeft = AddCopLeft(exercise, phaseIndex);
-                                        currentZoneLeft = Feedback(copXLeft, copYLeft,
-                                               adjustedZonesLeft.greenZoneX, adjustedZonesLeft.greenZoneY,
-                                               adjustedZonesLeft.redZoneX, adjustedZonesLeft.redZoneY);
-                            }
-                    }
-                    else
-                    {
-                        currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-                    }
+                    currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
                     currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
                 }
 

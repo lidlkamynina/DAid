@@ -158,8 +158,8 @@ public static class ExerciseList
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
                 (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 4.0)), //right leg, left leg (2, (-1.0, 1.0), (-5.0, 5.0), (-1.5, 1.5), (-6.0, 6.0))
-                (2, (-0.7, 0.7), (-4.0, 4.0), (-1.5, 1.5), (-4.0, 4.0)) // right leg, left leg (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 6.0))
+                (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 4.0)), //right leg, 
+                (2, (-0.7, 0.7), (-4.0, 4.0), (-1.5, 1.5), (-4.0, 4.0)) // right leg,
             }
         ),
         new ExerciseData( 
@@ -169,7 +169,7 @@ public static class ExerciseList
             intro: 1,
             demo: 3,
             preparationCop: 3,
-            timingCop: 60,
+            timingCop: 50,
             release: 2,
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
@@ -186,7 +186,7 @@ public static class ExerciseList
             intro: 0,
             demo: 0,
             preparationCop: 3,
-            timingCop: 60,
+            timingCop: 50,
             release: 2,
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
