@@ -16,8 +16,8 @@ namespace DAid.Clients
     public class Client
     {
         string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
-        string guipath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/clientgui.exe"; // change as needed, need to run once gui alone
-        string portFilePath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/selected_ports.txt"; // change as needed
+        string guipath = "D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
+        string portFilePath = "D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"
 
         private Process _hmdProcess;
         private readonly Server _server;
@@ -31,7 +31,7 @@ namespace DAid.Clients
         private double _copXLeft = 0, _copYLeft = 0;
         private double _copXRight = 0, _copYRight = 0;
 
-private ExerciseData _currentExercise;
+    private ExerciseData _currentExercise;
         private int _currentPhase;
         
 
@@ -40,12 +40,7 @@ private ExerciseData _currentExercise;
 
         private TcpClient _guiClient;
         private NetworkStream _guiStream;
-
-        // New flag for exercise active state.
-
-        // To store current exercise ID for feedback messages.
         private int currentExerciseID = 0;
-
         public Client(Server server)
         {
             _server = server ?? throw new ArgumentNullException(nameof(server));
@@ -71,7 +66,6 @@ private ExerciseData _currentExercise;
                     DisconnectFromHMD();
                     return;
                 }
-
                 try
                 {
                     switch (command)
@@ -112,7 +106,7 @@ private ExerciseData _currentExercise;
             CloseGUI();
         }
 
-        private async Task HandleConnectCommandAsync(CancellationToken cancellationToken)
+        private async Task HandleConnectCommandAsync(CancellationToken cancellationToken) //retrieves port names and shows them them on gui
         {
             Console.WriteLine("[Client]: Requesting available COM ports from the server...");
 
@@ -157,7 +151,6 @@ private ExerciseData _currentExercise;
                 await Task.Delay(500);
             Console.WriteLine($"[Client]: File '{filePath}' detected.");
         }
-
         private void HandleCalibrateCommand()
         {
             if (_isCalibrated)
@@ -169,13 +162,12 @@ private ExerciseData _currentExercise;
             Console.WriteLine("Requesting server to calibrate connected devices...");
             SendMessageToGUI("Requesting server to calibrate connected devices...");
             Console.WriteLine("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
-             SendMessageToGUI("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
+            SendMessageToGUI("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
             
             _server.HandleCalibrateCommand();
             _isCalibrated = true;
             Console.WriteLine("Calibration completed. Use 'start' to begin visualization.");
         }
-
         private async Task HandleStartCommand()
         {
             if (!_isCalibrated)
@@ -208,69 +200,65 @@ private ExerciseData _currentExercise;
             for (int i = 6; i < exercises.Count; i++) {
             var exercise = exercises[i]; 
             SendExerciseConfiguration(exercise);
+            
             if(exercise == exercises[6]){
                 await Task.Delay(2500).ConfigureAwait(false);
 
             }
+            
             if (exerciseDelays.TryGetValue(i, out int delay)) Thread.Sleep(delay);
-            Console.WriteLine("Sending delay");
-         if (!completedExerciseSets.Contains(exercise.RepetitionID))
-         {
-              if (exercise.Intro > 0)
+            if (!completedExerciseSets.Contains(exercise.RepetitionID))
             {
-                await Task.Delay(2000).ConfigureAwait(false);
-                Console.WriteLine($"[Intro]: Waiting {exercise.Intro} sec...");
-                await Task.Delay(exercise.Intro * 1000).ConfigureAwait(false);
-            }
+                if (exercise.Intro > 0)
+                    {
+                    await Task.Delay(2000).ConfigureAwait(false);
+                    Console.WriteLine($"[Intro]: Waiting {exercise.Intro} sec...");
+                    await Task.Delay(exercise.Intro * 1000).ConfigureAwait(false);
+                    }
 
-            if (exercise.Demo > 0)
-            {
-                Console.WriteLine($"[Demo]: Showing {exercise.Demo} sec...");
-                await Task.Delay(exercise.Demo * 1000).ConfigureAwait(false);
+                if (exercise.Demo > 0)
+                    {
+                    Console.WriteLine($"[Demo]: Showing {exercise.Demo} sec...");
+                    await Task.Delay(exercise.Demo * 1000).ConfigureAwait(false);
+                    }
             }
-         }
             for (int set = 0; set < exercise.Sets; set++)
-            {
-            if (exercise.PreparationCop > 0)
-            {
-                await CheckPreparationCop(exercise.PreparationCop,exercise.LegsUsed);
-            }
-            Console.WriteLine($"Starting set {set + 1} of exercise {exercise.RepetitionID}");
-            if (exercise.RepetitionID == 5 || exercise.RepetitionID == 6)
-            {
-                await Run5and6Async(exercise).ConfigureAwait(false); //runs squats - walking lunges and lateral jumps in a separate method
-            }
-            else
-            {           
-                await RunExerciseAsync(exercise).ConfigureAwait(false); //the rest of the repetitions
-            }
-            }
-        if (repeatSet.TryGetValue(exercise.RepetitionID, out var repeatExercises) && !completedExerciseSets.Contains(exercise.RepetitionID))
-        {
-            completedExerciseSets.Add(exercise.RepetitionID);
-            Console.WriteLine($"Repeating Exercises: {string.Join(", ", repeatExercises)}...");
-            foreach (var repeatID in repeatExercises)
-            {
-                var repeatExercise = exercises.FirstOrDefault(e => e.RepetitionID == repeatID);
-                
-                if (repeatExercise != null)
                 {
-                    await CheckPreparationCop(repeatExercise.PreparationCop,repeatExercise.LegsUsed);
-                    SendExerciseConfiguration(repeatExercise);
-                    await RunExerciseAsync(repeatExercise).ConfigureAwait(false);
+                if (exercise.PreparationCop > 0)
+                {
+                    await CheckPreparationCop(exercise.PreparationCop,exercise.LegsUsed);
+                }
+                Console.WriteLine($"Starting set {set + 1} of exercise {exercise.RepetitionID}");
+                if (exercise.RepetitionID == 5 || exercise.RepetitionID == 6)
+                {
+                    await Run5and6Async(exercise).ConfigureAwait(false); //runs squats - walking lunges and lateral jumps in a separate method
+                }else{           
+                    await RunExerciseAsync(exercise).ConfigureAwait(false); //the rest of the repetitions
+                    }
+                }
+            if (repeatSet.TryGetValue(exercise.RepetitionID, out var repeatExercises) && !completedExerciseSets.Contains(exercise.RepetitionID))
+            {
+                completedExerciseSets.Add(exercise.RepetitionID);
+                Console.WriteLine($"Repeating Exercises: {string.Join(", ", repeatExercises)}...");
+                foreach (var repeatID in repeatExercises)
+                {
+                    var repeatExercise = exercises.FirstOrDefault(e => e.RepetitionID == repeatID);
+                    if (repeatExercise != null)
+                    {
+                        await CheckPreparationCop(repeatExercise.PreparationCop,repeatExercise.LegsUsed);
+                        SendExerciseConfiguration(repeatExercise);
+                        await RunExerciseAsync(repeatExercise).ConfigureAwait(false);
+                    }
                 }
             }
         }
+        Console.WriteLine("All exercises completed!");
+        _isVisualizing = false;
     }
-    Console.WriteLine("All exercises completed!");
-    _isVisualizing = false;
-}
 
-    private async Task CheckPreparationCop(int duration, string activeLeg)
-{
+    private async Task CheckPreparationCop(int duration, string activeLeg) {
     Console.WriteLine($"[Preparation CoP]: Checking for {duration} sec (Active Leg: {activeLeg})...");
     DateTime startTime = DateTime.Now;
-    
     while (true) 
     {
         bool isFootValid = false;
@@ -872,8 +860,6 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
         Console.WriteLine($"Error connecting to HMD: {ex.Message}");
     }
 }
-
-
         private void DisconnectFromHMD()
         {
             if (_bypassHMD)
