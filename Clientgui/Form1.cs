@@ -19,6 +19,11 @@ namespace ClientGUI
         private bool _isRunning = true;
         private List<string> selectedPorts = new List<string>();
 
+        // Add these members to your Form1 class.
+        private string selectedUserConfig = "";
+        private Dictionary<string, string> userConfigDict = new Dictionary<string, string>();
+
+
         // File name for storing users.
         private string usersFilePath = Path.Combine(Application.StartupPath, "users.txt");
 
@@ -92,7 +97,6 @@ namespace ClientGUI
         /// </summary>
         private void continueButton_Click(object sender, EventArgs e)
         {
-            // Clear the flow panel and show a dropdown (ComboBox) with the list of users.
             flowLayoutPanel1.Controls.Clear();
 
             Label selectLabel = new Label
@@ -109,21 +113,21 @@ namespace ClientGUI
                 Margin = new Padding(5)
             };
 
-            // Load the user data from the file (if any)
             if (File.Exists(usersFilePath))
             {
-                // Assuming each line is in CSV format: ID,Name,Age,Sex,Weight,Height,ShoeSize,LeadingLeg,Position,Injury
                 string[] lines = File.ReadAllLines(usersFilePath);
                 foreach (string line in lines)
                 {
                     if (!string.IsNullOrWhiteSpace(line))
                     {
-                        // Use the first two fields (ID and Name) for display.
+                        // Assuming CSV format: ID,Name,Age,Sex,Weight,Height,...
                         string[] parts = line.Split(',');
                         if (parts.Length >= 2)
                         {
                             string display = $"ID: {parts[0]} - {parts[1]}";
                             userComboBox.Items.Add(display);
+                            // Save the complete config (CSV line) for later use.
+                            userConfigDict[display] = line;
                         }
                     }
                 }
@@ -142,11 +146,9 @@ namespace ClientGUI
                 return;
             }
 
-            // Select the first item by default.
             userComboBox.SelectedIndex = 0;
             flowLayoutPanel1.Controls.Add(userComboBox);
 
-            // Add a confirmation button.
             Button selectUserButton = new Button
             {
                 Text = "OK",
@@ -157,11 +159,15 @@ namespace ClientGUI
             };
             selectUserButton.Click += (s, ea) =>
             {
-                AppendText($"User selected: {userComboBox.SelectedItem.ToString()}");
+                string selectedDisplay = userComboBox.SelectedItem.ToString();
+                // Retrieve the full configuration from the dictionary.
+                selectedUserConfig = userConfigDict[selectedDisplay];
+                AppendText($"User selected: {selectedDisplay}");
                 ProceedAfterUserSelection();
             };
             flowLayoutPanel1.Controls.Add(selectUserButton);
         }
+
 
         /// <summary>
         /// Once a user has been selected or entered, hide the user-selection controls
@@ -508,18 +514,30 @@ namespace ClientGUI
         // Connect Button Click handler (now visible only after a user is selected)
         private void connectButton_Click(object sender, EventArgs e)
         {
-            // Send a connection message to the client
+            if (!string.IsNullOrEmpty(selectedUserConfig))
+            {
+                SendMessageToClient("config:" + selectedUserConfig);
+                AppendText("Selected user's config sent to client.");
+            }
+            else
+            {
+                AppendText("No user configuration available to send.");
+            }
+            // Send a connection command to the client.
             SendMessageToClient("connect");
-            connectButton.Enabled = false;
             AppendText("Connect command sent to client. Waiting for port list...");
 
-            // Disable the connect button and inform the user
+            // Now send the selected user configuration (if one was selected).
+            
+
+            // Disable the Connect button.
             connectButton.Enabled = false;
             AppendText("Connect button disabled. Awaiting port information.");
 
-            // After sending the message, wait for the client to send a response
+            // Start waiting for the client response.
             Task.Run(() => WaitForClientResponse());
         }
+
 
         private void WaitForClientResponse()
         {
