@@ -18,7 +18,7 @@ namespace DAid.Clients
         string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
         string guipath = "D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
         string portFilePath = "D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt" 
-
+        string questip = "192.168.8.118"; // CHANGE AS NEEDED
         private Process _hmdProcess;
         private readonly Server _server;
         private VisualizationWindow _visualizationWindow;
@@ -183,7 +183,7 @@ namespace DAid.Clients
             }
             _server.StartDataStream();
             OpenVisualizationWindow();
-            ConnectToHMD("127.0.0.1", 9001);
+            ConnectToHMD(questip, 9001);
             SubscribeToDeviceUpdates();
             _isVisualizing = true;
 
@@ -781,7 +781,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
             Console.Write("> ");
             string input = Console.ReadLine()?.Trim();
             if (input == "1")
-                ConnectToHMD("127.0.0.1", 9001);
+                ConnectToHMD(questip, 9001);
             else if (input == "2")
                 DisconnectFromHMD();
         }
@@ -803,8 +803,8 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
             Console.WriteLine("Starting HMD application...");
             try
             {
-                _hmdProcess = Process.Start(hmdpath);
-                Thread.Sleep(5000); // Give it time to start
+                // _hmdProcess = Process.Start(hmdpath);
+                // Thread.Sleep(5000); // ATM UNNECESSARY
             }
             catch (Exception ex)
             {
@@ -1001,7 +1001,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
             else if (response.ToLower() == "1")
             {
                 Console.WriteLine("[Client]: 1 command received from GUI.");
-                ConnectToHMD("127.0.0.1", 9001);
+                ConnectToHMD(questip, 9001);
             }
             else if (response.ToLower() == "2")
             {
