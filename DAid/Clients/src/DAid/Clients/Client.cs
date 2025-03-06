@@ -197,7 +197,7 @@ namespace DAid.Clients
             };
             Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 2000 }, { 3, 2000 }  };
             for (int i = 0; i < exercises.Count; i++) {
-            var exercise = exercises[i]; 
+            var exercise = exercises[3]; 
             SendExerciseConfiguration(exercise);
             
             if(exercise == exercises[6]){
@@ -454,6 +454,8 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
 
         private async Task RunExerciseAsync(ExerciseData exercise)
 {
+        DateTime outOfZoneTimeLeft = DateTime.MinValue;
+        DateTime outOfZoneTimeRight = DateTime.MinValue;
     if (exercise.RepetitionID == 1 || exercise.RepetitionID == 2)
     {
         await Task.Delay(3000).ConfigureAwait(false);  // shows exercise text for 3 seconds so both client and HMD wait
@@ -469,12 +471,9 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
         {
             var phase = exercise.ZoneSequence[phaseIndex];
             Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
-
             DateTime phaseStartTime = DateTime.Now;
             bool lostBalance = false;
-            DateTime outOfZoneTimeLeft = DateTime.MinValue;
-            DateTime outOfZoneTimeRight = DateTime.MinValue;
-            int currentZoneLeft = -1, currentZoneRight = -1;
+            int currentZoneLeft = 0, currentZoneRight = 0;
             //noCOP check for phase in exercise/ moves to the next phase afterwards
             if (exercise.RepetitionID == 4 && phaseIndex == 2)   // Exercise 5, Phase 4 (Index 3)
         {
@@ -524,10 +523,13 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                     feedbackRight = currentZoneRight;
                     SendFeedback(feedbackRight, "Right");
                 }
-                if (currentZoneLeft == 1 || currentZoneRight == 1)
+                if (currentZoneLeft == 1)
                 {
                     outOfZoneTimeLeft = DateTime.MinValue;
-                    outOfZoneTimeRight = DateTime.MinValue;
+                }
+                else if (currentZoneRight == 1)
+                {
+                outOfZoneTimeRight = DateTime.MinValue;
                 }
                 else
                 {
@@ -544,7 +546,6 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                                               ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 4);
                     bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
                                                ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 4);
-
                     if (leftFootOutTooLong || rightFootOutTooLong)
                     {
                         lostBalance = true;
