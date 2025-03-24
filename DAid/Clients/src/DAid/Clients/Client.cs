@@ -17,8 +17,9 @@ namespace DAid.Clients
     {
 
         string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
-        string guipath = "D:/GitHub/MRFoot-CGUI/Clientgui/bin/Debug/clientgui.exe"; // change as needed, need to run once gui alone
-        string portFilePath = "D:/GitHub/MRFoot-CGUI/Clientgui/bin/Debug/selected_ports.txt"; // change as needed, creates the files itself
+        string guipath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
+        string portFilePath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt" 
+        string questip = "192.168.8.118" ; // CHANGE AS NEEDED "192.168.8.118" for HOME WIFI
         private Process _hmdProcess;
 
         private readonly Server _server;
@@ -183,34 +184,44 @@ private async Task HandleStartCommand()
     SubscribeToDeviceUpdates();
     _isVisualizing = true;
 
-    var exercises = ExerciseList.Exercises;
-    var completedExerciseSets = new HashSet<int>();
-    var repeatSet = new Dictionary<int, List<int>>
-    {
-        { 2, new List<int> { 1, 2 } },  // Repeat 1 & 2 after 2
-        { 10, new List<int> { 9, 10 } } // Repeat 9 & 10 after 10
-    };
-
-    for (int i = 0; i < exercises.Count; i++)
-    {
-        var exercise = exercises[i];
-        int count = 0;
+            var exercises = ExerciseList.Exercises;
+            var completedExerciseSets = new HashSet<int>();
+            // repeating exercise groups after left and right
+            var repeatSet = new Dictionary<int, List<int>>
+            {
+            { 2, new List<int> { 1, 2 } },  // Repeat 1 & 2 after 2
+            { 8, new List<int> { 7, 8 } } // Repeat 7 & 8 after 8
+            };
+            Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 2000 }, { 3, 2000 }  };
+            for (int i = 0; i < exercises.Count; i++) {
+            var exercise = exercises[i]; 
+            SendExerciseConfiguration(exercise);
             
-                
-        SendExerciseConfiguration(exercise);
-        if (i == 1 && count == 0)
-            {
-                count++;
-                Thread.Sleep(1000); // sends left leg stance for exercise 1 and delays so the client isnt ahead
+             if(exercise == exercises[4]){
+                await Task.Delay(1000).ConfigureAwait(false);
+
             }
-         if (!completedExerciseSets.Contains(exercise.RepetitionID))
-         {
-              if (exercise.Intro > 0)
-            {
-                await Task.Delay(2000).ConfigureAwait(false);
-                Console.WriteLine($"[Intro]: Waiting {exercise.Intro} sec...");
-                await Task.Delay(exercise.Intro * 1000).ConfigureAwait(false);
+            if(exercise == exercises[5]){
+                await Task.Delay(1000).ConfigureAwait(false);
+
             }
+            if(exercise == exercises[6]){
+                await Task.Delay(2500).ConfigureAwait(false);
+
+            }
+            if(exercise == exercises[7]){
+                await Task.Delay(1000).ConfigureAwait(false);
+
+            }
+            if (exerciseDelays.TryGetValue(i, out int delay)) Thread.Sleep(delay);
+            if (!completedExerciseSets.Contains(exercise.RepetitionID))
+            {
+                if (exercise.Intro > 0)
+                    {
+                    await Task.Delay(2000).ConfigureAwait(false);
+                    Console.WriteLine($"[Intro]: Waiting {exercise.Intro} sec...");
+                    await Task.Delay(exercise.Intro * 1000).ConfigureAwait(false);
+                    }
 
             if (exercise.Demo > 0)
             {
@@ -310,12 +321,150 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
         Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
 
         DateTime phaseStartTime = DateTime.Now;
-        bool lostBalance = false;
-         DateTime outOfZoneTimeLeft = DateTime.MinValue;
-        DateTime outOfZoneTimeRight = DateTime.MinValue;
+        lostBalance = false;
+        int currentZoneLeft = -1, currentZoneRight = -1;
+        if (phaseIndex == 3)
+        {
+            Console.WriteLine($"[Phase {phaseIndex + 1}]: No CoP check, waiting for {phase.Duration} seconds...");
+            SendMessageToGUI($"[Phase {phaseIndex + 1}]: No CoP check, waiting...");
+            await Task.Delay(phase.Duration * 1000);
+            break;
+        }
+        while ((DateTime.Now - phaseStartTime).TotalSeconds < phase.Duration &&
+               (DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
+        {
+            double copXLeft = _copXLeft, copYLeft = _copYLeft;
+            double copXRight = _copXRight, copYRight = _copYRight;
 
-        List<int> currentZonesLeft = new List<int>();
-        List<int> currentZonesRight = new List<int>();
+            if (phaseIndex == 1 || phaseIndex == 2)
+            {
+                var adjustedZonesLeft = AddCopLeft(exercise, phaseIndex);
+                currentZoneLeft = Feedback(copXLeft, copYLeft,
+                                           adjustedZonesLeft.greenZoneX, adjustedZonesLeft.greenZoneY,
+                                           adjustedZonesLeft.redZoneX, adjustedZonesLeft.redZoneY);
+            }
+            else
+            {
+                currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+            }
+            currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+
+            if (currentZoneLeft != previousZoneLeft && currentZoneLeft > 0)
+            {
+                if (exercise.RepetitionID == 6 && phaseIndex == 2){
+                currentZoneRight = -1;
+            }
+                Console.WriteLine($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
+                SendMessageToGUI($"[Exercise]: Left Foot Changed to Zone {currentZoneLeft}");
+                previousZoneLeft = currentZoneLeft;
+                feedbackLeft = currentZoneLeft;
+                SendFeedback(feedbackLeft, "Left");
+            }
+            if (currentZoneRight != previousZoneRight && currentZoneRight > 0){
+            if (exercise.RepetitionID == 6 && phaseIndex == 1){
+                currentZoneLeft = -1;
+            }
+                Console.WriteLine($"[Exercise]: Right Foot Changed to Zone {currentZoneRight}");
+                SendMessageToGUI($"[Exercise]: Right Foot Changed to Zone {currentZoneRight}");
+                previousZoneRight = currentZoneRight;
+                feedbackRight = currentZoneRight;
+                SendFeedback(feedbackRight, "Right");
+            }
+            if (currentZoneLeft == 1 || currentZoneRight == 1)
+            {
+                outOfZoneTimeLeft = DateTime.MinValue;
+                outOfZoneTimeRight = DateTime.MinValue;
+            }
+            else
+            {
+                if (currentZoneLeft == 0 && outOfZoneTimeLeft == DateTime.MinValue)
+                    outOfZoneTimeLeft = DateTime.Now;
+                if (currentZoneRight == 0 && outOfZoneTimeRight == DateTime.MinValue)
+                    outOfZoneTimeRight = DateTime.Now;
+
+                bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
+                                          ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 12);
+                bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
+                                           ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 12);
+
+                if (leftFootOutTooLong || rightFootOutTooLong)
+                {
+                    lostBalance = true;
+                    break;
+                }
+            }
+            await Task.Delay(500).ConfigureAwait(false);;
+        }
+        if (lostBalance)
+        {
+            Console.WriteLine("You lost balance, restarting exercise...");
+            SendMessageToGUI("You lost balance, restarting exercise...");
+
+            if (previousZoneLeft != 7) SendFeedback(7, "Left");
+            if (previousZoneRight != 7) SendFeedback(7, "Right");
+
+            Console.WriteLine("Pausing for 5 seconds before restarting...");
+            await Task.Delay(5000).ConfigureAwait(false);
+            phase1Completed = 0;
+            phaseRepeatCount = 0;
+            previousZoneLeft = -1;
+            previousZoneRight = -1;
+            feedbackLeft = -1;
+            feedbackRight = -1;
+            outOfZoneTimeLeft = DateTime.MinValue;
+            outOfZoneTimeRight = DateTime.MinValue;
+            lostBalance = false; // Reset flag
+            exerciseStartTime = DateTime.Now;
+            Console.WriteLine("Restarting exercise...");
+            continue;
+        }
+        if (phaseIndex == 0)
+        {
+            phase1Completed = 1;
+        }
+        else if (phaseIndex == 1 || phaseIndex == 2)
+        {
+            phaseRepeatCount++;
+        }
+    }
+
+    Console.WriteLine("[Client]: Put leg down");
+    SendMessageToGUI("[Client]: Put leg down");
+    await Task.Delay(exercise.Release * 1000);
+}
+
+        private async Task RunExerciseAsync(ExerciseData exercise)
+{
+        DateTime outOfZoneTimeLeft = DateTime.MinValue;
+        DateTime outOfZoneTimeRight = DateTime.MinValue;
+    if (exercise.RepetitionID == 1 || exercise.RepetitionID == 2)
+    {
+        await Task.Delay(4000).ConfigureAwait(false);  // shows exercise text for 4 seconds so both client and HMD wait
+    }
+    Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
+    SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
+        DateTime exerciseStartTime = DateTime.Now;
+        int phaseIndex = 0;
+        int previousZoneLeft = -1, previousZoneRight = -1;
+        int feedbackLeft = -1, feedbackRight = -1;
+
+        while ((DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
+        {
+            var phase = exercise.ZoneSequence[phaseIndex];
+            Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
+            DateTime phaseStartTime = DateTime.Now;
+            bool lostBalance = false;
+            int currentZoneLeft = 0, currentZoneRight = 0;
+            //noCOP check for phase in exercise/ moves to the next phase afterwards
+            if (exercise.RepetitionID == 4 && phaseIndex == 2)   // Exercise 5, Phase 4 (Index 3)
+        {
+            Console.WriteLine($"[Phase {phaseIndex + 1}]: No CoP check, waiting for {phase.Duration} seconds...");
+            SendMessageToGUI($"[Phase {phaseIndex + 1}]: No CoP check, waiting...");
+
+            await Task.Delay(phase.Duration * 1000);
+            phaseIndex++; // Move to the next phase
+            continue;
+        }
 
         while ((DateTime.Now - phaseStartTime).TotalSeconds < phase.Duration &&
                (DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
@@ -380,47 +529,58 @@ private async Task RunExerciseAsync(ExerciseData exercise) //runs one exercise a
                     outOfZoneTimeRight = DateTime.Now;
                 }
 
-                bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
-                                          ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 2);
-                bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
-                                           ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 2);
-
-                if (leftFootOutTooLong || rightFootOutTooLong)
-                {
-                    lostBalance = true;
-                    break;
+                    bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
+                                              ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 12);
+                    bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
+                                               ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 12);
+                    if (leftFootOutTooLong || rightFootOutTooLong)
+                    {
+                        lostBalance = true;
+                        break;
+                    }
                 }
             }
-        }
-                if (lostBalance)
-        {
-            Console.WriteLine("You lost balance, restarting exercise...");
-            SendMessageToGUI("You lost balance, restarting exercise...");
-            if (exercise.LegsUsed == "both" || exercise.LegsUsed == "left")
+            if (lostBalance)
             {
-                if (!previousZonesLeft.Contains(7))
-                {
-                    SendFeedback(new List<int> { 7 }, "Left");
-                }
-            }
-            if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
-            {
-                if (!previousZonesRight.Contains(7))
-                {
-                    SendFeedback(new List<int> { 7 }, "Right");
-                }
-            }
-            await Task.Delay(5000).ConfigureAwait(false);
-            exerciseStartTime = DateTime.Now;
-            continue;
-        }
+                Console.WriteLine("You lost balance, restarting exercise...");
+                SendMessageToGUI("You lost balance, restarting exercise...");
 
-        phaseIndex++;
-        if (phaseIndex >= exercise.ZoneSequence.Count)
-        {
-            phaseIndex = 0;
+                if (exercise.LegsUsed == "both" || exercise.LegsUsed == "left")
+                {
+                    if (previousZoneLeft != 7)
+                    {
+                        SendFeedback(7, "Left");
+                        previousZoneLeft = 7;
+                    }
+                }
+                if (exercise.LegsUsed == "both" || exercise.LegsUsed == "right")
+                {
+                    if (previousZoneRight != 7)
+                    {
+                        SendFeedback(7, "Right");
+                        previousZoneRight = 7;
+                    }
+                }
+                Console.WriteLine("Pausing for 5 seconds before restarting...");
+                await Task.Delay(5000).ConfigureAwait(false);
+                phaseIndex = 0;
+                previousZoneLeft = -1;
+                previousZoneRight = -1;
+                feedbackLeft = -1;
+                feedbackRight = -1;
+                outOfZoneTimeLeft = DateTime.MinValue;
+                outOfZoneTimeRight = DateTime.MinValue;
+                lostBalance = false; // Reset flag
+                exerciseStartTime = DateTime.Now;
+                Console.WriteLine("Restarting exercise...");
+                continue;
+            }
+            phaseIndex++;
+            if (phaseIndex >= exercise.ZoneSequence.Count)
+            {
+                phaseIndex = 0; // Loop through multiple phases within 30 seconds
+            }
         }
-    }
         Console.WriteLine("[Client]: Put leg down");
         SendMessageToGUI("[Client]: Put leg down");
         await Task.Delay(exercise.Release*1000);
@@ -643,8 +803,8 @@ private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double
             Console.WriteLine("Starting HMD application...");
             try
             {
-                _hmdProcess = Process.Start(hmdpath);
-                Thread.Sleep(5000); // Give it time to start
+                //  _hmdProcess = Process.Start(hmdpath);
+                //  Thread.Sleep(5000); // ATM UNNECESSARY
             }
             catch (Exception ex)
             {

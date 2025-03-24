@@ -73,7 +73,7 @@ public static class ExerciseList
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (30, (-1.0, 1.0), (-1.0, 1.0), (-2.0, -1.0), (-6.0, -1.1))
+                   (30, (-0.5, 0.5), (-0.7, 0.7), (-1.5, 1.5), (-4.0, 4.1))
             }
         ),
         new ExerciseData( 
@@ -88,7 +88,7 @@ public static class ExerciseList
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (30, (-1.0, 1.0), (-1.0, 1.0), (1.0, 2.0), (-6.0, -1.1))
+                 (30, (0.5, -0.5), (-0.7, 0.7), (-1.5, 1.5), (-4.0, 4.1))
             }
         ),
         new ExerciseData( 
@@ -97,7 +97,7 @@ public static class ExerciseList
             legsUsed: "both",
             intro: 0,
             demo: 6,
-            preparationCop: 6,
+            preparationCop: 3,
             timingCop: 30,
             release: 2,
             sets: 2,
@@ -130,8 +130,8 @@ public static class ExerciseList
             repetitionID: 5,
             name: "Squats Walking Lunges - Both Leg",
             legsUsed: "both",
-            intro: 1,
-            demo: 3,
+            intro: 0,
+            demo: 6,
             preparationCop: 3,
             timingCop: 50,
             release: 2,
@@ -148,8 +148,8 @@ public static class ExerciseList
             repetitionID: 6,
             name: "Jumping - Lateral Jumps Both",
             legsUsed: "both",
-            intro: 1,
-            demo: 3,
+            intro: 0,
+            demo: 5,
             preparationCop: 3,
             timingCop: 60,
             release: 2,
@@ -199,8 +199,8 @@ public static class ExerciseList
             repetitionID: 9,
             name: "Jumping - Box Jumps",
             legsUsed: "both",
-            intro: 1,
-            demo: 3,
+            intro: 0,
+            demo: 12,
             preparationCop: 3,
             timingCop: 30,
             release: 2,
