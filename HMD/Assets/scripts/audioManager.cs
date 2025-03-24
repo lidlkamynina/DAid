@@ -14,6 +14,8 @@ public class ExerciseAudioClips
     public AudioClip LeftLeg;
     [Tooltip("Dynamic switch leg clip when switching to right leg for this exercise.")]
     public AudioClip RightLeg;
+
+    
 }
 
 public class audioManager : MonoBehaviour
@@ -38,6 +40,61 @@ public class audioManager : MonoBehaviour
     [Tooltip("Default generic instruction audio clip.")]
     public AudioClip instructionClip;
 
+    public AudioClip Demo2;
+    // --- New fields for Exercise 3's steps ---
+    [Tooltip("Voice clip for exercise 3 - Step 1: Veic pietupienu uz leju lîdz 90 grâdiem.")]
+    public AudioClip Exercise3Step1;
+    [Tooltip("Voice clip for exercise 3 - Step 2: Celies augðâ!")]
+    public AudioClip Exercise3Step2;
+    [Tooltip("Voice clip for exercise 3 - Step 3: Uz pirkstgaliem.")]
+    public AudioClip Exercise3Step3;
+    [Tooltip("Voice clip for exercise 3 - Step 4: Nostâjies uz abâm kâjâm.")]
+    public AudioClip Exercise3Step4;
+
+    public AudioClip Demo3;
+    [Tooltip("Voice clip for exercise 3 - Step 1: Veic pietupienu, ceïi lîdz 90 grâdiem!")]
+    public AudioClip Exercise4Step1;
+    [Tooltip("Voice clip for exercise 3 - Step 2: Noturi pozîciju!")]
+    public AudioClip Exercise4Step2;
+    [Tooltip("Voice clip for exercise 3 - Step 3: Lec!")]
+    public AudioClip Exercise4Step3;
+    //[Tooltip("Voice clip for exercise 3 - Step 4: Uz pirkstgaliem!")]
+    //public AudioClip Exercise4Step4; // Not used in Exercise 4 because audio exists in ex 3 for it
+    public AudioClip Demo4;
+    [Tooltip("Voice clip for exercise 3 - Step 1: Uz abâm kâjâm!")]
+    public AudioClip Exercise5Step1;
+    [Tooltip("Voice clip for exercise 3 - Step 2: Izklupiens ar labo kâju!")]
+    public AudioClip Exercise5Step2;
+    [Tooltip("Voice clip for exercise 3 - Step 3: Izklupiens ar kreiso kâju!")]
+    public AudioClip Exercise5Step3;
+    [Tooltip("Voice clip for exercise 3 - Step 4: Skriet atpakaï uz sâkumu!")]
+    public AudioClip Exercise5Step4;
+
+    public AudioClip Demo5;
+
+    [Tooltip("Voice clip for exercise 3 - Step 2: Izklupiens ar labo kâju!")]
+    public AudioClip Exercise6Step2;
+    [Tooltip("Voice clip for exercise 3 - Step 3: Izklupiens ar kreiso kâju!")]
+    public AudioClip Exercise6Step3;
+
+    public AudioClip Demo6;
+
+    [Tooltip("Voice clip for exercise 6 - Step 1: Lçnâm tupies lejâ!")]
+    public AudioClip Exercise7Step1;
+
+    public AudioClip Demo7;
+
+    [Tooltip("Voice clip for exercise 8 - Uz priekðu")]
+    public AudioClip Exercise8Step1;
+    [Tooltip("Voice clip for exercise 8 - Uz vidu")]
+    public AudioClip Exercise8Step2;
+    [Tooltip("Voice clip for exercise 8 - Aizmugure")]
+    public AudioClip Exercise8Step3;
+    [Tooltip("Voice clip for exercise 8 - Pa labi")]
+    public AudioClip Exercise8Step4;
+    [Tooltip("Voice clip for exercise 8 - Pa kreisi")]
+    public AudioClip Exercise8Step5;
+
     [Header("Switch Leg Audio Clips (Default)")]
     [Tooltip("Default audio clip for switching to left leg.")]
     public AudioClip LeftLeg;
@@ -47,7 +104,7 @@ public class audioManager : MonoBehaviour
     [Header("Exercise Zone Voice Clips")]
     [Tooltip("List of voice clips for in-exercise zone feedback (zone 1 = index 0, zone 2 = index 1, etc.). Set the size and assign each clip accordingly.")]
     public List<AudioClip> exerciseZoneClips = new List<AudioClip>();
-
+    public AudioClip beepClip;
     [Header("Dynamic Exercise Audio Clips")]
     [Tooltip("List of audio clips specific to each exercise (by ExerciseID).")]
     public List<ExerciseAudioClips> exerciseAudioClips = new List<ExerciseAudioClips>();
@@ -95,13 +152,38 @@ public class audioManager : MonoBehaviour
         // Fallback to default demo clip.
         PlayClip(Demo_1, stopPrevious: false);
     }
+    public void PlayDemo2()
+    {
+        PlayClip(Demo2, stopPrevious: false);
+    }
+    public void PlayDemo3()
+    {
+        PlayClip(Demo3, stopPrevious: false);
+    }
+    public void PlayDemo4()
+    {
+        PlayClip(Demo4, stopPrevious: false);
+    }
+    public void PlayDemo5()
+    {
+        PlayClip(Demo5, stopPrevious: false);
+    }
+
+    public void PlayDemo6()
+    {
+        PlayClip(Demo6, stopPrevious: false);
+    }
+    public void PlayDemo7()
+    {
+        PlayClip(Demo7, stopPrevious: false);
+    }
 
     /// <summary>
     /// Plays the preparation phase audio clip.
     /// </summary>
     public void PlayPreparation(string leg)
     {
-        if(leg == "left")
+        if (leg == "left")
         {
             PlayClip(LeftLeg, stopPrevious: false);
         }
@@ -109,12 +191,11 @@ public class audioManager : MonoBehaviour
         {
             PlayClip(RightLeg, stopPrevious: false);
         }
-        
     }
+
     public void PlayNoturi()
     {
         PlayClip(Noturi, stopPrevious: false);
-
     }
 
     public void PlayHold()
@@ -197,16 +278,160 @@ public class audioManager : MonoBehaviour
     /// <param name="zone">The zone number (e.g., 1, 2, 3...)</param>
     public void PlayExerciseZoneVoice(int zone)
     {
-        int index = zone - 1; // Adjust for 0-indexed list.
-        if (index >= 0 && index < exerciseZoneClips.Count)
+        // Check if we're in Exercise 3 (RepetitionID > 2) and zone is not 7.
+        if (GameManager.Instance.currentExercise.RepetitionID > 2 && zone != 7)
         {
-            PlayExclusiveClip(exerciseZoneClips[index]);
+            // For Exercise 3, play the beep concurrently without stopping current narration.
+            audioSource.PlayOneShot(beepClip);
         }
         else
         {
-            Debug.LogWarning("AudioManager: Invalid zone number: " + zone);
+            int index = zone - 1; // Adjust for 0-indexed list.
+            if (index >= 0 && index < exerciseZoneClips.Count)
+            {
+                PlayExclusiveClip(exerciseZoneClips[index]);
+            }
+            else
+            {
+                Debug.LogWarning("AudioManager: Invalid zone number: " + zone);
+            }
         }
     }
+
+
+    // --- New Methods for Exercise 3 Steps ---
+
+    public void PlayExercise3Step1()
+    {
+        PlayClip(Exercise3Step1, stopPrevious: false);
+    }
+    public void PlayExercise3Step2()
+    {
+        PlayClip(Exercise3Step2, stopPrevious: false);
+    }
+    public void PlayExercise3Step3()
+    {
+        PlayClip(Exercise3Step3, stopPrevious: false);
+    }
+    public void PlayExercise3Step4()
+    {
+        PlayClip(Exercise3Step4, stopPrevious: false);
+    }
+
+    public void PlayExercise4Step1()
+    {
+        PlayClip(Exercise4Step1, stopPrevious: false);
+    }
+    public void PlayExercise4Step2()
+    {
+        PlayClip(Exercise4Step2, stopPrevious: false);
+    }
+    public void PlayExercise4Step3()
+    {
+        PlayClip(Exercise4Step3, stopPrevious: false);
+    }
+    public void PlayExercise4Step4()
+    {
+        PlayClip(Exercise3Step3, stopPrevious: false);
+    }
+
+    public void PlayExercise5Step1()
+    {
+        PlayClip(Exercise5Step1, stopPrevious: false);
+    }
+    public void PlayExercise5Step2()
+    {
+        PlayClip(Exercise5Step2, stopPrevious: false);
+    }
+    public void PlayExercise5Step3()
+    {
+        PlayClip(Exercise5Step3, stopPrevious: false);
+    }
+    public void PlayExercise5Step4()
+    {
+        PlayClip(Exercise5Step4, stopPrevious: false);
+    }
+    public void PlayExercise6Step1()
+    {
+        PlayClip(Exercise5Step1, stopPrevious: false);
+    }
+    public void PlayExercise6Step2()
+    {
+        PlayClip(Exercise6Step2, stopPrevious: false);
+    }
+    public void PlayExercise6Step3()
+    {
+        PlayClip(Exercise6Step3, stopPrevious: false);
+    }
+    public void PlayExercise7Step1()
+    {
+        PlayClip(Exercise7Step1, stopPrevious: false);
+    }
+    public void PlayExercise7Step2()
+    {
+        PlayClip(Exercise3Step2, stopPrevious: false);
+    }
+
+    public void PlayExercise8Step1()
+    {
+        PlayClip(Exercise8Step1, stopPrevious: false);
+    }
+    public void PlayExercise8Step2()
+    {
+        PlayClip(Exercise8Step2, stopPrevious: false);
+    }
+    public void PlayExercise8Step3()
+    {
+        PlayClip(Exercise8Step3, stopPrevious: false);
+    }
+    public void PlayExercise8Step4()
+    {
+        PlayClip(Exercise8Step4, stopPrevious: false);
+    }
+    public void PlayExercise8Step5()
+    {
+        PlayClip(Exercise8Step5, stopPrevious: false);
+    }
+
+
+    //public void PlayExercise3Step2()
+    //{
+    //    ExerciseAudioClips ea = exerciseAudioClips.Find(x => x.exerciseID == 3);
+    //    if (ea != null && ea.Exercise3Step2 != null)
+    //    {
+    //        PlayClip(ea.Exercise3Step2, stopPrevious: false);
+    //    }
+    //    else
+    //    {
+    //        Debug.LogWarning("AudioManager: No audio clip for Exercise 3 Step 2");
+    //    }
+    //}
+
+    //public void PlayExercise3Step3()
+    //{
+    //    ExerciseAudioClips ea = exerciseAudioClips.Find(x => x.exerciseID == 3);
+    //    if (ea != null && ea.Exercise3Step3 != null)
+    //    {
+    //        PlayClip(ea.Exercise3Step3, stopPrevious: false);
+    //    }
+    //    else
+    //    {
+    //        Debug.LogWarning("AudioManager: No audio clip for Exercise 3 Step 3");
+    //    }
+    //}
+
+    //public void PlayExercise3Step4()
+    //{
+    //    ExerciseAudioClips ea = exerciseAudioClips.Find(x => x.exerciseID == 3);
+    //    if (ea != null && ea.Exercise3Step4 != null)
+    //    {
+    //        PlayClip(ea.Exercise3Step4, stopPrevious: false);
+    //    }
+    //    else
+    //    {
+    //        Debug.LogWarning("AudioManager: No audio clip for Exercise 3 Step 4");
+    //    }
+    //}
 
     #endregion
 
@@ -216,7 +441,7 @@ public class audioManager : MonoBehaviour
     /// </summary>
     /// <param name="clip">The clip to play.</param>
     /// <param name="stopPrevious">If true, stops any currently playing clip before playing.</param>
-    private void PlayClip(AudioClip clip, bool stopPrevious)
+    public void PlayClip(AudioClip clip, bool stopPrevious)
     {
         if (clip == null)
         {
@@ -231,43 +456,13 @@ public class audioManager : MonoBehaviour
         audioSource.PlayOneShot(clip);
     }
 
-    //[System.Serializable]
-    //public class CombinationZoneAudioClip
-    //{
-    //    [Tooltip("First zone in the combination (should be the smaller number)")]
-    //    public int zone1;
-    //    [Tooltip("Second zone in the combination (should be the larger number)")]
-    //    public int zone2;
-    //    [Tooltip("Audio clip for this combination of zones")]
-    //    public AudioClip clip;
-    //}
-
-    //[Header("Combination Zone Audio Clips")]
-    //public List<CombinationZoneAudioClip> combinationZoneAudioClips = new List<CombinationZoneAudioClip>();
-
-
-    //// New method for combination zone audio
-    //public void PlayCombinationZoneVoice(int zoneA, int zoneB)
-    //{
-    //    // Ensure order doesn't affect lookup: sort the zones so that zone1 is always the smaller number.
-    //    int zone1 = Mathf.Min(zoneA, zoneB);
-    //    int zone2 = Mathf.Max(zoneA, zoneB);
-
-    //    // Search for a matching clip in the list.
-    //    CombinationZoneAudioClip match = combinationZoneAudioClips.Find(item => item.zone1 == zone1 && item.zone2 == zone2);
-
-    //    if (match != null && match.clip != null)
-    //    {
-    //        Debug.Log($"Playing combination zone voice for zones {zone1} and {zone2}");
-    //        PlayExclusiveClip(match.clip);
-    //    }
-    //    else
-    //    {
-    //        Debug.LogWarning($"No combination audio clip found for zones {zone1} and {zone2}");
-    //    }
-    //}
-
-
+    public void StopAllAudio()
+    {
+        if (audioSource != null && audioSource.isPlaying)
+        {
+            audioSource.Stop();
+        }
+    }
 
     /// <summary>
     /// Helper method to play a clip exclusively.

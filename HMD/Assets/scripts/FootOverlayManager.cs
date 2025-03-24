@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class FootOverlayManagerTwoFeet : MonoBehaviour
 {
@@ -16,9 +17,10 @@ public class FootOverlayManagerTwoFeet : MonoBehaviour
     public Image rightFootBottomOverlay;
 
     [Header("Foot UI Groups")]
-    // These are the parent GameObjects that hold each foot's overlays.
     public GameObject leftFootGroup;
     public GameObject rightFootGroup;
+
+    private float fadeDuration = 0.25f; // 250ms fade time
 
     public static FootOverlayManagerTwoFeet Instance { get; private set; }
 
@@ -30,77 +32,53 @@ public class FootOverlayManagerTwoFeet : MonoBehaviour
             Destroy(gameObject);
     }
 
-    /// <summary>
-    /// Updates the overlay colors for the specified foot based on the zone.
-    /// </summary>
     public void setDefaultGreen()
     {
-        Color green = new Color(0, 1, 0, 0.5f);
-        leftFootLeftOverlay.color = green;
-        leftFootRightOverlay.color = green;
-        leftFootTopOverlay.color = green;
-        leftFootBottomOverlay.color = green;
-        rightFootLeftOverlay.color = green;
-        rightFootRightOverlay.color = green;
-        rightFootTopOverlay.color = green;
-        rightFootBottomOverlay.color = green;
+        // Set default green with even more transparency (alpha 0.2)
+        Color green = new Color(0, 1, 0, 0.2f);
+        StartCoroutine(FadeOverlay(leftFootLeftOverlay, green));
+        StartCoroutine(FadeOverlay(leftFootRightOverlay, green));
+        StartCoroutine(FadeOverlay(leftFootTopOverlay, green));
+        StartCoroutine(FadeOverlay(leftFootBottomOverlay, green));
+        StartCoroutine(FadeOverlay(rightFootLeftOverlay, green));
+        StartCoroutine(FadeOverlay(rightFootRightOverlay, green));
+        StartCoroutine(FadeOverlay(rightFootTopOverlay, green));
+        StartCoroutine(FadeOverlay(rightFootBottomOverlay, green));
     }
+
     public void UpdateOverlayForZone(int zone, string foot)
     {
-        Color green = new Color(0, 1, 0, 0.5f);
-        Color red = new Color(1, 0, 0, 0.5f);
+        // Use more transparent green (alpha 0.2) and opaque red (alpha 1)
+        Color green = new Color(0, 1, 0, 0.2f);
+        Color red = new Color(1, 0, 0, 1f);
 
         if (foot.ToLower() == "left")
         {
             switch (zone)
             {
                 case 1:
-                    leftFootLeftOverlay.color = green;
-                    leftFootRightOverlay.color = green;
-                    leftFootTopOverlay.color = green;
-                    leftFootBottomOverlay.color = green;
+                    FadeLeftFoot(green, green, green, green);
                     break;
                 case 2:
-                    leftFootLeftOverlay.color = red;
-                    leftFootRightOverlay.color = red;
-                    leftFootTopOverlay.color = red;
-                    leftFootBottomOverlay.color = red;
+                    FadeLeftFoot(red, red, red, red);
                     break;
                 case 3:
-                    leftFootLeftOverlay.color = green;
-                    leftFootRightOverlay.color = green;
-                    leftFootTopOverlay.color = green;
-                    leftFootBottomOverlay.color = red;
+                    FadeLeftFoot(green, green, green, red);
                     break;
                 case 4:
-                    leftFootLeftOverlay.color = green;
-                    leftFootRightOverlay.color = green;
-                    leftFootTopOverlay.color = red;
-                    leftFootBottomOverlay.color = green;
+                    FadeLeftFoot(green, green, red, green);
                     break;
                 case 5:
-                    leftFootLeftOverlay.color = green;
-                    leftFootRightOverlay.color = red;
-                    leftFootTopOverlay.color = green;
-                    leftFootBottomOverlay.color = green;
+                    FadeLeftFoot(red, green, green, green);
                     break;
                 case 6:
-                    leftFootLeftOverlay.color = red;
-                    leftFootRightOverlay.color = green;
-                    leftFootTopOverlay.color = green;
-                    leftFootBottomOverlay.color = green;
+                    FadeLeftFoot(green, red, green, green);
                     break;
                 case 7:
-                    leftFootLeftOverlay.color = red;
-                    leftFootRightOverlay.color = red;
-                    leftFootTopOverlay.color = red;
-                    leftFootBottomOverlay.color = red;
+                    FadeLeftFoot(red, red, red, red);
                     break;
                 default:
-                    leftFootLeftOverlay.color = green;
-                    leftFootRightOverlay.color = green;
-                    leftFootTopOverlay.color = green;
-                    leftFootBottomOverlay.color = green;
+                    FadeLeftFoot(green, green, green, green);
                     break;
             }
         }
@@ -109,66 +87,78 @@ public class FootOverlayManagerTwoFeet : MonoBehaviour
             switch (zone)
             {
                 case 1:
-                    rightFootLeftOverlay.color = green;
-                    rightFootRightOverlay.color = green;
-                    rightFootTopOverlay.color = green;
-                    rightFootBottomOverlay.color = green;
+                    FadeRightFoot(green, green, green, green);
                     break;
                 case 2:
-                    rightFootLeftOverlay.color = red;
-                    rightFootRightOverlay.color = red;
-                    rightFootTopOverlay.color = red;
-                    rightFootBottomOverlay.color = red;
+                    FadeRightFoot(red, red, red, red);
                     break;
                 case 3:
-                    rightFootLeftOverlay.color = green;
-                    rightFootRightOverlay.color = green;
-                    rightFootTopOverlay.color = green;
-                    rightFootBottomOverlay.color = red;
+                    FadeRightFoot(green, green, green, red);
                     break;
                 case 4:
-                    rightFootLeftOverlay.color = green;
-                    rightFootRightOverlay.color = green;
-                    rightFootTopOverlay.color = red;
-                    rightFootBottomOverlay.color = green;
+                    FadeRightFoot(green, green, red, green);
                     break;
                 case 5:
-                    rightFootLeftOverlay.color = green;
-                    rightFootRightOverlay.color = red;
-                    rightFootTopOverlay.color = green;
-                    rightFootBottomOverlay.color = green;
+                    FadeRightFoot(red, green, green, green);
                     break;
                 case 6:
-                    rightFootLeftOverlay.color = red;
-                    rightFootRightOverlay.color = green;
-                    rightFootTopOverlay.color = green;
-                    rightFootBottomOverlay.color = green;
+                    FadeRightFoot(green, red, green, green);
                     break;
                 case 7:
-                    rightFootLeftOverlay.color = red;
-                    rightFootRightOverlay.color = red;
-                    rightFootTopOverlay.color = red;
-                    rightFootBottomOverlay.color = red;
+                    FadeRightFoot(red, red, red, red);
                     break;
                 default:
-                    rightFootLeftOverlay.color = green;
-                    rightFootRightOverlay.color = green;
-                    rightFootTopOverlay.color = green;
-                    rightFootBottomOverlay.color = green;
+                    FadeRightFoot(green, green, green, green);
                     break;
             }
         }
         else if (foot.ToLower() == "both")
         {
-            // Update both feet.
             UpdateOverlayForZone(zone, "left");
             UpdateOverlayForZone(zone, "right");
         }
     }
 
-    /// <summary>
-    /// Sets which foot's UI group is active.
-    /// </summary>
+    private void FadeLeftFoot(Color left, Color right, Color top, Color bottom)
+    {
+        StartCoroutine(FadeOverlay(leftFootLeftOverlay, left));
+        StartCoroutine(FadeOverlay(leftFootRightOverlay, right));
+        StartCoroutine(FadeOverlay(leftFootTopOverlay, top));
+        StartCoroutine(FadeOverlay(leftFootBottomOverlay, bottom));
+    }
+
+    private void FadeRightFoot(Color left, Color right, Color top, Color bottom)
+    {
+        StartCoroutine(FadeOverlay(rightFootLeftOverlay, left));
+        StartCoroutine(FadeOverlay(rightFootRightOverlay, right));
+        StartCoroutine(FadeOverlay(rightFootTopOverlay, top));
+        StartCoroutine(FadeOverlay(rightFootBottomOverlay, bottom));
+    }
+
+    private IEnumerator FadeOverlay(Image overlay, Color targetColor)
+    {
+        Color startColor = overlay.color;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            overlay.color = Color.Lerp(startColor, targetColor, elapsedTime / fadeDuration);
+            yield return null;
+        }
+
+        overlay.color = targetColor; // Ensure final color is set exactly
+
+        // If the target color is opaque red, bring this overlay to the front.
+        if (Mathf.Approximately(targetColor.r, 1f) &&
+            Mathf.Approximately(targetColor.g, 0f) &&
+            Mathf.Approximately(targetColor.b, 0f) &&
+            Mathf.Approximately(targetColor.a, 1f))
+        {
+            overlay.transform.SetAsLastSibling();
+        }
+    }
+
     public void SetActiveFoot(string activeFoot)
     {
         activeFoot = activeFoot.ToLower();
@@ -196,7 +186,7 @@ public class FootOverlayManagerTwoFeet : MonoBehaviour
                 rightFootGroup.SetActive(true);
             Debug.Log("Active foot set to BOTH");
         }
-        else // "none" or any other value
+        else
         {
             if (leftFootGroup != null)
                 leftFootGroup.SetActive(false);

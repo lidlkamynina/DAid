@@ -9,7 +9,7 @@ using System.Collections.Generic;
 public class HMDDataReceiver : MonoBehaviour
 {
     public static HMDDataReceiver Instance { get; private set; }
-
+    private bool restartInProgress = false;
     private TcpListener _listener;
     private TcpClient _client;
     private NetworkStream _stream;
@@ -32,6 +32,8 @@ public class HMDDataReceiver : MonoBehaviour
 
     private static readonly Queue<Action> mainThreadActions = new Queue<Action>();
 
+    private string incomingBuffer = "";
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -49,33 +51,84 @@ public class HMDDataReceiver : MonoBehaviour
 
     void Update()
     {
+        // Process queued actions on the main thread.
+        lock (mainThreadActions)
         {
-            // process queued actions in case of problem with client taking too much main thread
-            lock (mainThreadActions)
+            while (mainThreadActions.Count > 0)
             {
-                while (mainThreadActions.Count > 0)
+                mainThreadActions.Dequeue().Invoke();
+            }
+        }
+
+        // Process incoming data only if a client is connected.
+        if (_isConnected && _stream != null && _stream.DataAvailable)
+        {
+            try
+            {
+                byte[] buffer = new byte[1024];
+                int bytesRead = _stream.Read(buffer, 0, buffer.Length);
+                string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                Debug.Log($"Saòemtais JSON: {receivedData}");
+
+                // Append the received data to our persistent buffer.
+                incomingBuffer += receivedData;
+
+                // Process complete JSON objects from the buffer.
+                while (true)
                 {
-                    mainThreadActions.Dequeue().Invoke();
+                    // Find the first opening brace.
+                    int startIndex = incomingBuffer.IndexOf("{");
+                    if (startIndex == -1)
+                    {
+                        // No JSON object found.
+                        incomingBuffer = "";
+                        break;
+                    }
+
+                    int braceCount = 0;
+                    int endIndex = -1;
+                    // Loop over the buffer starting at the first '{'.
+                    for (int i = startIndex; i < incomingBuffer.Length; i++)
+                    {
+                        if (incomingBuffer[i] == '{')
+                        {
+                            braceCount++;
+                        }
+                        else if (incomingBuffer[i] == '}')
+                        {
+                            braceCount--;
+                        }
+
+                        // When the brace count returns to zero, we have a complete JSON object.
+                        if (braceCount == 0)
+                        {
+                            endIndex = i;
+                            break;
+                        }
+                    }
+
+                    // If we didn't find a complete JSON object, wait for more data.
+                    if (endIndex == -1)
+                    {
+                        break;
+                    }
+
+                    // Extract the complete JSON message.
+                    string completeJson = incomingBuffer.Substring(startIndex, endIndex - startIndex + 1);
+                    Debug.Log($"Processing complete JSON message: {completeJson}");
+                    ParseAndUpdateVisualization(completeJson);
+
+                    // Remove the processed JSON from the buffer.
+                    incomingBuffer = incomingBuffer.Substring(endIndex + 1);
                 }
             }
-            // process incoming data only if a client is connected.
-            if (_isConnected && _stream != null && _stream.DataAvailable)
+            catch (Exception ex)
             {
-                try
-                {
-                    byte[] buffer = new byte[1024];
-                    int bytesRead = _stream.Read(buffer, 0, buffer.Length);
-                    string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    Debug.Log($"Saòemtais JSON: {receivedData}");
-                    ParseAndUpdateVisualization(receivedData);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"Kïûda datu saòemðanâ: {ex.Message}");
-                }
+                Debug.LogError($"Kïûda datu saòemðanâ: {ex.Message}");
             }
         }
     }
+
 
     public static void RunOnMainThread(Action action)
     {
@@ -86,10 +139,7 @@ public class HMDDataReceiver : MonoBehaviour
         }
     }
 
-    private void OnApplicationQuit()
-    {
-        DisconnectFromServer();
-    }
+   
     private void LogToFile(string message)
     {
         string path = Application.persistentDataPath + "/server_log.txt";
@@ -120,19 +170,24 @@ public class HMDDataReceiver : MonoBehaviour
     {
         try
         {
-            if (_client != null) // prevent multiple connections
+            // Get the new client connection.
+            TcpClient newClient = _listener.EndAcceptTcpClient(result);
+
+            // If there's already an active connection, disconnect it.
+            if (_client != null)
             {
-                Debug.LogWarning("Already connected to a client, rejecting new connection.");
-                return;
+                Debug.LogWarning("Already connected to a client, disconnecting the old connection and accepting new one.");
+                DisconnectFromServer();
             }
 
-            _client = _listener.EndAcceptTcpClient(result);
+            // Assign the new client and set up the stream.
+            _client = newClient;
             _stream = _client.GetStream();
             _isConnected = true;
 
             RunOnMainThread(() =>
             {
-                Debug.Log("Klients savienots ar HMD.");
+                Debug.Log("Client connected to HMD.");
                 if (debugSphere != null)
                 {
                     var debugRenderer = debugSphere.GetComponent<Renderer>();
@@ -141,17 +196,29 @@ public class HMDDataReceiver : MonoBehaviour
                 }
             });
 
-            // accept the next client connection if needed
+            // Accept the next client connection.
             _listener.BeginAcceptTcpClient(new AsyncCallback(OnClientConnect), _listener);
         }
         catch (Exception ex)
         {
             RunOnMainThread(() =>
             {
-                Debug.LogError($"Kïûda pieòemot klienta savienojumu: {ex.Message}");
+                Debug.LogError($"Error accepting client connection: {ex.Message}");
             });
         }
     }
+
+    private void OnApplicationQuit()
+    {
+        // Properly disconnect any client and stop the listener.
+        DisconnectFromServer();
+        if (_listener != null)
+        {
+            _listener.Stop();
+            _listener = null;
+        }
+    }
+
 
 
     private void DisconnectFromServer()
@@ -176,7 +243,6 @@ public class HMDDataReceiver : MonoBehaviour
     /// <param name="jsonData">The JSON data received from the client.</param>
     private void ParseAndUpdateVisualization(string jsonData)
     {
-        // First, try to parse the base message to know its type.
         BaseMessage baseMsg = JsonUtility.FromJson<BaseMessage>(jsonData);
         if (baseMsg == null || string.IsNullOrEmpty(baseMsg.MessageType))
         {
@@ -207,6 +273,28 @@ public class HMDDataReceiver : MonoBehaviour
     private void UpdateFootFeedback(FeedbackMessage feedback)
     {
         Debug.Log($"Saòemts feedback: Foot: {feedback.Foot}, Zone: {feedback.Zone}");
+
+        // Check if this is a restart command (zone 7)
+        if (feedback.Zone == 7)
+        {
+            if (!restartInProgress)
+            {
+                restartInProgress = true;
+                Debug.Log("Zone 7 received: triggering restart.");
+                // Instead of normal feedback handling, convert this into a command call.
+                ProcessCommand(new CommandData { Command = "RESTART_EXERCISE" });
+            }
+            return;
+        }
+
+        // If a restart is already in progress, ignore other feedback messages.
+        if (restartInProgress)
+        {
+            Debug.Log("Restart in progress, ignoring feedback.");
+            return;
+        }
+
+        // Process feedback normally:
         if (feedback.Foot.ToLower() == "left")
         {
             GameManager.Instance?.UpdateFootStatusForFoot(feedback.Zone, "Left");
@@ -235,6 +323,10 @@ public class HMDDataReceiver : MonoBehaviour
                 break;
             case "RESTART_EXERCISE":
                 GameManager.Instance?.RequestExerciseRestart();
+                Debug.Log("Received RESTART_EXERCISE command. Calling RequestExerciseRestart.");
+                // Start a coroutine to reset the restart flag after a delay,
+                // allowing the restart command to complete before resuming normal updates.
+                StartCoroutine(ResetRestartFlagAfterDelay(5f));
                 break;
             default:
                 Debug.LogWarning("Nezinâma komanda!");
@@ -242,26 +334,11 @@ public class HMDDataReceiver : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// sends a command to the client (debug only)
-    /// </summary>
-    /// <param name="command">The command string to send.</param>
-    public void SendCommandToClient(string command)
+    private System.Collections.IEnumerator ResetRestartFlagAfterDelay(float delay)
     {
-        try
-        {
-            if (_stream != null && _client.Connected)
-            {
-                byte[] commandBytes = Encoding.UTF8.GetBytes(command);
-                _stream.Write(commandBytes, 0, commandBytes.Length);
-                _stream.Flush();
-                Debug.Log($"Nosûtîta komanda klientam: {command}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Kïûda, sûtot komandu: {ex.Message}");
-        }
+        yield return new WaitForSeconds(delay);
+        restartInProgress = false;
+        Debug.Log("Restart flag reset, resuming normal feedback processing.");
     }
 
     // --------------------- JSON Message Classes ---------------------
