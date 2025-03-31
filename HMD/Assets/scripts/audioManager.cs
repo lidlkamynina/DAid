@@ -281,15 +281,19 @@ public class audioManager : MonoBehaviour
         // Check if we're in Exercise 3 (RepetitionID > 2) and zone is not 7.
         if (GameManager.Instance.currentExercise.RepetitionID > 2 && zone != 7)
         {
-            // For Exercise 3, play the beep concurrently without stopping current narration.
-            audioSource.PlayOneShot(beepClip);
+            // undo if needed beep.
+            //audioSource.PlayOneShot(beepClip);
         }
         else
         {
             int index = zone - 1; // Adjust for 0-indexed list.
             if (index >= 0 && index < exerciseZoneClips.Count)
             {
-                PlayExclusiveClip(exerciseZoneClips[index]);
+                if(GameManager.Instance.sets5 == 1 || GameManager.Instance.sets5 == 2)// 1st set of ex 1 only
+                {
+                    PlayExclusiveClip(exerciseZoneClips[index]);
+                }
+                
             }
             else
             {

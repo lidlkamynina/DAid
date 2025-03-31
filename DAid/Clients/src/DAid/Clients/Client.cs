@@ -201,19 +201,23 @@ namespace DAid.Clients
             SendExerciseConfiguration(exercise);
             
              if(exercise == exercises[4]){
-                await Task.Delay(1000).ConfigureAwait(false);
-
+                await Task.Delay(2500).ConfigureAwait(false);
+ 
             }
             if(exercise == exercises[5]){
-                await Task.Delay(1000).ConfigureAwait(false);
-
-            }
-            if(exercise == exercises[6]){
                 await Task.Delay(2500).ConfigureAwait(false);
 
             }
+            if(exercise == exercises[6]){
+                await Task.Delay(2000).ConfigureAwait(false);
+
+            }
             if(exercise == exercises[7]){
-                await Task.Delay(1000).ConfigureAwait(false);
+                await Task.Delay(2500).ConfigureAwait(false);
+
+            }
+             if(exercise == exercises[8]){
+                await Task.Delay(2500).ConfigureAwait(false);
 
             }
             if (exerciseDelays.TryGetValue(i, out int delay)) Thread.Sleep(delay);

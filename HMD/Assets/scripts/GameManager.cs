@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI; // For the gif display
 using System;
+using UnityEngine.TextCore.Text;
 
 #region Data Structures
 // This local ExerciseConfig mirrors the structure sent by the client.
@@ -116,6 +117,8 @@ public class GameManager : MonoBehaviour
         yield return WaitForClientConnection();
         yield return RunIntroStep();
         yield return RunDemoStep();
+
+
         yield return RunPreparationPhase();
         yield return RunExerciseExecution();
         reptestText.gameObject.SetActive(false);
@@ -134,67 +137,61 @@ public class GameManager : MonoBehaviour
 
         reptestText.gameObject.SetActive(false);
         yield return new WaitForSeconds(2f);
-        
+
         currentExercise = exerciseConfigs[3]; // change to 3 when done
         //gifDisplay.gameObject.SetActive(true);
         yield return RunSequenceForExercise4();
-
-        //gifDisplay.gameObject.SetActive(false);
-        //if (leftFootInstructionText != null)
-        //    leftFootInstructionText.gameObject.SetActive(false);
-        //if (rightFootInstructionText != null)
-        //    rightFootInstructionText.gameObject.SetActive(false);
-        //characterAnimator.gameObject.SetActive(false);
-        //yield return new WaitForSeconds(2f);
+        FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
+        gifDisplay.gameObject.SetActive(false);
+        if (leftFootInstructionText != null)
+            leftFootInstructionText.gameObject.SetActive(false);
+        if (rightFootInstructionText != null)
+            rightFootInstructionText.gameObject.SetActive(false);
+        characterAnimator.gameObject.SetActive(true);
+        yield return new WaitForSeconds(2f);
+        
+        currentExercise = exerciseConfigs[4];
+        yield return StartCoroutine(AnimateRotation(characterAnimator.transform, Quaternion.Euler(0, -45, 0), Quaternion.Euler(0, -90, 0), 0.25f));
+        yield return RunSequenceForExercise5();
+        FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
+        gifDisplay.gameObject.SetActive(false);
+        if (leftFootInstructionText != null)
+            leftFootInstructionText.gameObject.SetActive(false);
+        if (rightFootInstructionText != null)
+            rightFootInstructionText.gameObject.SetActive(false);
+        yield return new WaitForSeconds(2f);
         //// Now check if a new exercise (ID 3) has arrived.
-        //currentExercise = exerciseConfigs[4];
-        //gifDisplay.gameObject.SetActive(true);
-        //yield return RunSequenceForExercise5();
+        currentExercise = exerciseConfigs[5]; // 5 real id
+        yield return StartCoroutine(AnimateRotation(characterAnimator.transform, Quaternion.Euler(0, -90, 0), Quaternion.Euler(0, -45, 0), 0.25f));
+        yield return RunSequenceForExercise6();
 
-        //gifDisplay.gameObject.SetActive(false);
-        //if (leftFootInstructionText != null)
-        //    leftFootInstructionText.gameObject.SetActive(false);
-        //if (rightFootInstructionText != null)
-        //    rightFootInstructionText.gameObject.SetActive(false);
-        //yield return new WaitForSeconds(2f);
-        //// Now check if a new exercise (ID 3) has arrived.
-        //currentExercise = exerciseConfigs[5];
-        //gifDisplay.gameObject.SetActive(true);
-        //yield return RunSequenceForExercise6();
+        FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
 
-        //FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
-        //if (characterAnimator != null)
-        //{
-        //    characterAnimator.gameObject.SetActive(false);
-        //}
-        //if (leftFootInstructionText != null)
-        //    leftFootInstructionText.gameObject.SetActive(false);
-        //if (rightFootInstructionText != null)
-        //    rightFootInstructionText.gameObject.SetActive(false);
-        //reptestText.gameObject.SetActive(false);
+        if (leftFootInstructionText != null)
+            leftFootInstructionText.gameObject.SetActive(false);
+        if (rightFootInstructionText != null)
+            rightFootInstructionText.gameObject.SetActive(false);
+        reptestText.gameObject.SetActive(false);
         //yield return WaitForClientConnection();
-        //yield return new WaitForSeconds(2f);
-        //// Now check if a new exercise (ID 3) has arrived.
-        //currentExercise = exerciseConfigs[6];
-        //gifDisplay.gameObject.SetActive(true);
-        //yield return RunSequenceForExercise7();
+        yield return new WaitForSeconds(2f);
+        // Now check if a new exercise (ID 3) has arrived.
+        currentExercise = exerciseConfigs[6];
 
-        //FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
-        //if (characterAnimator != null)
-        //{
-        //    characterAnimator.gameObject.SetActive(false);
-        //}
-        //if (leftFootInstructionText != null)
-        //    leftFootInstructionText.gameObject.SetActive(false);
-        //if (rightFootInstructionText != null)
-        //    rightFootInstructionText.gameObject.SetActive(false);
-        //reptestText.gameObject.SetActive(false);
+        yield return RunSequenceForExercise7();
+
+        FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
+
+        if (leftFootInstructionText != null)
+            leftFootInstructionText.gameObject.SetActive(false);
+        if (rightFootInstructionText != null)
+            rightFootInstructionText.gameObject.SetActive(false);
+        reptestText.gameObject.SetActive(false);
         //yield return WaitForClientConnection();
-        //yield return new WaitForSeconds(2f);
-        //// Now check if a new exercise (ID 3) has arrived.
-        //currentExercise = exerciseConfigs[8];
-        //gifDisplay.gameObject.SetActive(true);
-        //yield return RunSequenceForExercise8();
+        yield return new WaitForSeconds(2f);
+       
+        currentExercise = exerciseConfigs[8];
+
+        yield return RunSequenceForExercise8();
     }
     //IEnumerator DemonstrateExercise5()
     //{
@@ -264,7 +261,7 @@ public class GameManager : MonoBehaviour
                 yield return RunPreparationPhaseForExercise4();
             }
         }
-        instructionText.text = "Demo has ended, close the application."; // Demo has ended, close the application. for non full app ver
+        instructionText.text = ""; // Demo has ended, close the application. for non full app ver
     }
     IEnumerator RunSequenceForExercise5()
     {
@@ -286,6 +283,7 @@ public class GameManager : MonoBehaviour
             FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
             instructionText.text = "Nostājies uz ABĀM kājām";
             yield return StartCountdown(currentExercise.Release);
+            instructionText.text = "";
             //yield return WaitForExerciseConfigs();
 
             // If not the final set, run preparation again before the next set.
@@ -300,7 +298,7 @@ public class GameManager : MonoBehaviour
     IEnumerator RunSequenceForExercise6()
     {
         yield return RunDemoStepForExercise6();
-        yield return RunPreparationPhaseForExercise5();
+        yield return RunPreparationPhaseForExercise6();
 
         // Loop for each set as defined in the exercise config.
         for (int set = 0; set < currentExercise.Sets; set++)
@@ -309,10 +307,11 @@ public class GameManager : MonoBehaviour
             yield return RunExerciseExecutionForExercise6();
 
             // Release Phase
-            if(set == 0)
+            if (set == 0)
             {
-                reptestText.text = $"\n Set {sets2} / 2";
-            }else if(set == 1)
+                reptestText.text = $"\n Set <color=#00FFFF>{sets2}</color> / 2";
+            }
+            else if (set == 1)
             {
                 reptestText.text = "";
             }
@@ -323,13 +322,16 @@ public class GameManager : MonoBehaviour
             FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
             SetGif(exercise3DemoGifs[8]);
             instructionText.text = "Nostājies uz ABĀM kājām";
+            characterAnimator.ResetTrigger("Ex5");
+            characterAnimator.SetTrigger("Idle");
             yield return StartCountdown(currentExercise.Release);
+            instructionText.text = "";
             //yield return WaitForExerciseConfigs();
 
             // If not the final set, run preparation again before the next set.
             if (set < currentExercise.Sets - 1)
             {
-                yield return RunPreparationPhaseForExercise5();
+                yield return RunPreparationPhaseForExercise6();
             }
         }
         instructionText.text = "";
@@ -345,24 +347,28 @@ public class GameManager : MonoBehaviour
             // Run the execution phase (30-sec timer with rep cycles and restart handling)
             yield return RunExerciseExecutionForExercise7();
 
+
             // Release Phase
-            if (set < 3)
+            if (repss < 2)
             {
-                reptestText.text = $"\n Set {sets3} / 4";
+                reptestText.text = $"Set <color=#00FFFF>1</color> / 2";
             }
-            else if (set == 3)
+            else
             {
-                reptestText.text = "";
+                reptestText.text = $"Set <color=#00FFFF>2</color> / 2";
             }
             audioManager.Instance.StopAllAudio();
+            instructionText.text = "";
             audioManager.Instance.PlayReleaseLeg();
             SetGif(exercise3DemoGifs[8]);
             FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
             FootOverlayManagerTwoFeet.Instance.SetActiveFoot("both");
             instructionText.color = Color.cyan;
+            characterAnimator.Play("Idle", 0, 0f);
             instructionText.text = "Nostājies uz ABĀM kājām";
 
             yield return StartCountdown(currentExercise.Release);
+            instructionText.text = "";
             yield return WaitForExerciseConfigs();
 
             // If not the final set, run preparation again before the next set.
@@ -388,7 +394,7 @@ public class GameManager : MonoBehaviour
             // Release Phase
             if (set == 0)
             {
-                reptestText.text = $"\n Set {sets4} / 2";
+                reptestText.text = $"\n Set <color=#00FFFF>{sets4}</color> / 2";
             }
             else if (set == 1)
             {
@@ -398,9 +404,12 @@ public class GameManager : MonoBehaviour
             audioManager.Instance.PlayReleaseLeg();
             SetGif(exercise3DemoGifs[8]);
             instructionText.color = Color.cyan;
-          // FootOverlayManagerTwoFeet.Instance.SetActiveFoot("both");
+            characterAnimator.Play("Idle", 0, 0f);
+            // FootOverlayManagerTwoFeet.Instance.SetActiveFoot("both");
             instructionText.text = "Nostājies uz ABĀM kājām";
             yield return StartCountdown(currentExercise.Release);
+            instructionText.text = "";
+            
             //yield return WaitForExerciseConfigs();
 
             // If not the final set, run preparation again before the next set.
@@ -463,13 +472,24 @@ public class GameManager : MonoBehaviour
             yield return StartCountdown(50);
         }
     }
+    public int sets5 = -1;
 
+    public int sets13 = -1;
     IEnumerator RunPreparationPhase()
     {
+        
         reptestText.gameObject.SetActive(true);
         preparationSuccessful = false;
-        reptestText.text = $"Set {sets5} / 4";
-        while (!preparationSuccessful) 
+        if (sets13 < 1)
+        {
+            reptestText.text = $"Set <color=#00FFFF>1</color> / 2";
+        }
+        else
+        {
+            reptestText.text = $"Set <color=#00FFFF>2</color> / 2";
+        }
+
+        while (!preparationSuccessful)
         {
             // Determine the correct exercise configuration based on reps
             if (reps == 1 || reps == 3)
@@ -509,6 +529,7 @@ public class GameManager : MonoBehaviour
             // Freeze the animation without resuming
             yield return FreezeAtLastFrame(currentExercise.PreparationCop, false);
             characterAnimator.ResetTrigger("StartExercise");
+            
 
             if (restartExerciseRequested)
             {
@@ -518,45 +539,93 @@ public class GameManager : MonoBehaviour
             }
             else
             {
+                
                 preparationSuccessful = true;
             }
         }
+        sets13++;
     }
 
 
-    int sets5 = 1;
+    
     IEnumerator RunExerciseExecution()
     {
         int configIndex = 0;
-        
 
         while (reps < 5)
         {
             instructionText.color = Color.white;
-            reptestText.text = $"Rep {reps} / 4 \n Set {sets5} / 4";
+            
+                
+            
+            if(sets13 < 1 && reps < 3)
+            {
+                reptestText.text = $"Rep <color=#00FFFF>{reps}</color> / 2 \nSet <color=#00FFFF>1</color> / 2";
+            }
+            else if ( reps == 3)
+            {
+                reptestText.text = $"Rep <color=#00FFFF>1</color> / 2 \nSet <color=#00FFFF>2</color> / 2";
+            }
+            else if (reps == 4)
+            {
+                reptestText.text = $"Rep <color=#00FFFF>2</color> / 2 \nSet <color=#00FFFF>2</color> / 2";
+            }
+
             currentExercise = exerciseConfigs[configIndex];
-            instructionText.text = "STARTS! Turi līdzsvaru 30 sekundes!";
-            audioManager.Instance.PlayNoturi();
-            yield return StartCountdown(4);  // 4-second delay before starting the timer
+            
+            //if(sets13 < 3)
+            //{
+            //    instructionText.text = "STARTS! Turi līdzsvaru 30 sekundes!";
+            //    audioManager.Instance.PlayNoturi();
+            //}
+            //else
+            //{
+            //    instructionText.text = "";
+               
+            //}
+            
+           // yield return StartCountdown(4);  // 4-second delay before starting the timer
 
             // Freeze the animation during the execution timer.
             characterAnimator.speed = 0;
-
+            float initialDuration = 4f;
+            float exerciseDuration = currentExercise.TimingCop; // e.g., 6 seconds if you want a total of 10 seconds
+            float totalTime = initialDuration + exerciseDuration;
+            bool audioPlayed = false;
             // Begin the 30-second timer loop with restart handling.
             bool timerCompleted = false;
             while (!timerCompleted)
             {
                 float timer = currentExercise.TimingCop; // full 30-second duration
-                while (timer > 0)
+                while (totalTime > 0)
                 {
-                    countdownText.text = Mathf.CeilToInt(timer).ToString();
-                    timer -= Time.deltaTime;
+                    countdownText.text = Mathf.CeilToInt(totalTime).ToString();
+                    totalTime -= Time.deltaTime;
+                    if (totalTime > exerciseDuration)
+                    {
+                        // Only trigger this once.
+                        if (!audioPlayed)
+                        {
+                            if (sets13 < 2)
+                            {
+                                instructionText.text = "STARTS! Turi līdzsvaru 30 sekundes!";
+                                audioManager.Instance.PlayNoturi();
+                                audioPlayed = true;
+                            }
+                            else
+                            {
+                                instructionText.text = "";
+                            }
+                            
+                        }
+                    }
                     // Check if a restart has been triggered.
                     if (restartExerciseRequested)
                     {
                         break;
                     }
                     yield return null;
+
                 }
                 if (restartExerciseRequested)
                 {
@@ -579,6 +648,9 @@ public class GameManager : MonoBehaviour
             // Unfreeze the animation and transition to idle.
             audioManager.Instance.StopAllAudio();
             characterAnimator.speed = 1;
+  
+            
+
             characterAnimator.ResetTrigger("StartExercise");
             characterAnimator.SetTrigger("Idle");
             audioManager.Instance.StopAllAudio();
@@ -620,26 +692,26 @@ public class GameManager : MonoBehaviour
         instructionText.text = "Vingrojums 2: Pietupiens ar pirkstgalu celšanu 30 sekundes";
 
         // Trigger the demo animation (assumes characterAnimator is your Animator reference)
-        
+
 
 
         // Update instructions according to the rep cycle timing (total 6 seconds)
         // Step 1: 0-3 seconds
-       // instructionText.text = "Veic pietupienu uz leju līdz 90 grādiem!";
+        // instructionText.text = "Veic pietupienu uz leju līdz 90 grādiem!";
         characterAnimator.SetTrigger("ExTest2");
         yield return StartCountdown(6);
-        
+
         // Step 2: 3-4 seconds
         //instructionText.text = "Celies augšā!";
-       // yield return StartCountdown(1);
+        // yield return StartCountdown(1);
 
         // Step 3: 4-5 seconds
-       // instructionText.text = "Uz pirkstgaliem!";
-       // yield return StartCountdown(1);
+        // instructionText.text = "Uz pirkstgaliem!";
+        // yield return StartCountdown(1);
 
         // Step 4: 5-6 seconds
-       // instructionText.text = "Uz abām kājām!";
-       // yield return StartCountdown(1);
+        // instructionText.text = "Uz abām kājām!";
+        // yield return StartCountdown(1);
         characterAnimator.ResetTrigger("ExTest2");
     }
 
@@ -649,7 +721,7 @@ public class GameManager : MonoBehaviour
         preparationSuccessful = false;
         while (!preparationSuccessful)
         {
-            
+
             reptestText.text = $"Set {sets6} / 2";
             characterAnimator.SetTrigger("Idle");
             audioManager.Instance.PlayReleaseLeg();
@@ -681,6 +753,7 @@ public class GameManager : MonoBehaviour
     int repar = 0;
     IEnumerator RunExerciseExecutionForExercise3()
     {
+        instructionText.text = "";
         repar = 1;
         instructionText.color = Color.white;
         UpdateActiveFootDisplay();
@@ -694,20 +767,24 @@ public class GameManager : MonoBehaviour
         // Repeat the rep cycle as long as there’s remaining time.
         while (globalTimer > 0)
         {
-            reptestText.text = $"Rep {repar} / 5 \n Set {sets6} / 2";
 
+            reptestText.text = $"Rep <color=#00FFFF>{repar}</color> / 5 \nSet <color=#00FFFF>{sets6}</color> / 2";
             if (globalTimer > 0)
             {
                 // --- Trigger the rep cycle animation ---
-                
-                
-                
+
+
+
                 yield return null;
                 // --- Step 1: 3 seconds ---
                 float stepDuration = 3f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise3Step1();
-                instructionText.text = "Lēnām tupies 3, 2, 1";
+                if(sets6 == 1)
+                {
+                    audioManager.Instance.PlayExercise3Step1();
+                    instructionText.text = "Lēnām tupies 3, 2, 1";
+                }
+            
                 while (stepTime < stepDuration)
                 {
                     if (restartExerciseRequested)
@@ -724,8 +801,12 @@ public class GameManager : MonoBehaviour
                 // --- Step 2: 1 second ---
                 stepDuration = 1f;
                 stepTime = 0f;
-                audioManager.Instance.PlayExercise3Step2();
-                instructionText.text = "Celies augšā!";
+                if (sets6 == 1)
+                {
+                    audioManager.Instance.PlayExercise3Step2();
+                    instructionText.text = "Celies augšā!";
+                }
+                   
                 while (stepTime < stepDuration)
                 {
                     if (restartExerciseRequested)
@@ -742,8 +823,12 @@ public class GameManager : MonoBehaviour
                 // --- Step 3: 1 second ---
                 stepDuration = 1f;
                 stepTime = 0f;
-                audioManager.Instance.PlayExercise3Step3();
-                instructionText.text = "Uz pirkstgaliem!";
+                if (sets6 == 1)
+                {
+                    audioManager.Instance.PlayExercise3Step3();
+                    instructionText.text = "Uz pirkstgaliem!";
+                }
+                    
                 while (stepTime < stepDuration)
                 {
                     if (restartExerciseRequested)
@@ -760,8 +845,12 @@ public class GameManager : MonoBehaviour
                 // --- Step 4: 1 second ---
                 stepDuration = 1f;
                 stepTime = 0f;
-                audioManager.Instance.PlayExercise3Step4();
-                instructionText.text = "Uz abām kājām!";
+                if (sets6 == 1)
+                {
+                    audioManager.Instance.PlayExercise3Step4();
+                    instructionText.text = "Uz abām kājām!";
+                }
+                    
                 while (stepTime < stepDuration)
                 {
                     if (restartExerciseRequested)
@@ -775,7 +864,7 @@ public class GameManager : MonoBehaviour
                 if (restartExerciseRequested)
                     break;
 
-               
+
 
                 repar++;
             }
@@ -795,7 +884,7 @@ public class GameManager : MonoBehaviour
                 break;
             }
         }
-        
+
         // --- Restart Handling ---
         if (restartExerciseRequested)
         {
@@ -929,6 +1018,8 @@ public class GameManager : MonoBehaviour
         // Show the demo GIF sequence.
         characterAnimator.ResetTrigger("Idle");
         characterAnimator.speed = 1;
+        characterAnimator.SetFloat("SpeedMultiplier", 0.6667f);
+
         characterAnimator.SetTrigger("Ex3");
         yield return StartCountdown(6);
         characterAnimator.ResetTrigger("Ex3");
@@ -941,12 +1032,13 @@ public class GameManager : MonoBehaviour
         {
             characterAnimator.SetTrigger("Idle");
             reptestText.gameObject.SetActive(true);
-            reptestText.text = $"Set {sets7} / 2";
+          
+            reptestText.text = $"Set <color=#00FFFF>{sets7}</color> / 2";
             audioManager.Instance.PlayReleaseLeg();
             instructionText.color = Color.cyan;
             instructionText.text = "Nostājies uz ABĀM kājām";
             UpdateActiveFootDisplay();
-            
+
             yield return StartCountdown(currentExercise.PreparationCop);
 
             if (restartExerciseRequested)
@@ -966,6 +1058,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator RunExerciseExecutionForExercise4()
     {
+        instructionText.text = "";
         instructionText.color = Color.white;
         UpdateActiveFootDisplay();
         float globalTimer = currentExercise.TimingCop; // Total execution time (e.g., 30 seconds)
@@ -978,8 +1071,9 @@ public class GameManager : MonoBehaviour
         repars = 1;
         while (globalTimer > 0)
         {
-            
-            reptestText.text = $"Rep {repars} / 5 \n Set {sets7} / 2";
+
+            reptestText.text = $"Rep <color=#00FFFF>{repars}</color> / 5 \nSet <color=#00FFFF>{sets7}</color> / 2";
+
             // If there is time for a full rep cycle (6 sec), execute it step by step.
             if (globalTimer != 0)
 
@@ -987,9 +1081,11 @@ public class GameManager : MonoBehaviour
                 // --- Step 1: 2 seconds ---
                 float stepDuration = 2f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise4Step1();
-                instructionText.text = "Veic pietupienu uz leju!";
-                
+                if (sets7 == 1)
+                {
+                    audioManager.Instance.PlayExercise4Step1();
+                    instructionText.text = "Veic pietupienu uz leju!";
+                }
                 while (stepTime < stepDuration)
                 {
                     if (restartExerciseRequested)
@@ -1006,9 +1102,11 @@ public class GameManager : MonoBehaviour
                 // --- Step 2: 2 second ---
                 stepDuration = 2f;
                 stepTime = 0f;
-                audioManager.Instance.PlayExercise4Step2();
-                instructionText.text = "Noturi pozīciju!";
-               
+                if (sets7 == 1)
+                {
+                    audioManager.Instance.PlayExercise4Step2();
+                    instructionText.text = "Noturi pozīciju!";
+                }
                 while (stepTime < stepDuration)
                 {
                     if (restartExerciseRequested)
@@ -1025,9 +1123,11 @@ public class GameManager : MonoBehaviour
                 // --- Step 3: 1 second ---
                 stepDuration = 1f;
                 stepTime = 0f;
-                audioManager.Instance.PlayExercise4Step3();
-                instructionText.text = "Lec augšā!";
-               
+                if (sets7 == 1)
+                {
+                    audioManager.Instance.PlayExercise4Step3();
+                    instructionText.text = "Lec augšā!";
+                }
                 while (stepTime < stepDuration)
                 {
                     if (restartExerciseRequested)
@@ -1044,9 +1144,11 @@ public class GameManager : MonoBehaviour
                 // --- Step 4: 1 second ---
                 stepDuration = 1f;
                 stepTime = 0f;
-                audioManager.Instance.PlayExercise4Step4();
-                instructionText.text = "Uz pirkstgaliem!";
-               
+                if (sets7 == 1) 
+                {
+                    audioManager.Instance.PlayExercise4Step4();
+                    instructionText.text = "Uz pirkstgaliem!";
+                }
                 while (stepTime < stepDuration)
                 {
                     if (restartExerciseRequested)
@@ -1060,7 +1162,7 @@ public class GameManager : MonoBehaviour
                 if (restartExerciseRequested)
                     break;
                 repars++;
-                
+
             }
             else
             {
@@ -1135,12 +1237,12 @@ public class GameManager : MonoBehaviour
     IEnumerator ShowDemoGifSequenceForExercise4()
     {
         // Ensure that exactly four demo GIFs have been assigned.
-       
 
-            characterAnimator.ResetTrigger("Idle");
-            characterAnimator.speed = 1;
-            characterAnimator.SetTrigger("Ex3");
-            yield return StartCountdown(6);
+
+        characterAnimator.ResetTrigger("Idle");
+        characterAnimator.speed = 1;
+        characterAnimator.SetTrigger("Ex3");
+        yield return StartCountdown(6);
         characterAnimator.ResetTrigger("Ex3");
 
 
@@ -1152,13 +1254,20 @@ public class GameManager : MonoBehaviour
 
     IEnumerator RunDemoStepForExercise5()
     {
+        
         // Play demo audio and show demo instructions.
         FootOverlayManagerTwoFeet.Instance?.SetActiveFoot("none");
         audioManager.Instance.PlayDemo4();
         instructionText.color = Color.cyan;
         instructionText.text = "Vingrojums 4: Izklupiens uz priekšu";
         // Show the demo GIF sequence.
-        yield return ShowDemoGifSequenceForExercise5();
+        characterAnimator.ResetTrigger("Idle");
+        characterAnimator.speed = 1;
+        characterAnimator.SetFloat("SpeedMultiplier", 1.1917f);
+
+        characterAnimator.SetTrigger("Ex4");
+        yield return StartCountdown(4);
+        characterAnimator.ResetTrigger("Ex4");
     }
 
     IEnumerator RunPreparationPhaseForExercise5()
@@ -1166,8 +1275,10 @@ public class GameManager : MonoBehaviour
         preparationSuccessful = false;
         while (!preparationSuccessful)
         {
+            characterAnimator.SetTrigger("Idle");
             audioManager.Instance.PlayReleaseLeg();
             instructionText.text = "Nostājies uz ABĀM kājām";
+            reptestText.text = $"Set <color=#00FFFF>{sets}</color> / 2";
             UpdateActiveFootDisplay();
             SetGif(exercise3DemoGifs[8]);
             yield return StartCountdown(currentExercise.PreparationCop);
@@ -1191,6 +1302,7 @@ public class GameManager : MonoBehaviour
     int sets = 1;
     IEnumerator RunExerciseExecutionForExercise5()
     {
+        instructionText.text = "";
         instructionText.color = Color.white;
         UpdateActiveFootDisplay();
         float globalTimer = currentExercise.TimingCop; // Total execution time (e.g., 30 seconds)
@@ -1199,15 +1311,19 @@ public class GameManager : MonoBehaviour
         if (rightFootInstructionText != null)
             rightFootInstructionText.gameObject.SetActive(true);
         reptestText.gameObject.SetActive(true);
-        reptestText.text = $"\n Set {sets} / 2";
+        reptestText.text = $"Set <color=#00FFFF>{sets}</color> / 2";
 
         // --- Step 1: Execute once (1 second) ---
         if (globalTimer > 0)
         {
             float stepDuration = 1f;
             float stepTime = 0f;
-            audioManager.Instance.PlayExercise5Step1();
-            instructionText.text = "Uz abām kājām!";
+            if (sets == 1)
+            {
+                audioManager.Instance.PlayExercise5Step1();
+                instructionText.text = "Uz abām kājām!";
+            }
+            else { instructionText.text = ""; }
             SetGif(exercise3DemoGifs[8]);
             while (stepTime < stepDuration && globalTimer > 0)
             {
@@ -1231,8 +1347,11 @@ public class GameManager : MonoBehaviour
         // --- Steps 2 & 3: Repeat 10 times ---
         for (int i = 0; i < 10; i++)
         {
+            characterAnimator.ResetTrigger("Idle");
+            characterAnimator.SetTrigger("Ex4");
 
-            reptestText.text = $"Rep {i+1}/10\nSet {sets}/2";
+            // reptestText.text = $"Rep {i+1}/10\nSet {sets}/2";
+            reptestText.text = $"Rep <color=#00FFFF>{i + 1}</color> / 10 \nSet <color=#00FFFF>{sets}</color> / 2";
             if (globalTimer <= 0)
                 break;
 
@@ -1240,10 +1359,13 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 2f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise5Step2();
-                instructionText.text = "Izklupiens ar labo kāju!";
+                if (sets == 1)
+                {
+                    audioManager.Instance.PlayExercise5Step2();
+                    instructionText.text = "Izklupiens ar labo kāju!";
+                }
                 SetGif(exercise3DemoGifs[9]);
-                
+
                 while (stepTime < stepDuration && globalTimer > 0)
                 {
                     if (restartExerciseRequested)
@@ -1266,10 +1388,13 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 2f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise5Step3();
-                instructionText.text = "Izklupiens ar kreiso kāju!";
-                SetGif(exercise3DemoGifs[10]);
-                
+                if (sets == 1)
+                {
+                    audioManager.Instance.PlayExercise5Step3();
+                    instructionText.text = "Izklupiens ar kreiso kāju!";
+                }
+                    SetGif(exercise3DemoGifs[10]);
+
                 while (stepTime < stepDuration && globalTimer > 0)
                 {
                     if (restartExerciseRequested)
@@ -1284,22 +1409,27 @@ public class GameManager : MonoBehaviour
                     yield return null;
                 }
             }
-            
-        }
 
+        }
+        characterAnimator.ResetTrigger("Ex4");
+        characterAnimator.SetTrigger("Idle");
         // --- Step 4: Execute once (8 seconds) ---
         if (globalTimer > 0)
         {
             float stepDuration = 8f;
             float stepTime = 0f;
-            audioManager.Instance.PlayExercise5Step4();
+           
             if (leftFootInstructionText != null)
                 leftFootInstructionText.gameObject.SetActive(false);
             if (rightFootInstructionText != null)
                 rightFootInstructionText.gameObject.SetActive(false);
             FootOverlayManagerTwoFeet.Instance?.SetActiveFoot("none");
-            reptestText.text = $"\nSet {sets} / 2";
-            instructionText.text = "Skriet atpakaļ uz sākumu!";
+            reptestText.text = $"Set <color=#00FFFF>{sets}</color> / 2";
+            if (sets == 1)
+            {
+                audioManager.Instance.PlayExercise5Step4();
+                instructionText.text = "Skriet atpakaļ uz sākumu!";
+            }
             SetGif(exercise3DemoGifs[11]);
             while (stepTime < stepDuration && globalTimer > 0)
             {
@@ -1322,7 +1452,7 @@ public class GameManager : MonoBehaviour
             yield return HandleRestart5();
             yield break;
         }
-
+        characterAnimator.ResetTrigger("Ex4");
         repa = 1;
         sets++;
         yield break;
@@ -1332,7 +1462,8 @@ public class GameManager : MonoBehaviour
     {
         // Immediately stop any audio.
         audioManager.Instance.StopAllAudio();
-
+        characterAnimator.ResetTrigger("Ex4");
+        characterAnimator.SetTrigger("Idle");
         // Inform the user about the restart.
         // Inform the user about the restart.
         audioManager.Instance.PlayExerciseZoneVoice(7);
@@ -1403,16 +1534,49 @@ public class GameManager : MonoBehaviour
 
     IEnumerator RunDemoStepForExercise6()
     {
+        reptestText.text = "";
         // Play demo audio and show demo instructions.
         FootOverlayManagerTwoFeet.Instance?.SetActiveFoot("none");
         audioManager.Instance.PlayDemo5();
         instructionText.color = Color.cyan;
         instructionText.text = "Vingrojums 5: sānu lecieni";
         // Show the demo GIF sequence.
-        yield return ShowDemoGifSequenceForExercise6();
+        characterAnimator.ResetTrigger("Idle");
+        characterAnimator.speed = 1;
+        characterAnimator.SetFloat("SpeedMultiplier", 0.5f);
+
+        characterAnimator.SetTrigger("Ex5");
+        yield return StartCountdown(5);
+        characterAnimator.ResetTrigger("Ex5");
     }
 
-   
+    IEnumerator RunPreparationPhaseForExercise6()
+    {
+        preparationSuccessful = false;
+        while (!preparationSuccessful)
+        {
+            characterAnimator.SetTrigger("Idle");
+            audioManager.Instance.PlayReleaseLeg();
+            instructionText.text = "Nostājies uz ABĀM kājām";
+            reptestText.text = $"Set <color=#00FFFF>{sets2}</color> / 2";
+            UpdateActiveFootDisplay();
+            
+            yield return StartCountdown(currentExercise.PreparationCop);
+
+            if (restartExerciseRequested)
+            {
+                restartExerciseRequested = false;
+                instructionText.text = "Līdzsvars zaudēts, sāc no sākuma!";
+                yield return new WaitForSeconds(1f);
+                yield return RunPreparationPhaseForExercise6();
+
+            }
+            else
+            {
+                preparationSuccessful = true;
+            }
+        }
+    }
 
     int sets2 = 1;
     IEnumerator RunExerciseExecutionForExercise6()
@@ -1424,15 +1588,19 @@ public class GameManager : MonoBehaviour
         if (rightFootInstructionText != null)
             rightFootInstructionText.gameObject.SetActive(true);
         reptestText.gameObject.SetActive(true);
-        reptestText.text = $"\n Set {sets2} / 2";
+        reptestText.text = $"Set <color=#00FFFF>{sets2}</color> / 2";
+
 
         // --- Step 1: Execute once (1 second) ---
         if (globalTimer > 0)
         {
             float stepDuration = 1f;
             float stepTime = 0f;
-            audioManager.Instance.PlayExercise6Step1();
-            instructionText.text = "Uz abām kājām!";
+            if (sets2 == 1)
+            {
+                audioManager.Instance.PlayExercise6Step1();
+                instructionText.text = "Uz abām kājām!";
+            }
             SetGif(exercise3DemoGifs[8]);
             while (stepTime < stepDuration && globalTimer > 0)
             {
@@ -1452,12 +1620,14 @@ public class GameManager : MonoBehaviour
         {
             yield break;
         }
-
+        characterAnimator.ResetTrigger("Idle");
+        characterAnimator.SetTrigger("Ex5");
         // --- Steps 2 & 3: Repeat 7 times ---
         for (int i = 0; i < 7; i++)
         {
-
-            reptestText.text = $"Rep {i + 1}/7\nSet {sets2}/2";
+            
+            //reptestText.text = $"Rep {i + 1}/7\nSet {sets2}/2";
+            reptestText.text = $"Rep <color=#00FFFF>{i + 1}</color> / 7 \nSet <color=#00FFFF>{sets2}</color> / 2";
             if (globalTimer <= 0)
                 break;
 
@@ -1465,9 +1635,12 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 2f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise6Step2();
-                instructionText.text = "Lec pa labi!";
-                FootOverlayManagerTwoFeet.Instance.SetActiveFoot("right");
+                if (sets2 == 1)
+                {
+                    audioManager.Instance.PlayExercise6Step2();
+                    instructionText.text = "Lec pa labi!";
+                }
+                    FootOverlayManagerTwoFeet.Instance.SetActiveFoot("right");
                 if (leftFootInstructionText != null)
                     leftFootInstructionText.gameObject.SetActive(false);
                 if (rightFootInstructionText != null)
@@ -1496,8 +1669,11 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 2f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise6Step3();
-                instructionText.text = "Lec pa kreisi!";
+                if (sets2 == 1)
+                {
+                    audioManager.Instance.PlayExercise6Step3();
+                    instructionText.text = "Lec pa kreisi!";
+                }
                 SetGif(exercise3DemoGifs[13]);
                 FootOverlayManagerTwoFeet.Instance.SetActiveFoot("left");
                 if (leftFootInstructionText != null)
@@ -1519,8 +1695,8 @@ public class GameManager : MonoBehaviour
                     yield return null;
                 }
             }
-            
-            
+
+
 
         }
 
@@ -1530,16 +1706,17 @@ public class GameManager : MonoBehaviour
             yield return HandleRestart6();
             yield break;
         }
-
+        characterAnimator.ResetTrigger("Ex5");
         sets2++;
         yield break;
     }
 
     IEnumerator HandleRestart6()
     {
-        // Immediately stop any audio.
+        characterAnimator.speed = 1; // Unfreeze animation.
         audioManager.Instance.StopAllAudio();
-
+        characterAnimator.ResetTrigger("Ex5");
+        characterAnimator.SetTrigger("Idle");
         // Inform the user about the restart.
         audioManager.Instance.PlayExerciseZoneVoice(7);
         instructionText.text = "Līdzsvars zaudēts, sāc no sākuma!";
@@ -1606,14 +1783,32 @@ public class GameManager : MonoBehaviour
         instructionText.color = Color.cyan;
         instructionText.text = "Vingrojums 6: Stāvēšana uz vienas kājas ar biedru";
         // Show the demo GIF sequence.
-        yield return ShowDemoGifSequenceForExercise7();
-    }
 
+        characterAnimator.ResetTrigger("Idle");
+        characterAnimator.speed = 1;
+        characterAnimator.SetFloat("SpeedMultiplier", 1f); // CHANGE THIS
+         
+        characterAnimator.SetTrigger("Ex6");
+        yield return StartCountdown(5);
+        characterAnimator.ResetTrigger("Ex6");
+        characterAnimator.SetTrigger("Idle");
+    }
+    public int sets3 = -1;
     IEnumerator RunPreparationPhaseForExercise7()
     {
+       
         preparationSuccessful = false;
+        if (repss < 2)
+        {
+            reptestText.text = $"Set <color=#00FFFF>1</color> / 2";
+        }
+        else
+        {
+            reptestText.text = $"Set <color=#00FFFF>2</color> / 2";
+        }
         while (!preparationSuccessful)
         {
+            
             // Determine the correct exercise configuration based on reps
             if (repss == 0 || repss == 2)
             {
@@ -1633,18 +1828,63 @@ public class GameManager : MonoBehaviour
             if (repss == 0 || repss == 2)
             {
                 audioManager.Instance.PlayPreparation(right);
-                instructionText.text = "Nostājies uz LABĀS kājas";
+                instructionText.text = "GATAVOTIES! Nostājies uz LABĀS kājas";
                 UpdateActiveFootDisplay();
+                bool isRightLeg = (repss == 0 || repss == 2);
+                characterAnimator.ResetTrigger("Idle");
+                
+                characterAnimator.SetBool("IsLeftLeg", !isRightLeg);
+                yield return new WaitForEndOfFrame();
+                characterAnimator.SetTrigger("Ex6");
+                
+                yield return null;
+                yield return FreezeAtLastFrame(3, false);
+                yield return null;
+               
+                characterAnimator.ResetTrigger("Ex6");
+
+
+                characterAnimator.speed = 1;
+
+                characterAnimator.Play("Idle", 0, 0f);
+                //yield return StartCountdown(3);
+                instructionText.text = "";
                 SetGif(exercise3DemoGifs[16]);
-                yield return StartCountdown(currentExercise.PreparationCop);
+               
+               
             }
             else if (repss == 1 || repss == 3)
             {
                 audioManager.Instance.PlayPreparation(left);
-                instructionText.text = "Nostājies uz KREISĀS kājas";
+                instructionText.text = "GATAVOTIES! Nostājies uz KREISĀS kājas";
                 UpdateActiveFootDisplay();
+                
+                bool isRightLeg = (repss == 1 || repss == 3);
+                characterAnimator.ResetTrigger("Idle");
+
+                characterAnimator.SetBool("IsLeftLeg", !isRightLeg);
+                yield return new WaitForEndOfFrame();
+                float clipLengthInSeconds = 300f; // total clip length
+                float startTimeInSeconds = 150f;    // desired start time (2:30)
+                float normalizedStartTime = startTimeInSeconds / clipLengthInSeconds;
+
+                
+                characterAnimator.SetTrigger("Ex6L");
+
+                yield return null;
+                yield return FreezeAtLastFrame(3, false);
+                yield return null;
+                
+                characterAnimator.ResetTrigger("Ex6L");
+
+
+                characterAnimator.speed = 1;
+                characterAnimator.Play("Idle", 0, 0f);
+                //yield return StartCountdown(3);
+                instructionText.text = "";
                 SetGif(exercise3DemoGifs[14]);
-                yield return StartCountdown(currentExercise.PreparationCop);
+                
+                
             }
 
             if (restartExerciseRequested)
@@ -1652,21 +1892,27 @@ public class GameManager : MonoBehaviour
                 restartExerciseRequested = false;
                 instructionText.text = "Līdzsvars zaudēts, sāc no sākuma!";
                 yield return new WaitForSeconds(1f);
-                yield return RunPreparationPhaseForExercise5();
+                yield return RunPreparationPhaseForExercise7();
 
             }
             else
             {
                 preparationSuccessful = true;
             }
+            
         }
     }
 
-    int sets3 = 1;
+    
     IEnumerator RunExerciseExecutionForExercise7()
     {
+        float clipLengthInSeconds = 300f; // total clip length
+        float startTimeInSeconds = 150f;    // desired start time (2:30)
+        float normalizedStartTime = startTimeInSeconds / clipLengthInSeconds;
+        instructionText.text = "";
         instructionText.color = Color.white;
         UpdateActiveFootDisplay();
+        characterAnimator.SetTrigger("Idle");
         float globalTimer = currentExercise.TimingCop; // Total execution time (e.g., 30 seconds)
         if (currentExercise.LegsUsed == "right")
         {
@@ -1680,17 +1926,56 @@ public class GameManager : MonoBehaviour
                 leftFootInstructionText.gameObject.SetActive(true);
             rightFootInstructionText.gameObject.SetActive(false);
         }
-      
-        
+
+
         reptestText.gameObject.SetActive(true);
-        reptestText.text = $"\n Set {sets3} / 4";
+
+        
 
 
         // --- Steps 1 & 2: Repeat 10 times ---
         for (int i = 0; i < 10; i++)
         {
+            //if (sets3 < 1 && repss < 2)
+            //{
+            //    reptestText.text = $"Rep <color=#00FFFF>{repss}</color> / 10 \nSet <color=#00FFFF>1</color> / 2";
+            //}
+            //else if (repss > 3)
+            //{
+            //    reptestText.text = $"Rep <color=#00FFFF>{repss}</color> / 10 \nSet <color=#00FFFF>2</color> / 2";
+            //}
+            if (repss < 2)
+            {
+                reptestText.text = $"Rep <color=#00FFFF>{i + 1}</color> / 10 \nSet <color=#00FFFF>1</color> / 2";
+            }
+            else
+            {
+                reptestText.text = $"Rep <color=#00FFFF>{i + 1}</color> / 10 \nSet <color=#00FFFF>2</color> / 2";
+            }
+            //if (sets3 < 1)
+            //{
+            //    reptestText.text = $"Rep <color=#00FFFF>{i+1}</color> / 10 \nSet <color=#00FFFF>1</color> / 2";
+            //}
+            //else if (sets3 >= 1)
+            //{
+            //    reptestText.text = $"Rep <color=#00FFFF>{i+1}</color> / 10 \nSet <color=#00FFFF>2</color> / 2";
+            //}
+            
+            characterAnimator.ResetTrigger("Idle");
 
-            reptestText.text = $"Rep {i + 1}/10\nSet {sets3}/4";
+            if (repss == 1 || repss == 3)
+            {
+                characterAnimator.SetTrigger("Ex6L");
+            }
+            else if (repss == 0 || repss == 2)
+            {
+                characterAnimator.SetTrigger("Ex6");
+            }
+
+            
+
+            //reptestText.text = $"Rep {i + 1}/10\nSet {sets3}/4";
+           // reptestText.text = $"Rep <color=#00FFFF>{i + 1}</color> / 10 \nSet <color=#00FFFF>{sets3}</color> / 2";
             if (globalTimer <= 0)
                 break;
 
@@ -1698,14 +1983,17 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 3f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise7Step1();
-                instructionText.text = "Lēnām tupies lejā!";
+                if (sets3 == 1)
+                {
+                    audioManager.Instance.PlayExercise7Step1();
+                    instructionText.text = "Lēnām tupies lejā!";
+                }
                 if (repss == 0 || repss == 2)
                 {
                     SetGif(exercise3DemoGifs[16]);
                 }
                 else { SetGif(exercise3DemoGifs[14]); }
-                
+
 
                 while (stepTime < stepDuration && globalTimer > 0)
                 {
@@ -1729,14 +2017,17 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 2f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise7Step2();
-                instructionText.text = "Celies augšā!";
-                if (repss == 0 || repss == 2)
+                if (sets3 == 1)
+                {
+                    audioManager.Instance.PlayExercise7Step2();
+                    instructionText.text = "Celies augšā!";
+                }
+                    if (repss == 0 || repss == 2)
                 {
                     SetGif(exercise3DemoGifs[17]);
                 }
                 else { SetGif(exercise3DemoGifs[15]); }
-                
+
 
                 while (stepTime < stepDuration && globalTimer > 0)
                 {
@@ -1763,6 +2054,18 @@ public class GameManager : MonoBehaviour
             yield return HandleRestart7();
             yield break;
         }
+        
+       
+        if (repss == 1 || repss == 3)
+        {
+            characterAnimator.ResetTrigger("Ex6");
+            characterAnimator.SetTrigger("Idle");
+        }
+        else if (repss == 0 || repss == 2)
+        {
+            characterAnimator.ResetTrigger("Ex6L");
+            characterAnimator.SetTrigger("Idle");
+        }
         repss++;
         sets3++;
         yield break;
@@ -1771,7 +2074,11 @@ public class GameManager : MonoBehaviour
     IEnumerator HandleRestart7()
     {
         // Immediately stop any audio.
+        characterAnimator.speed = 1; // Unfreeze animation.
         audioManager.Instance.StopAllAudio();
+        characterAnimator.ResetTrigger("Ex6");
+        characterAnimator.ResetTrigger("Ex6L");
+        characterAnimator.SetTrigger("Idle");
 
         // Inform the user about the restart.
         audioManager.Instance.PlayExerciseZoneVoice(7);
@@ -1837,7 +2144,13 @@ public class GameManager : MonoBehaviour
         instructionText.color = Color.cyan;
         instructionText.text = "Vingrojums 7: kastes lecieni";
         // Show the demo GIF sequence.
-        yield return ShowDemoGifSequenceForExercise8();
+        characterAnimator.ResetTrigger("Idle");
+        characterAnimator.speed = 1;
+        characterAnimator.SetFloat("SpeedMultiplier", 1.5f); // CHANGE THIS
+        characterAnimator.SetTrigger("Ex7");
+        yield return StartCountdown(10);
+        characterAnimator.ResetTrigger("Ex7");
+        characterAnimator.Play("Idle", 0, 0f);
     }
 
 
@@ -1845,6 +2158,7 @@ public class GameManager : MonoBehaviour
     int sets4 = 1;
     IEnumerator RunExerciseExecutionForExercise8()
     {
+        instructionText.text = "";
         instructionText.color = Color.white;
         FootOverlayManagerTwoFeet.Instance.SetActiveFoot("none");
         float globalTimer = currentExercise.TimingCop; // Total execution time (e.g., 30 seconds)
@@ -1853,15 +2167,17 @@ public class GameManager : MonoBehaviour
         if (rightFootInstructionText != null)
             rightFootInstructionText.gameObject.SetActive(false);
         reptestText.gameObject.SetActive(true);
-        reptestText.text = $"\n Set {sets4} / 2";
+        reptestText.text = $"Set <color=#00FFFF>{sets4}</color> / 2";
 
-   
+
         // --- Steps 1-8 Repeat 10 times ---
         for (int i = 0; i < 10; i++)
         {
+            characterAnimator.ResetTrigger("Idle");
+            characterAnimator.SetTrigger("Ex7");
+            // reptestText.text = $"Rep {i + 1}/3\nSet {sets4}/2";
+            reptestText.text = $"Rep <color=#00FFFF>{i + 1}</color> / 3 \nSet <color=#00FFFF>{sets4}</color> / 2";
 
-            reptestText.text = $"Rep {i + 1}/3\nSet {sets4}/2";
-            
             if (globalTimer <= 0)
                 break;
 
@@ -1869,8 +2185,11 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 1f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise8Step1();
-                instructionText.text = "Uz priekšu";
+                if (sets4 == 1)
+                {
+                    audioManager.Instance.PlayExercise8Step1();
+                    instructionText.text = "Uz priekšu";
+                }
                 SetGif(exercise3DemoGifs[18]);
 
                 while (stepTime < stepDuration && globalTimer > 0)
@@ -1894,9 +2213,13 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 1f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise8Step2();
-                instructionText.text = "Uz vidu";
-                SetGif(exercise3DemoGifs[19]);
+                if (sets4 == 1)
+                {
+                    audioManager.Instance.PlayExercise8Step2();
+                    instructionText.text = "Uz vidu";
+
+                }
+                    SetGif(exercise3DemoGifs[19]);
 
                 while (stepTime < stepDuration && globalTimer > 0)
                 {
@@ -1919,9 +2242,12 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 1f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise8Step3();
-                instructionText.text = "Aizmugure";
-                SetGif(exercise3DemoGifs[19]);
+                if (sets4 == 1)
+                {
+                    audioManager.Instance.PlayExercise8Step3();
+                    instructionText.text = "Aizmugure";
+                }
+                    SetGif(exercise3DemoGifs[19]);
 
                 while (stepTime < stepDuration && globalTimer > 0)
                 {
@@ -1944,9 +2270,12 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 1f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise8Step2();
-                instructionText.text = "Uz vidu";
-                SetGif(exercise3DemoGifs[19]);
+                if (sets4 == 1)
+                {
+                    audioManager.Instance.PlayExercise8Step2();
+                    instructionText.text = "Uz vidu";
+                }
+                    SetGif(exercise3DemoGifs[19]);
 
                 while (stepTime < stepDuration && globalTimer > 0)
                 {
@@ -1969,8 +2298,11 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 1f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise8Step4();
-                instructionText.text = "Pa labi";
+                if (sets4 == 1)
+                {
+                    audioManager.Instance.PlayExercise8Step4();
+                    instructionText.text = "Pa labi";
+                }
                 SetGif(exercise3DemoGifs[20]);
 
                 while (stepTime < stepDuration && globalTimer > 0)
@@ -1994,9 +2326,12 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 1f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise8Step2();
-                instructionText.text = "Uz vidu";
-                SetGif(exercise3DemoGifs[19]);
+                if (sets4 == 1)
+                {
+                    audioManager.Instance.PlayExercise8Step2();
+                    instructionText.text = "Uz vidu";
+                }
+                    SetGif(exercise3DemoGifs[19]);
 
                 while (stepTime < stepDuration && globalTimer > 0)
                 {
@@ -2020,8 +2355,11 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 1f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise8Step5();
-                instructionText.text = "Pa kreisi";
+                if (sets4 == 1)
+                {
+                    audioManager.Instance.PlayExercise8Step5();
+                    instructionText.text = "Pa kreisi";
+                }
                 SetGif(exercise3DemoGifs[21]);
 
                 while (stepTime < stepDuration && globalTimer > 0)
@@ -2045,9 +2383,12 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 1f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise8Step2();
-                instructionText.text = "Uz vidu";
-                SetGif(exercise3DemoGifs[19]);
+                if (sets4 == 1)
+                {
+                    audioManager.Instance.PlayExercise8Step2();
+                    instructionText.text = "Uz vidu";
+                }
+                    SetGif(exercise3DemoGifs[19]);
 
                 while (stepTime < stepDuration && globalTimer > 0)
                 {
@@ -2070,9 +2411,12 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 1f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise8Step1();
-                instructionText.text = "Uz priekšu";
-                SetGif(exercise3DemoGifs[18]);
+                if (sets4 == 1)
+                {
+                    audioManager.Instance.PlayExercise8Step1();
+                    instructionText.text = "Uz priekšu";
+                }
+                    SetGif(exercise3DemoGifs[18]);
 
                 while (stepTime < stepDuration && globalTimer > 0)
                 {
@@ -2095,9 +2439,12 @@ public class GameManager : MonoBehaviour
             {
                 float stepDuration = 1f;
                 float stepTime = 0f;
-                audioManager.Instance.PlayExercise8Step2();
-                instructionText.text = "Uz vidu";
-                SetGif(exercise3DemoGifs[19]);
+                if (sets4 == 1)
+                {
+                    audioManager.Instance.PlayExercise8Step2();
+                    instructionText.text = "Uz vidu";
+                }
+                    SetGif(exercise3DemoGifs[19]);
 
                 while (stepTime < stepDuration && globalTimer > 0)
                 {
@@ -2120,11 +2467,11 @@ public class GameManager : MonoBehaviour
 
         // Final restart check (just in case)
         if (restartExerciseRequested)
-        { 
+        {
             yield return HandleRestart8();
             yield break;
         }
-
+        characterAnimator.ResetTrigger("Ex7");
         sets4++;
         yield break;
     }
@@ -2132,7 +2479,10 @@ public class GameManager : MonoBehaviour
     IEnumerator HandleRestart8()
     {
         // Immediately stop any audio.
+        characterAnimator.speed = 1; // Unfreeze animation.
         audioManager.Instance.StopAllAudio();
+        characterAnimator.ResetTrigger("Ex7");
+        characterAnimator.SetTrigger("Idle");
 
         // Inform the user about the restart.
         audioManager.Instance.PlayExerciseZoneVoice(7);
@@ -2204,45 +2554,45 @@ public class GameManager : MonoBehaviour
         {
 
             // Step 1: 1 seconds.
-           
+
             SetGif(exercise3DemoGifs[18]);
             yield return StartCountdown(1);
 
             // Step 2: 1 second.
-            
+
             SetGif(exercise3DemoGifs[19]);
             yield return StartCountdown(1);
 
             // Step 3: 1 second.
-           
+
             SetGif(exercise3DemoGifs[19]);
             yield return StartCountdown(1);
             // Step 3: 1 second.
-            
+
             SetGif(exercise3DemoGifs[19]);
             yield return StartCountdown(1);
             // Step 3: 1 second.
-          
+
             SetGif(exercise3DemoGifs[20]);
             yield return StartCountdown(1);
             // Step 3: 1 second.
-          
+
             SetGif(exercise3DemoGifs[19]);
             yield return StartCountdown(1);
             // Step 3: 1 second.
-           
+
             SetGif(exercise3DemoGifs[21]);
             yield return StartCountdown(1);
 
-          
+
             SetGif(exercise3DemoGifs[19]);
             yield return StartCountdown(1);
-            
+
             SetGif(exercise3DemoGifs[18]);
             yield return StartCountdown(1);
 
             // Step 2: 2 second.
-            
+
             SetGif(exercise3DemoGifs[19]);
             yield return StartCountdown(1);
 
@@ -2264,7 +2614,17 @@ public class GameManager : MonoBehaviour
 
         ReturnToIdle();
     }
-
+    IEnumerator AnimateRotation(Transform target, Quaternion from, Quaternion to, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            target.rotation = Quaternion.Lerp(from, to, elapsed / duration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        target.rotation = to; // Ensure the final rotation is set
+    }
     IEnumerator FreezeAtLastFrame(int holdSeconds, bool resumeAfter = true)
     {
         float waitTime = 0f;
@@ -2354,6 +2714,10 @@ public class GameManager : MonoBehaviour
         {
             yield return new WaitForSeconds(0.5f);
         }
+        if (currentExercise.RepetitionID == 7)
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
     }
 
     void UpdateActiveFootDisplay()
@@ -2364,31 +2728,60 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    
+
 
     public string GetSingleZoneMessage(int zone)
     {
-        audioManager.Instance.PlayExerciseZoneVoice(zone);
-        switch (zone)
+        
+        if (sets5 < 3)
         {
-            case 1:
-                return "Tev lieliski izdodas!";
-            case 2:
-                return "Nostāties pareizi";
-            case 3:
-                return "Uz priekšu!"; // Pārvirzi svaru
-            case 4:
-                return "Uz aizmuguri!"; //Pārvirzi svaru u
-            case 5:
-                return "Pa kreisi!"; // Pavirzi svaru p
-            case 6:
-                return "Pa labi!"; // Pavirzi svaru p
-            case 7:
-                RequestExerciseRestart();
-                return "Līdzsvars zaudēts, sāc no sākuma!";
-            default:
-                return "Nezināma zona.";
+            audioManager.Instance.PlayExerciseZoneVoice(zone);
+            switch (zone)
+            {
+                case 1:
+                    return "Tev lieliski izdodas!"; // Tev lieliski izdodas!
+                case 2:
+                    return "Nostāties pareizi"; // Nostāties pareizi
+                case 3:
+                    return "Uz priekšu!"; // Uz priekšu!
+                case 4:
+                    return "Uz aizmuguri!"; //Uz aizmuguri!
+                case 5:
+                    return "Pa kreisi!"; // Pa kreisi!
+                case 6:
+                    return "Pa labi!"; // Pa labi!
+                case 7:
+                    RequestExerciseRestart();
+                    return "Līdzsvars zaudēts, sāc no sākuma!";
+                default:
+                    return "Nezināma zona.";
+            }
         }
+        else
+        {
+            switch (zone)
+            {
+                case 1:
+                    return ""; // Tev lieliski izdodas!
+                case 2:
+                    return ""; // Nostāties pareizi
+                case 3:
+                    return ""; // Uz priekšu!
+                case 4:
+                    return ""; //Uz aizmuguri!
+                case 5:
+                    return ""; // Pa kreisi!
+                case 6:
+                    return ""; // Pa labi!
+                case 7:
+                    RequestExerciseRestart();
+                    return "Līdzsvars zaudēts, sāc no sākuma!";
+                default:
+                    return "Nezināma zona.";
+            }
+        }
+        
+       
     }
 
     public void MarkPreparationSuccessful()

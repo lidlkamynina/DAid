@@ -16,11 +16,11 @@ public class HMDDataReceiver : MonoBehaviour
     private bool _isConnected = false;
     public bool IsClientConnected => _isConnected;
 
-    [Header("Server Settings")]
+    [Header("Server Settings")] 
     [Tooltip("Server IP Address (e.g., 127.0.0.1)")]
     public string serverIp = "127.0.0.1";
     [Tooltip("Server Port")]
-    public int serverPort = 9001;
+    public int serverPort = 9003;
 
     [Header("Debug / Visual Objects")]
     [Tooltip("Debug Sphere for connection status")]
@@ -155,6 +155,7 @@ public class HMDDataReceiver : MonoBehaviour
         {
             LogToFile("Server starting on port " + serverPort);
             _listener = new TcpListener(IPAddress.Any, serverPort);
+            _listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             _listener.Start();
             LogToFile("Server started on port " + serverPort);
             _listener.BeginAcceptTcpClient(new AsyncCallback(OnClientConnect), _listener);

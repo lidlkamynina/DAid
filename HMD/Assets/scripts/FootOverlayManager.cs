@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
@@ -15,6 +15,10 @@ public class FootOverlayManagerTwoFeet : MonoBehaviour
     public Image rightFootRightOverlay;
     public Image rightFootTopOverlay;
     public Image rightFootBottomOverlay;
+
+    [Header("Arrow Overlays")]
+    public Image leftFootArrow;
+    public Image rightFootArrow;
 
     [Header("Foot UI Groups")]
     public GameObject leftFootGroup;
@@ -44,6 +48,12 @@ public class FootOverlayManagerTwoFeet : MonoBehaviour
         StartCoroutine(FadeOverlay(rightFootRightOverlay, green));
         StartCoroutine(FadeOverlay(rightFootTopOverlay, green));
         StartCoroutine(FadeOverlay(rightFootBottomOverlay, green));
+
+        // Hide arrows by default
+        if (leftFootArrow != null)
+            leftFootArrow.gameObject.SetActive(false);
+        if (rightFootArrow != null)
+            rightFootArrow.gameObject.SetActive(false);
     }
 
     public void UpdateOverlayForZone(int zone, string foot)
@@ -54,7 +64,8 @@ public class FootOverlayManagerTwoFeet : MonoBehaviour
 
         if (foot.ToLower() == "left")
         {
-            switch (zone)
+            // Handle left foot overlays
+            switch (zone) // left, right, top, bottom respectively
             {
                 case 1:
                     FadeLeftFoot(green, green, green, green);
@@ -81,9 +92,12 @@ public class FootOverlayManagerTwoFeet : MonoBehaviour
                     FadeLeftFoot(green, green, green, green);
                     break;
             }
+            // For left foot arrow, we assume no mirroring.
+            UpdateArrow(leftFootArrow, zone, false);
         }
         else if (foot.ToLower() == "right")
         {
+            // Handle right foot overlays
             switch (zone)
             {
                 case 1:
@@ -111,6 +125,8 @@ public class FootOverlayManagerTwoFeet : MonoBehaviour
                     FadeRightFoot(green, green, green, green);
                     break;
             }
+            // For right foot arrow, we assume it is mirrored due to its parent settings.
+            UpdateArrow(rightFootArrow, zone, true);
         }
         else if (foot.ToLower() == "both")
         {
@@ -157,6 +173,74 @@ public class FootOverlayManagerTwoFeet : MonoBehaviour
         {
             overlay.transform.SetAsLastSibling();
         }
+    }
+
+    // Update the arrow visibility and rotation based on the zone.
+    // The isMirrored flag tells if the arrow is already flipped (e.g., via parent's scale).
+    private void UpdateArrow(Image arrow, int zone, bool isMirrored)
+    {
+        if (arrow == null)
+            return;
+
+        // Hide arrow for zones 1, 2, and 7.
+        if (zone == 1 || zone == 2 || zone == 7)
+        {
+            arrow.gameObject.SetActive(false);
+            return;
+        }
+
+        float rotationAngle = 0f;
+        if (!isMirrored)
+        {
+            // For non-mirrored arrow:
+            // Zone 3: back → arrow points up (90°)
+            // Zone 4: front → arrow points down (-90°)
+            // Zone 5: left → arrow points left (180°)
+            // Zone 6: right → arrow points right (0°)
+            switch (zone)
+            {
+                case 3:
+                    rotationAngle = 90f;
+                    break;
+                case 4:
+                    rotationAngle = -90f; // or 270f
+                    break;
+                case 5:
+                    rotationAngle = 180f;
+                    break;
+                case 6:
+                    rotationAngle = 0f;
+                    break;
+            }
+        }
+        else
+        {
+            // For mirrored arrow, swap the left/right rotations:
+            // Zone 3: back → arrow points up (90°) remains the same.
+            // Zone 4: front → arrow points down (-90°) remains the same.
+            // Zone 5: left → arrow should show left. Since the arrow sprite is mirrored,
+            //          a rotation of 0 will display left.
+            // Zone 6: right → arrow should show right. Thus, rotation of 180° will display right.
+            switch (zone)
+            {
+                case 3:
+                    rotationAngle = 90f;
+                    break;
+                case 4:
+                    rotationAngle = -90f; // or 270f
+                    break;
+                case 5:
+                    rotationAngle = 0f;
+                    break;
+                case 6:
+                    rotationAngle = 180f;
+                    break;
+            }
+        }
+
+        arrow.gameObject.SetActive(true);
+        arrow.rectTransform.localRotation = Quaternion.Euler(0f, 0f, rotationAngle);
+
     }
 
     public void SetActiveFoot(string activeFoot)
