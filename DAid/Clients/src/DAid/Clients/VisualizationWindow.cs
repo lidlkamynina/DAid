@@ -83,46 +83,47 @@ else
         }
 
         private void DrawSockVisualization(Graphics graphics, double copX, double copY, double[] pressures, int xOffset, bool isRightSock)
-        {
-            // Draw grid lines with labels
-            DrawGrid(graphics, xOffset);
+{
+    DrawGrid(graphics, xOffset);
 
-            if (pressures.Length == 0)
-                return;
+    if (pressures.Length == 0)
+        return;
+    float scaleFactor = CanvasSize / 4.0f; 
+    
+    float scaledX = (float)(xOffset + CanvasSize / 2 + copX * scaleFactor);
+    float scaledY = (float)(CanvasSize / 2 - copY * scaleFactor);
+    graphics.FillEllipse(Brushes.Red, scaledX - 8, scaledY - 8, 16, 16);
+    graphics.DrawString($"CoP X: {copX:F2}, Y: {copY:F2}", new Font("Arial", 10, FontStyle.Bold), Brushes.Black, scaledX + 10, scaledY);
+    // DrawPressures(graphics, pressures, xOffset, isRightSock);
+}
 
-            // Scale CoP to canvas
-            float scaledX = (float)(xOffset + CanvasSize / 2 + copX * (CanvasSize / 8));
-            float scaledY = (float)(CanvasSize / 2 - copY * (CanvasSize / 8));
+private void DrawGrid(Graphics graphics, int xOffset)
+{
+    Pen gridPen = new Pen(Color.LightGray, 1);
+    Pen highlightPen = new Pen(Color.Green, 2); 
+    Font font = new Font("Arial", 8);
+    Font highlightFont = new Font("Arial", 10, FontStyle.Bold);
+    Brush textBrush = Brushes.Black;
+    Brush highlightBrush = Brushes.Green;
 
-            // Draw CoP with larger visibility
-            graphics.FillEllipse(Brushes.Red, scaledX - 8, scaledY - 8, 16, 16);
-            graphics.DrawString($"CoP X: {copX:F2}, Y: {copY:F2}", new Font("Arial", 10, FontStyle.Bold), Brushes.Black, scaledX + 10, scaledY);
+    graphics.DrawLine(Pens.Gray, xOffset, CanvasSize / 2, xOffset + CanvasSize, CanvasSize / 2);
+    graphics.DrawLine(Pens.Gray, xOffset + CanvasSize / 2, 0, xOffset + CanvasSize / 2, CanvasSize);
+    float scaleFactor = CanvasSize / 4.0f;
 
-            // Draw pressures
-            DrawPressures(graphics, pressures, xOffset, isRightSock);
-        }
+    for (double i = -2; i <= 2; i += 0.5) 
+    {
+        int x = (int)(xOffset + CanvasSize / 2 + i * scaleFactor);
+        int y = (int)(CanvasSize / 2 - i * scaleFactor);
 
-        private void DrawGrid(Graphics graphics, int xOffset)
-        {
-            Pen gridPen = new Pen(Color.LightGray, 1);
-            Font font = new Font("Arial", 8);
-            Brush textBrush = Brushes.Black;
+        bool isHighlighted = Math.Abs(i) == 0.5; 
 
-            // Draw center lines
-            graphics.DrawLine(Pens.Gray, xOffset, CanvasSize / 2, xOffset + CanvasSize, CanvasSize / 2);
-            graphics.DrawLine(Pens.Gray, xOffset + CanvasSize / 2, 0, xOffset + CanvasSize / 2, CanvasSize);
-
-            // Draw grid markers
-            for (int i = -3; i <= 3; i++)
-            {
-                int x = (int)(xOffset + CanvasSize / 2 + i * (CanvasSize / 8));
-                int y = (int)(CanvasSize / 2 + i * (CanvasSize / 8));
-                graphics.DrawLine(gridPen, x, CanvasSize / 2 - 5, x, CanvasSize / 2 + 5);
-                graphics.DrawLine(gridPen, xOffset + CanvasSize / 2 - 5, y, xOffset + CanvasSize / 2 + 5, y);
-                graphics.DrawString(i.ToString(), font, textBrush, x - 5, CanvasSize / 2 + 10);
-                graphics.DrawString(i.ToString(), font, textBrush, xOffset + CanvasSize / 2 - 20, y - 5);
-            }
-        }
+        // Use a bold color for ±0.5
+        graphics.DrawLine(isHighlighted ? highlightPen : gridPen, x, CanvasSize / 2 - 5, x, CanvasSize / 2 + 5);
+        graphics.DrawLine(isHighlighted ? highlightPen : gridPen, xOffset + CanvasSize / 2 - 5, y, xOffset + CanvasSize / 2 + 5, y);
+        graphics.DrawString(i.ToString("0.0"), isHighlighted ? highlightFont : font, isHighlighted ? highlightBrush : textBrush, x - 5, CanvasSize / 2 + 10);
+        graphics.DrawString(i.ToString("0.0"), isHighlighted ? highlightFont : font, isHighlighted ? highlightBrush : textBrush, xOffset + CanvasSize / 2 - 25, y - 5);
+    }
+}
 
         private void DrawPressures(Graphics graphics, double[] pressures, int xOffset, bool isRightSock)
         {

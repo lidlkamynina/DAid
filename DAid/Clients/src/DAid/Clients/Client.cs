@@ -16,9 +16,9 @@ namespace DAid.Clients
     public class Client
     {
         string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
-        string guipath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
-        string portFilePath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt" 
-        string questip = "192.168.8.118" ; // CHANGE AS NEEDED "192.168.8.118" for HOME WIFI
+        string guipath = "D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
+        string portFilePath = "D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt" 
+        string questip = "192.168.8.118"; // CHANGE AS NEEDED
         private Process _hmdProcess;
         private readonly Server _server;
         private VisualizationWindow _visualizationWindow;
@@ -197,27 +197,15 @@ namespace DAid.Clients
             };
             Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 2000 }, { 3, 2000 }  };
             for (int i = 0; i < exercises.Count; i++) {
-            var exercise = exercises[i]; 
+            var exercise = exercises[3]; 
             SendExerciseConfiguration(exercise);
             
-             if(exercise == exercises[4]){
-                await Task.Delay(2500).ConfigureAwait(false);
- 
-            }
-            if(exercise == exercises[5]){
-                await Task.Delay(2500).ConfigureAwait(false);
-
-            }
             if(exercise == exercises[6]){
-                await Task.Delay(2000).ConfigureAwait(false);
+                await Task.Delay(2500).ConfigureAwait(false);
 
             }
             if(exercise == exercises[7]){
-                await Task.Delay(2500).ConfigureAwait(false);
-
-            }
-             if(exercise == exercises[8]){
-                await Task.Delay(2500).ConfigureAwait(false);
+                await Task.Delay(1000).ConfigureAwait(false);
 
             }
             if (exerciseDelays.TryGetValue(i, out int delay)) Thread.Sleep(delay);
@@ -414,9 +402,9 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                     outOfZoneTimeRight = DateTime.Now;
 
                 bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
-                                          ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 12);
+                                          ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 4);
                 bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
-                                           ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 12);
+                                           ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 4);
 
                 if (leftFootOutTooLong || rightFootOutTooLong)
                 {
@@ -470,7 +458,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
         DateTime outOfZoneTimeRight = DateTime.MinValue;
     if (exercise.RepetitionID == 1 || exercise.RepetitionID == 2)
     {
-        await Task.Delay(4000).ConfigureAwait(false);  // shows exercise text for 4 seconds so both client and HMD wait
+        await Task.Delay(3000).ConfigureAwait(false);  // shows exercise text for 3 seconds so both client and HMD wait
     }
     Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
     SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
@@ -555,9 +543,9 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                     }
 
                     bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
-                                              ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 12);
+                                              ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 4);
                     bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
-                                               ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 12);
+                                               ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 4);
                     if (leftFootOutTooLong || rightFootOutTooLong)
                     {
                         lostBalance = true;
@@ -815,8 +803,8 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
             Console.WriteLine("Starting HMD application...");
             try
             {
-                //  _hmdProcess = Process.Start(hmdpath);
-                //  Thread.Sleep(5000); // ATM UNNECESSARY
+                // _hmdProcess = Process.Start(hmdpath);
+                // Thread.Sleep(5000); // ATM UNNECESSARY
             }
             catch (Exception ex)
             {
