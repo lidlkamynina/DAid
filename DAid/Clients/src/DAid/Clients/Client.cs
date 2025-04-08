@@ -49,7 +49,7 @@ namespace DAid.Clients
         {
             Console.WriteLine("Client started. Enter commands: connect, calibrate, start, stop, hmd, gui, exit");
             OpenGUI(5555);
-            _bypassHMD = false; // Bypass HMD connection for now
+            _bypassHMD = true; // Bypass HMD connection for now
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -197,7 +197,7 @@ namespace DAid.Clients
             };
             Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 2000 }, { 3, 2000 }  };
             for (int i = 0; i < exercises.Count; i++) {
-            var exercise = exercises[3]; 
+            var exercise = exercises[i]; 
             SendExerciseConfiguration(exercise);
             
             if(exercise == exercises[6]){
@@ -628,7 +628,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                 (int, (double, double), (double, double), (double, double), (double, double)) phaseData;
                 if (exercise.RepetitionID == 5 && phaseIndex == 2)
                 {
-                    phaseData = (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 4.0));
+                    phaseData = (2, (-1.5, 1.5), (0.0, 5.5), (-2.0, 2.0), (0.0, 4.0));
                 }
                 else if (exercise.RepetitionID == 5 && phaseIndex == 3)
                 {
