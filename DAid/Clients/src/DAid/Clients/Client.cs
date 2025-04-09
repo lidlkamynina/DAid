@@ -197,7 +197,7 @@ namespace DAid.Clients
             };
             Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 2000 }, { 3, 2000 }  };
             for (int i = 0; i < exercises.Count; i++) {
-            var exercise = exercises[i]; 
+            var exercise = exercises[4]; 
             SendExerciseConfiguration(exercise);
             
             if(exercise == exercises[6]){
@@ -337,6 +337,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
         }
 
         var phase = exercise.ZoneSequence[phaseIndex];
+        _currentPhase = phaseIndex;
         Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
 
         DateTime phaseStartTime = DateTime.Now;
@@ -361,12 +362,15 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                 currentZoneLeft = Feedback(copXLeft, copYLeft,
                                            adjustedZonesLeft.greenZoneX, adjustedZonesLeft.greenZoneY,
                                            adjustedZonesLeft.redZoneX, adjustedZonesLeft.redZoneY);
+            //Console.WriteLine($"[Live Feedback]: Left Foot is in Zone {currentZoneLeft}");
             }
             else
             {
                 currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+                
             }
             currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
+            Console.WriteLine($"[Live Feedback]: Right Foot is in Zone {currentZoneRight}");
 
             if (currentZoneLeft != previousZoneLeft && currentZoneLeft > 0)
             {
@@ -628,11 +632,11 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                 (int, (double, double), (double, double), (double, double), (double, double)) phaseData;
                 if (exercise.RepetitionID == 5 && phaseIndex == 2)
                 {
-                    phaseData = (2, (-1.5, 1.5), (0.0, 5.5), (-2.0, 2.0), (0.0, 4.0));
+                    phaseData = (2, (-0.5, 1.5), (0.0, 3.0), (-2.0, 2.0), (0.0, 3.0));
                 }
                 else if (exercise.RepetitionID == 5 && phaseIndex == 3)
                 {
-                    phaseData = (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-4.0, 4.0));
+                    phaseData = (2, (-0.5, 0.5), (-2.0, 2.0), (-1.5, 1.5), (-5.0, 5.0));
                 }
                 else if (exercise.RepetitionID == 6 && phaseIndex == 2)
                 {
