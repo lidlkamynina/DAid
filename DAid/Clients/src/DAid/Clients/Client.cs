@@ -16,9 +16,9 @@ namespace DAid.Clients
     public class Client
     {
         string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
-        string guipath = "D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
-        string portFilePath = "D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt" 
-        string questip = "192.168.8.118"; // CHANGE AS NEEDED
+        string guipath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
+        string portFilePath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt" 
+        string questip = "192.168.8.118"; // CHANGE AS NEEDED 192.168.8.118
         private Process _hmdProcess;
         private readonly Server _server;
         private VisualizationWindow _visualizationWindow;
@@ -183,7 +183,7 @@ namespace DAid.Clients
             }
             _server.StartDataStream();
             OpenVisualizationWindow();
-            ConnectToHMD(questip, 9001);
+            ConnectToHMD(questip, 9002);
             SubscribeToDeviceUpdates();
             _isVisualizing = true;
 
@@ -195,17 +195,29 @@ namespace DAid.Clients
             { 2, new List<int> { 1, 2 } },  // Repeat 1 & 2 after 2
             { 8, new List<int> { 7, 8 } } // Repeat 7 & 8 after 8
             };
-            Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 2000 }, { 3, 2000 }  };
+            Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 3000 }, { 3, 2500 }  };
             for (int i = 0; i < exercises.Count; i++) {
-            var exercise = exercises[3]; 
+            var exercise = exercises[i]; 
             SendExerciseConfiguration(exercise);
-            
-            if(exercise == exercises[6]){
+            if(exercise == exercises[4]){ // lunge
+                await Task.Delay(1500).ConfigureAwait(false);
+
+            }
+            if(exercise == exercises[5]){ // side jumps
                 await Task.Delay(2500).ConfigureAwait(false);
 
             }
-            if(exercise == exercises[7]){
+            
+            if(exercise == exercises[6]){ // squats
+                await Task.Delay(2500).ConfigureAwait(false);
+
+            }
+            if(exercise == exercises[7]){ // squatsleft
                 await Task.Delay(1000).ConfigureAwait(false);
+
+            }
+            if(exercise == exercises[8]){ // box jumps
+                await Task.Delay(2000).ConfigureAwait(false);
 
             }
             if (exerciseDelays.TryGetValue(i, out int delay)) Thread.Sleep(delay);
@@ -309,7 +321,10 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
 {
     Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
     SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
-
+    if (exercise.RepetitionID > 2)
+    {
+        await Task.Delay(2000).ConfigureAwait(false);  // shows exercise text for 2 seconds so both client and HMD wait
+    }
     DateTime exerciseStartTime = DateTime.Now;
     int phase1Completed = 0; 
     int phaseRepeatCount = 0; 
@@ -320,6 +335,8 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
     DateTime outOfZoneTimeLeft = DateTime.MinValue;
     DateTime outOfZoneTimeRight = DateTime.MinValue;
 
+       
+    
     while ((DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
     {
         int phaseIndex = -1;
@@ -337,6 +354,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
         }
 
         var phase = exercise.ZoneSequence[phaseIndex];
+        _currentPhase = phaseIndex;
         Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
 
         DateTime phaseStartTime = DateTime.Now;
@@ -367,7 +385,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                 currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
             }
             currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-
+            Console.WriteLine($"[Live Feedback]: Right Foot is in Zone {currentZoneRight}");
             if (currentZoneLeft != previousZoneLeft && currentZoneLeft > 0)
             {
                 if (exercise.RepetitionID == 6 && phaseIndex == 2){
@@ -402,9 +420,9 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                     outOfZoneTimeRight = DateTime.Now;
 
                 bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
-                                          ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 4);
+                                          ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 50);
                 bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
-                                           ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 4);
+                                           ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 50);
 
                 if (leftFootOutTooLong || rightFootOutTooLong)
                 {
@@ -458,7 +476,11 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
         DateTime outOfZoneTimeRight = DateTime.MinValue;
     if (exercise.RepetitionID == 1 || exercise.RepetitionID == 2)
     {
-        await Task.Delay(3000).ConfigureAwait(false);  // shows exercise text for 3 seconds so both client and HMD wait
+        await Task.Delay(1940).ConfigureAwait(false);  // shows exercise text for 2 seconds so both client and HMD wait
+    }
+     if (exercise.RepetitionID > 2)
+    {
+        await Task.Delay(2000).ConfigureAwait(false);  // shows exercise text for 2 seconds so both client and HMD wait
     }
     Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
     SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
@@ -543,9 +565,9 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                     }
 
                     bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
-                                              ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 4);
+                                              ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 50);
                     bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
-                                               ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 4);
+                                               ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 50);
                     if (leftFootOutTooLong || rightFootOutTooLong)
                     {
                         lostBalance = true;
@@ -628,11 +650,11 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
                 (int, (double, double), (double, double), (double, double), (double, double)) phaseData;
                 if (exercise.RepetitionID == 5 && phaseIndex == 2)
                 {
-                    phaseData = (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 4.0));
+                    phaseData = (2, (-0.5, 1.5), (0.0, 3.0), (-2.0, 2.0), (0.0, 3.0));
                 }
                 else if (exercise.RepetitionID == 5 && phaseIndex == 3)
                 {
-                    phaseData = (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-4.0, 4.0));
+                    phaseData = (2, (-0.5, 0.5), (-2.0, 2.0), (-1.5, 1.5), (-5.0, 5.0));
                 }
                 else if (exercise.RepetitionID == 6 && phaseIndex == 2)
                 {
@@ -781,7 +803,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
             Console.Write("> ");
             string input = Console.ReadLine()?.Trim();
             if (input == "1")
-                ConnectToHMD(questip, 9001);
+                ConnectToHMD(questip, 9002);
             else if (input == "2")
                 DisconnectFromHMD();
         }
@@ -1001,7 +1023,7 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
             else if (response.ToLower() == "1")
             {
                 Console.WriteLine("[Client]: 1 command received from GUI.");
-                ConnectToHMD(questip, 9001);
+                ConnectToHMD(questip, 9002);
             }
             else if (response.ToLower() == "2")
             {
