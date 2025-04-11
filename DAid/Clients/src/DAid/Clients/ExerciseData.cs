@@ -68,7 +68,7 @@ public static class ExerciseList
             intro: 4,
             demo: 4,
             preparationCop: 3,
-            timingCop: 28,
+            timingCop: 28, // 28
             release: 3,
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
@@ -88,7 +88,7 @@ public static class ExerciseList
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                 (28, (0.5, -0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
+                 (28, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
             }
         ),
         new ExerciseData( 
@@ -123,7 +123,7 @@ public static class ExerciseList
             {
                 (2, (-1.0, 1.0), (-1.0, 1.0), (-1.5, 1.5), (-1.5, 1.5)),
                 (2, (-1.0, 1.0), (-1.0, 1.0), (-1.5, 1.5), (-1.5, 1.5)),
-                (1, (-1.0, 1.0), (0.2, 0.8), (-1.5, 1.5), (0.0, 1.0)), //not checking cop here, during jump
+                (1, (-1.0, 1.0), (-1.0, 0.8), (-1.5, 1.5), (-1.0, 1.0)), //not checking cop here, during jump
                 (1, (-1.0, 1.0), (0.2, 0.5), (-1.5, 1.5), (0.0, 1.0))
             }
         ),
@@ -134,12 +134,12 @@ public static class ExerciseList
             intro: 0,
             demo: 4,
             preparationCop: 3,
-            timingCop: 49,
+            timingCop: 48,
             release: 2,
             sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (1, (-0.5, 0.5), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
+                //(1, (-0.5, 0.5), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
                 (2, (-0.5, 0.5), (-2.0, 2.0), (-1.5, 1.5), (-5.0, 5.0)), //right leg,  left leg (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 6.0))
                 (2, (-0.5, 1.5), (0.0, 3.0), (-2.0, 2.0), (0.0, 3.0)), // right leg, left leg (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-5.0, 5.0))
                 (8, (-0.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0)) //no COP check
@@ -152,12 +152,12 @@ public static class ExerciseList
             intro: 0,
             demo: 4,
             preparationCop: 3,
-            timingCop: 29,
+            timingCop: 28,
             release: 2,
             sets: 2,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                (1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
+                //(1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
                 (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 4.0)), //right leg, 
                 (2, (-0.7, 0.7), (-4.0, 4.0), (-1.5, 1.5), (-4.0, 4.0)) // right leg,
             }
