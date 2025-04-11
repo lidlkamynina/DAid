@@ -88,7 +88,7 @@ public static class ExerciseList
             sets: 1,
             zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
             {
-                 (30, (0.5, -0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
+                 (30, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
             }
         ),
         new ExerciseData( 
@@ -123,7 +123,7 @@ public static class ExerciseList
             {
                 (2, (-1.0, 1.0), (-1.0, 1.0), (-1.5, 1.5), (-1.5, 1.5)),
                 (2, (-1.0, 1.0), (-1.0, 1.0), (-1.5, 1.5), (-1.5, 1.5)),
-                (1, (-1.0, 1.0), (0.2, 0.8), (-1.5, 1.5), (0.0, 1.0)), //not checking cop here, during jump
+                (1, (-1.0, 1.0), (-1.0, 0.8), (-1.5, 1.5), (-1.0, 1.0)), //not checking cop here, during jump
                 (1, (-1.0, 1.0), (0.2, 0.5), (-1.5, 1.5), (0.0, 1.0))
             }
         ),

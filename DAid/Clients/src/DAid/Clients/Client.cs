@@ -197,7 +197,7 @@ namespace DAid.Clients
             };
             Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 2000 }, { 3, 2000 }  };
             for (int i = 0; i < exercises.Count; i++) {
-            var exercise = exercises[5]; 
+            var exercise = exercises[i]; 
             SendExerciseConfiguration(exercise);
             
             if(exercise == exercises[6]){
@@ -233,9 +233,9 @@ namespace DAid.Clients
                 Console.WriteLine($"Starting set {set + 1} of exercise {exercise.RepetitionID}");
                 if (exercise.RepetitionID == 5 || exercise.RepetitionID == 6)
                 {
-                    await Run5and6Async(exercise).ConfigureAwait(false); //runs squats - walking lunges and lateral jumps in a separate method
+                    await Run5and6Async(exercise, set).ConfigureAwait(false); //runs squats - walking lunges and lateral jumps in a separate method
                 }else{           
-                    await RunExerciseAsync(exercise).ConfigureAwait(false); //the rest of the repetitions
+                    await RunExerciseAsync(exercise, set).ConfigureAwait(false); //the rest of the repetitions
                     }
                 }
             if (repeatSet.TryGetValue(exercise.RepetitionID, out var repeatExercises) && !completedExerciseSets.Contains(exercise.RepetitionID))
@@ -249,7 +249,7 @@ namespace DAid.Clients
                     {
                         await CheckPreparationCop(repeatExercise.PreparationCop,repeatExercise.LegsUsed);
                         SendExerciseConfiguration(repeatExercise);
-                        await RunExerciseAsync(repeatExercise).ConfigureAwait(false);
+                        await RunExerciseAsync(repeatExercise, 2).ConfigureAwait(false);
                     }
                 }
             }
@@ -305,7 +305,7 @@ namespace DAid.Clients
     }
 }
 
-private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exercises squats - walking lunges, lateral jumps
+private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and 5th exercises squats - walking lunges, lateral jumps
 {
     Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
     SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
@@ -440,13 +440,15 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
             phaseRepeatCount++;
         }
     }
-
-    Console.WriteLine("[Client]: Put leg down");
-    SendMessageToGUI("[Client]: Put leg down");
-    await Task.Delay(exercise.Release * 1000);
+         if (set == 1)
+        {
+            Console.WriteLine("[Client]: Put leg down");
+            SendMessageToGUI("[Client]: Put leg down");
+            await Task.Delay(exercise.Release * 1000);
+        }
 }
 
-        private async Task RunExerciseAsync(ExerciseData exercise)
+        private async Task RunExerciseAsync(ExerciseData exercise, int set)
 {
         DateTime outOfZoneTimeLeft = DateTime.MinValue;
         DateTime outOfZoneTimeRight = DateTime.MinValue;
@@ -585,13 +587,19 @@ private async Task Run5and6Async(ExerciseData exercise) // runs 4th and 5th exer
             phaseIndex++;
             if (phaseIndex >= exercise.ZoneSequence.Count)
             {
-                phaseIndex = 0; // Loop through multiple phases within 30 seconds
+                phaseIndex = 0; // Loop through multiple phases within length of the exercise
             }
         }
-        Console.WriteLine("[Client]: Put leg down");
-        SendMessageToGUI("[Client]: Put leg down");
-        await Task.Delay(exercise.Release * 1000);
-}
+        bool releaseEachSet = exercise.RepetitionID == 1 || exercise.RepetitionID == 2 ||exercise.RepetitionID == 7 || exercise.RepetitionID == 8 ; //release after each set
+        bool releaseFinalOnly = new[] { 3, 4, 9 }.Contains(exercise.RepetitionID); //release after 2nd set
+
+        if ((releaseEachSet && true) || (releaseFinalOnly && set == exercise.Sets - 1))
+        {
+            Console.WriteLine("[Client]: Put leg down");
+            SendMessageToGUI("[Client]: Put leg down");
+            await Task.Delay(exercise.Release * 1000);
+        }
+        }
 
 
         private int Feedback(double copX, double copY,  
