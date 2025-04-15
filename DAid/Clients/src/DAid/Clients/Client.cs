@@ -258,7 +258,7 @@ namespace DAid.Clients
         _isVisualizing = false;
     }
 
-    private async Task CheckPreparationCop(int duration, string activeLeg) {
+    private async Task CheckPreparationCop(double duration, string activeLeg) {
     Console.WriteLine($"[Preparation CoP]: Checking for {duration} sec (Active Leg: {activeLeg})...");
     DateTime startTime = DateTime.Now;
     while (true) 
@@ -342,7 +342,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
         {
             Console.WriteLine($"[Phase {phaseIndex + 1}]: No CoP check, waiting for {phase.Duration} seconds...");
             SendMessageToGUI($"[Phase {phaseIndex + 1}]: No CoP check, waiting...");
-            await Task.Delay(phase.Duration * 1000);
+            await Task.Delay((int)(phase.Duration * 1000));
             break;
         }
         while ((DateTime.Now - phaseStartTime).TotalSeconds < phase.Duration &&
@@ -476,7 +476,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
             Console.WriteLine($"[Phase {phaseIndex + 1}]: No CoP check, waiting for {phase.Duration} seconds...");
             SendMessageToGUI($"[Phase {phaseIndex + 1}]: No CoP check, waiting...");
 
-            await Task.Delay(phase.Duration * 1000);
+            await Task.Delay((int)(phase.Duration * 1000));
             phaseIndex++; // Move to the next phase
             continue;
         }
@@ -625,28 +625,28 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
     return 0 ;
 }
 
-                private (int duration, (double, double) greenZoneX, (double, double) greenZoneY, (double, double) redZoneX, (double, double) redZoneY) AddCopLeft(ExerciseData exercise, int phaseIndex)
+                private (double duration, (double, double) greenZoneX, (double, double) greenZoneY, (double, double) redZoneX, (double, double) redZoneY) AddCopLeft(ExerciseData exercise, int phaseIndex)
                 {
-                (int, (double, double), (double, double), (double, double), (double, double)) phaseData;
+                (double, (double, double), (double, double), (double, double), (double, double)) phaseData;
                 if (exercise.RepetitionID == 5 && phaseIndex == 1) //2
                 {
-                    phaseData = (2, (-0.5, 1.5), (0.0, 3.0), (-2.0, 2.0), (0.0, 3.0));
+                    phaseData = (2.0, (-0.5, 1.5), (0.0, 3.0), (-2.0, 2.0), (0.0, 3.0));
                 }
                 else if (exercise.RepetitionID == 5 && phaseIndex == 2) //3
                 {
-                    phaseData = (2, (-0.5, 0.5), (-2.0, 2.0), (-1.5, 1.5), (-5.0, 5.0));
+                    phaseData = (2.0, (-0.5, 0.5), (-2.0, 2.0), (-1.5, 1.5), (-5.0, 5.0));
                 }
                 else if (exercise.RepetitionID == 6 && phaseIndex == 1) //2
                 {
-                    phaseData = (2, (-1.0, 1.0), (0.2, 1.9), (-1.5, 1.5), (0.0, 4.0));
+                    phaseData = (2.0, (-1.0, 1.0), (0.2, 1.9), (-1.5, 1.5), (0.0, 4.0));
                 }
                 else if (exercise.RepetitionID == 6 && phaseIndex == 2) //3
                 {
-                    phaseData = (2, (-1.0, 1.0), (0.2, 1.9), (-1.5, 1.5), (0.0, 4.0));
+                    phaseData = (2.0, (-1.0, 1.0), (0.2, 1.9), (-1.5, 1.5), (0.0, 4.0));
                 }
                 else
                 {
-                    phaseData = (0, (0, 0), (0, 0), (0, 0), (0, 0));
+                    phaseData = (0.0, (0, 0), (0, 0), (0, 0), (0, 0));
                 }
                 return phaseData;
                 }

@@ -23,7 +23,7 @@ public class ExerciseData
                         int timingCop,
                         int release,
                         int sets,
-                        List<(int duration, (double, double) greenZoneX, (double, double) greenZoneY, (double, double) redZoneX, (double, double) redZoneY)> zoneSequence)
+                        List<(double duration, (double, double) greenZoneX, (double, double) greenZoneY, (double, double) redZoneX, (double, double) redZoneY)> zoneSequence)
     {
         RepetitionID = repetitionID;
         Name = name;
@@ -50,7 +50,7 @@ public class ExerciseData
 }
 public class ZoneSequenceItem
 {
-    public int Duration { get; set; }
+    public double Duration { get; set; }
     public (double, double) GreenZoneX { get; set; }
     public (double, double) GreenZoneY { get; set; }
     public (double, double) RedZoneX { get; set; }
@@ -71,9 +71,9 @@ public static class ExerciseList
             timingCop: 30,
             release: 3,
             sets: 1,
-            zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
+            zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
-                   (30, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
+                   (30.0, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
             }
         ),
         new ExerciseData( 
@@ -86,9 +86,9 @@ public static class ExerciseList
             timingCop: 30,
             release: 3,
             sets: 1,
-            zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
+            zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
-                 (30, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
+                 (30.0, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
             }
         ),
         new ExerciseData( 
@@ -101,12 +101,12 @@ public static class ExerciseList
             timingCop: 30,
             release: 2,
             sets: 2,
-            zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
+            zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
-                (3, (0.0, 1.0), (-1.0, 1.0), (-0.8, 1.2), (-1.5, 1.5)),
-                (1, (-1.0, 1.0), (-1.0, 1.0), (-1.5, 1.5), (-1.5, 1.5)),
-                (1, (0.5, 1.0), (1.0, 3.0), (-0.2, 1.5), (0.0, 4.0)),
-                (1, (-1.0, 1.0), (-1.0, 1.0), (-1.5, 1.5), (-1.5, 2.0))
+                (3.0, (0.0, 1.0), (-1.0, 1.0), (-0.8, 1.2), (-1.5, 1.5)),
+                (1.0, (-1.0, 1.0), (-1.0, 1.0), (-1.5, 1.5), (-1.5, 1.5)),
+                (1.0, (0.5, 1.0), (1.0, 3.0), (-0.2, 1.5), (0.0, 4.0)),
+                (1.0, (-1.0, 1.0), (-1.0, 1.0), (-1.5, 1.5), (-1.5, 2.0))
             }
         ),
          new ExerciseData( 
@@ -119,12 +119,12 @@ public static class ExerciseList
             timingCop: 30,
             release: 2,
             sets: 2,
-            zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
+            zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
-                (2, (-1.0, 1.0), (-1.0, 1.0), (-1.5, 1.5), (-1.5, 1.5)),
-                (2, (-1.0, 1.0), (-1.0, 1.0), (-1.5, 1.5), (-1.5, 1.5)),
-                (1, (-1.0, 1.0), (-1.0, 0.8), (-1.5, 1.5), (-1.0, 1.0)), //not checking cop here, during jump
-                (1, (-1.0, 1.0), (0.2, 0.5), (-1.5, 1.5), (0.0, 1.0))
+                (2.0, (-1.0, 1.0), (-1.0, 1.0), (-1.5, 1.5), (-1.5, 1.5)),
+                (2.0, (-1.0, 1.0), (-1.0, 1.0), (-1.5, 1.5), (-1.5, 1.5)),
+                (1.0, (-1.0, 1.0), (-1.0, 0.8), (-1.5, 1.5), (-1.0, 1.0)), //not checking cop here, during jump
+                (1.0, (-1.0, 1.0), (0.2, 0.5), (-1.5, 1.5), (0.0, 1.0))
             }
         ),
         new ExerciseData( 
@@ -137,12 +137,12 @@ public static class ExerciseList
             timingCop: 49, //48
             release: 2,
             sets: 2,
-            zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
+            zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
                 //(1, (-0.5, 0.5), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (2, (-0.5, 0.5), (-2.0, 2.0), (-1.5, 1.5), (-5.0, 5.0)), //right leg,  left leg (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 6.0))
-                (2, (-0.5, 1.5), (0.0, 3.0), (-2.0, 2.0), (0.0, 3.0)), // right leg, left leg (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-5.0, 5.0))
-                (8, (-0.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0)) //no COP check
+                (2.0, (-0.5, 0.5), (-2.0, 2.0), (-1.5, 1.5), (-5.0, 5.0)), //right leg,  left leg (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 6.0))
+                (2.0, (-0.5, 1.5), (0.0, 3.0), (-2.0, 2.0), (0.0, 3.0)), // right leg, left leg (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-5.0, 5.0))
+                (8.0, (-0.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0)) //no COP check
             }
         ),
         new ExerciseData( 
@@ -152,14 +152,14 @@ public static class ExerciseList
             intro: 1,
             demo: 3,
             preparationCop: 3,
-            timingCop: 29, //28
+            timingCop: 30,
             release: 2,
             sets: 2,
-            zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
+            zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
                 //(1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (2, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 4.0)), //right leg, 
-                (2, (-0.7, 0.7), (-4.0, 4.0), (-1.5, 1.5), (-4.0, 4.0)) // right leg,
+                (1.875, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 4.0)), //right leg, 
+                (1.875, (-0.7, 0.7), (-4.0, 4.0), (-1.5, 1.5), (-4.0, 4.0)) // right leg,
             }
         ),
         new ExerciseData( 
@@ -172,10 +172,10 @@ public static class ExerciseList
             timingCop: 50,
             release: 2,
             sets: 1,
-            zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
+            zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
-                (3, (-1.0, 0.8), (-1.5, 1.5), (-2.0, 1.2), (-3.0, 3.0)),
-                (2, (-0.8, 0.8), (-0.8, 0.8), (-1.5, 1.5), (-1.5, 1.5))
+                (3.0, (-1.0, 0.8), (-1.5, 1.5), (-2.0, 1.2), (-3.0, 3.0)),
+                (2.0, (-0.8, 0.8), (-0.8, 0.8), (-1.5, 1.5), (-1.5, 1.5))
             }
         ),
         new ExerciseData( 
@@ -188,10 +188,10 @@ public static class ExerciseList
             timingCop: 50,
             release: 2,
             sets: 1,
-            zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
+            zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
-                (3, (-1.0, 0.8), (-1.5, 1.5), (-2.0, 1.2), (-3.0, 3.0)),
-                (2, (-0.8, 0.8), (-0.8, 0.8), (-1.5, 1.5), (-1.5, 1.5))
+                (3.0, (-1.0, 0.8), (-1.5, 1.5), (-2.0, 1.2), (-3.0, 3.0)),
+                (2.0, (-0.8, 0.8), (-0.8, 0.8), (-1.5, 1.5), (-1.5, 1.5))
             }
         ),
     new ExerciseData( 
@@ -204,10 +204,10 @@ public static class ExerciseList
             timingCop: 30,
             release: 2,
             sets: 2,
-            zoneSequence: new List<(int, (double, double), (double, double), (double, double), (double, double))>
+            zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
-                (2, (-0.8, 0.8), (-0.8, 0.8), (-1.5, 1.5), (-1.5, 1.5)),
-                (28, (-1.5, 1.5), (-3.0, 3.0), (-2.0, 2.0), (-3.5, 3.5))
+                (2.0, (-0.8, 0.8), (-0.8, 0.8), (-1.5, 1.5), (-1.5, 1.5)),
+                (28.0, (-1.5, 1.5), (-3.0, 3.0), (-2.0, 2.0), (-3.5, 3.5))
             }
         )
     };
