@@ -68,7 +68,7 @@ public static class ExerciseList
             intro: 4,
             demo: 4,
             preparationCop: 3,
-            timingCop: 30, // 28
+            timingCop: 30, 
             release: 3,
             sets: 1,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
@@ -169,7 +169,7 @@ public static class ExerciseList
             intro: 0,
             demo: 5,
             preparationCop: 3,
-            timingCop: 5,
+            timingCop: 50,
             release: 2,
             sets: 1,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
@@ -185,7 +185,7 @@ public static class ExerciseList
             intro: 0,
             demo: 0,
             preparationCop: 3,
-            timingCop: 5,
+            timingCop: 50,
             release: 2,
             sets: 1,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>

@@ -18,7 +18,7 @@ namespace DAid.Clients
         string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
         string guipath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
         string portFilePath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt" 
-        string questip = "192.168.8.118"; // CHANGE AS NEEDED 192.168.8.118
+        string questip = "127.0.0.1"; // CHANGE AS NEEDED 192.168.8.118
         private Process _hmdProcess;
         private readonly Server _server;
         private VisualizationWindow _visualizationWindow;
@@ -196,7 +196,7 @@ namespace DAid.Clients
             { 8, new List<int> { 7, 8 } } // Repeat 7 & 8 after 8
             };
             Dictionary<int, int> exerciseDelays = new Dictionary<int, int> {{ 1, 1000 }, { 2, 3000 }, { 3, 2500 }  };
-            for (int i = 6; i < exercises.Count; i++) {
+            for (int i = 0; i < exercises.Count; i++) {
             var exercise = exercises[i]; 
             SendExerciseConfiguration(exercise);
             if(exercise == exercises[4]){ // lunge
@@ -227,12 +227,14 @@ namespace DAid.Clients
                     {
                     await Task.Delay(2000).ConfigureAwait(false);
                     Console.WriteLine($"[Intro]: Waiting {exercise.Intro} sec...");
+                    SendMessageToGUI($"[Intro]: Waiting {exercise.Intro} sec...");
                     await Task.Delay(exercise.Intro * 1000).ConfigureAwait(false);
                     }
 
                 if (exercise.Demo > 0)
                     {
                     Console.WriteLine($"[Demo]: Showing {exercise.Demo} sec...");
+                    SendMessageToGUI($"[Demo]: Showing {exercise.Demo} sec...");
                     await Task.Delay(exercise.Demo * 1000).ConfigureAwait(false);
                     }
             }
@@ -243,6 +245,7 @@ namespace DAid.Clients
                     await CheckPreparationCop(exercise.PreparationCop,exercise.LegsUsed);
                 }
                 Console.WriteLine($"Starting set {set + 1} of exercise {exercise.RepetitionID}");
+                SendMessageToGUI($"Starting set {set + 1} of exercise {exercise.RepetitionID}");
                 if (exercise.RepetitionID == 5 || exercise.RepetitionID == 6)
                 {
                     await Run5and6Async(exercise, set).ConfigureAwait(false); //runs squats - walking lunges and lateral jumps in a separate method
@@ -254,6 +257,7 @@ namespace DAid.Clients
             {
                 completedExerciseSets.Add(exercise.RepetitionID);
                 Console.WriteLine($"Repeating Exercises: {string.Join(", ", repeatExercises)}...");
+                SendMessageToGUI($"Repeating Exercises: {string.Join(", ", repeatExercises)}...");
                 foreach (var repeatID in repeatExercises)
                 {
                     var repeatExercise = exercises.FirstOrDefault(e => e.RepetitionID == repeatID);
@@ -267,11 +271,13 @@ namespace DAid.Clients
             }
         }
         Console.WriteLine("All exercises completed!");
+        SendMessageToGUI("All exercises completed!");
         _isVisualizing = false;
     }
 
     private async Task CheckPreparationCop(double duration, string activeLeg) { // int duration
     Console.WriteLine($"[Preparation CoP]: Checking for {duration} sec (Active Leg: {activeLeg})...");
+    SendMessageToGUI($"[Preparation CoP]: Checking for {duration} sec (Active Leg: {activeLeg})...");
     DateTime startTime = DateTime.Now;
     while (true) 
     {
@@ -305,6 +311,7 @@ namespace DAid.Clients
             if ((DateTime.Now - startTime).TotalSeconds >= duration)
             {
                 Console.WriteLine($"[Preparation CoP]: {activeLeg} foot correctly positioned for the required time.");
+                SendMessageToGUI($"[Preparation CoP]: {activeLeg} foot correctly positioned for the required time.");
                 return;
             }
         }
@@ -352,7 +359,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
         var phase = exercise.ZoneSequence[phaseIndex];
         _currentPhase = phaseIndex;
         Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
-
+        SendMessageToGUI($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
         DateTime phaseStartTime = DateTime.Now;
         lostBalance = false;
         int currentZoneLeft = -1, currentZoneRight = -1;
@@ -381,7 +388,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
                 currentZoneLeft = Feedback(copXLeft, copYLeft, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
             }
             currentZoneRight = Feedback(copXRight, copYRight, phase.GreenZoneX, phase.GreenZoneY, phase.RedZoneX, phase.RedZoneY);
-            Console.WriteLine($"[Live Feedback]: Right Foot is in Zone {currentZoneRight}");
+            //Console.WriteLine($"[Live Feedback]: Right Foot is in Zone {currentZoneRight}");
             if (currentZoneLeft != previousZoneLeft && currentZoneLeft > 0)
             {
                 if (exercise.RepetitionID == 6 && phaseIndex == 1){
@@ -437,6 +444,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
             if (previousZoneRight != 7) SendFeedback(7, "Right");
 
             Console.WriteLine("Pausing for 5 seconds before restarting...");
+            SendMessageToGUI("Pausing for 5 seconds before restarting...");
             await Task.Delay(5000).ConfigureAwait(false);
             
             phaseRepeatCount = 0;
@@ -449,6 +457,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
             lostBalance = false; // Reset flag
             exerciseStartTime = DateTime.Now;
             Console.WriteLine("Restarting exercise...");
+            SendMessageToGUI("Restarting exercise...");
             continue;
         }
         
@@ -489,6 +498,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
         {
             var phase = exercise.ZoneSequence[phaseIndex];
             Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
+            SendMessageToGUI($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
             DateTime phaseStartTime = DateTime.Now;
             bool lostBalance = false;
             int currentZoneLeft = 0, currentZoneRight = 0;
@@ -593,6 +603,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
                     }
                 }
                 Console.WriteLine("Pausing for 5 seconds before restarting...");
+                SendMessageToGUI("Pausing for 5 seconds before restarting...");
                 await Task.Delay(5000).ConfigureAwait(false);
                 phaseIndex = 0;
                 previousZoneLeft = -1;
@@ -604,6 +615,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
                 lostBalance = false; // Reset flag
                 exerciseStartTime = DateTime.Now;
                 Console.WriteLine("Restarting exercise...");
+                SendMessageToGUI("Restarting exercise...");
                 continue;
             }
             phaseIndex++;
@@ -675,6 +687,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
         private void SendFeedback(int feedbackCode, string foot)
         {
             Console.WriteLine($"[Feedback]: Received feedback code for {foot} foot: {feedbackCode}");
+            SendMessageToGUI($"[Feedback]: Received feedback code for {foot} foot: {feedbackCode}");
             var feedbackMessage = new FeedbackMessage
             {
                 MessageType = "Feedback",
@@ -688,6 +701,8 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
         private void SendExerciseConfiguration(ExerciseData exercise)
         {
             Console.WriteLine($"[Feedback]: Sending exercise configuration for exercise {exercise.RepetitionID}");
+            SendMessageToGUI($"[Feedback]: Sending exercise configuration for exercise {exercise.RepetitionID}");
+            
             var configMessage = new ExerciseConfigMessage
             {
                 MessageType = "ExerciseConfig",
@@ -710,14 +725,17 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
             if (!_isVisualizing)
             {
                 Console.WriteLine("[Client]: Visualization is not running.");
+                SendMessageToGUI("[Client]: Visualization is not running.");
                 return;
             }
             Console.WriteLine("[Client]: Stopping visualization and data streams...");
+            SendMessageToGUI("[Client]: Stopping visualization and data streams...");
             _server.StopDataStream();
             CloseVisualizationWindow();
             _isVisualizing = false;
             CloseHMD();
             Console.WriteLine("[Client]: Visualization and data streams stopped.");
+            SendMessageToGUI("[Client]: Visualization and data streams stopped.");
         }
 
         private void SubscribeToDeviceUpdates()
@@ -726,6 +744,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
             if (!activeDevices.Any())
             {
                 Console.WriteLine("[Client]: No active devices to subscribe to.");
+                SendMessageToGUI("[Client]: No active devices to subscribe to.");
                 return;
             }
             foreach (var device in activeDevices)
@@ -744,6 +763,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
          if ((_currentExercise?.RepetitionID == 5 || _currentExercise?.RepetitionID == 6) && _currentPhase == 4)
         {
             Console.WriteLine($"[Client]: Skipping CoP check for Exercise {_currentExercise.RepetitionID}, Phase 4.");
+            SendMessageToGUI($"[Client]: Skipping CoP check for Exercise {_currentExercise.RepetitionID}, Phase 4.");
             return; 
         }
         if (device.IsLeftSock)
@@ -825,6 +845,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
         if (hmdProcesses.Length == 0)
         {
             Console.WriteLine("Starting HMD application...");
+            SendMessageToGUI("Starting HMD application...");
             try
             {
                 // _hmdProcess = Process.Start(hmdpath);
@@ -871,16 +892,20 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
                 _hmdStream = _hmdClient.GetStream();
                 
                 Console.WriteLine("HMD Connected.");
+                SendMessageToGUI("HMD Connected.");
+                
                 return; // Connection successful
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Connection attempt {i + 1} failed: {ex.Message}. Retrying...");
+                SendMessageToGUI($"Connection attempt {i + 1} failed: {ex.Message}. Retrying...");
                 Thread.Sleep(delay);
             }
         }
 
         Console.WriteLine("Failed to connect to HMD after multiple attempts.");
+        SendMessageToGUI("Failed to connect to HMD after multiple attempts.");
     }
     catch (Exception ex)
     {
@@ -899,6 +924,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
             _hmdStream = null;
             _hmdClient = null;
             Console.WriteLine("HMD Disconnected.");
+            SendMessageToGUI("HMD Disconnected.");
         }
 
         private void CloseHMD()
