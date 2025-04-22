@@ -36,7 +36,7 @@ ModelImporter:
       name: ex6core
       takeName: 760476
       internalID: -5460603188453374159
-      firstFrame: 0
+      firstFrame: 5
       lastFrame: 150
       wrapMode: 0
       orientationOffsetY: 0
@@ -45,7 +45,7 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 0
+      loopBlend: 1
       loopBlendOrientation: 1
       loopBlendPositionY: 1
       loopBlendPositionXZ: 1

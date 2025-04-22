@@ -94,6 +94,12 @@ public class audioManager : MonoBehaviour
     public AudioClip Exercise8Step4;
     [Tooltip("Voice clip for exercise 8 - Pa kreisi")]
     public AudioClip Exercise8Step5;
+    [Tooltip("Voice clip for exercise 8 - Diagonâli labi")]
+    public AudioClip Exercise8Step6;
+    [Tooltip("Voice clip for exercise 8 - Diagonâli kreisi")]
+    public AudioClip Exercise8Step7;
+
+    public AudioClip StartExercise;
 
     [Header("Switch Leg Audio Clips (Default)")]
     [Tooltip("Default audio clip for switching to left leg.")]
@@ -132,6 +138,11 @@ public class audioManager : MonoBehaviour
     {
         // Plays the default intro clip.
         PlayClip(Intro, stopPrevious: false);
+    }
+    public void PlayStartExercise()
+    {
+        // Plays the default intro clip.
+        PlayClip(StartExercise, stopPrevious: false);
     }
 
     /// <summary>
@@ -395,6 +406,14 @@ public class audioManager : MonoBehaviour
     public void PlayExercise8Step5()
     {
         PlayClip(Exercise8Step5, stopPrevious: false);
+    }
+    public void PlayExercise8Step6()
+    {
+        PlayClip(Exercise8Step6, stopPrevious: false);
+    }
+    public void PlayExercise8Step7()
+    {
+        PlayClip(Exercise8Step7, stopPrevious: false);
     }
 
 

@@ -70,7 +70,7 @@ public class HMDDataReceiver : MonoBehaviour
                 string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                 Debug.Log($"Saòemtais JSON: {receivedData}");
 
-                // Append the received data to our persistent buffer.
+                // Append the received data to persistent buffer.
                 incomingBuffer += receivedData;
 
                 // Process complete JSON objects from the buffer.
@@ -99,7 +99,7 @@ public class HMDDataReceiver : MonoBehaviour
                             braceCount--;
                         }
 
-                        // When the brace count returns to zero, we have a complete JSON object.
+                        // When the brace count returns to zero, it is a completed JSON object.
                         if (braceCount == 0)
                         {
                             endIndex = i;
@@ -107,7 +107,7 @@ public class HMDDataReceiver : MonoBehaviour
                         }
                     }
 
-                    // If we didn't find a complete JSON object, wait for more data.
+                    // If cant find a complete JSON object, wait for more data.
                     if (endIndex == -1)
                     {
                         break;
@@ -174,7 +174,7 @@ public class HMDDataReceiver : MonoBehaviour
             // Get the new client connection.
             TcpClient newClient = _listener.EndAcceptTcpClient(result);
 
-            // If there's already an active connection, disconnect it.
+            // If theres already an active connection, disconnect it.
             if (_client != null)
             {
                 Debug.LogWarning("Already connected to a client, disconnecting the old connection and accepting new one.");
@@ -379,7 +379,7 @@ public class HMDDataReceiver : MonoBehaviour
     [Serializable]
     public class ZoneSequenceItem
     {
-        public int Duration;
+        public double Duration;
         public Vector2 GreenZoneX;
         public Vector2 GreenZoneY;
         public Vector2 RedZoneX;
