@@ -10,6 +10,9 @@ using System.Text;
 
 namespace DAid.Servers
 {
+    /// <summary>
+    /// Represents a physical sensor device, managing sensor data streams, logging, and calibration processes.
+    /// </summary>
     public sealed class Device
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -23,21 +26,57 @@ namespace DAid.Servers
         private CancellationTokenSource loggingCancellationTokenSource; 
 
         private bool isLogging; 
-
+        /// <summary>
+        /// Occurs when raw data is received from the sensor.
+        /// </summary>
         public event EventHandler<string> RawDataReceived;
+        /// <summary>
+        /// Occurs when Center of Pressure (CoP) data is updated.
+        /// Provides device name, X and Y coordinates, and sensor pressures.
+        /// </summary>
         public event EventHandler<(string DeviceName, double CoPX, double CoPY, double[] Pressures)> CoPUpdated;
-
+        
+        /// <summary>
+        /// Gets a value indicating whether the device is currently connected.
+        /// </summary>
         public bool IsConnected { get; private set; }
+        
+        /// <summary>
+        /// Gets the module name of the sensor device.
+        /// </summary>
         public string ModuleName { get; private set; } = "Unknown";
+        
+        /// <summary>
+        /// Indicates whether this device is associated with the left sock.
+        /// </summary>
         public bool IsLeftSock { get; private set; } = false;
-
+        
+        /// <summary>
+        /// Indicates whether the device is currently streaming data.
+        /// </summary>
         public bool IsStreaming { get; private set; } // Tracks streaming state
-        public string Path => path;                  // COM port path
+        
+        /// <summary>
+        /// Gets the COM port path associated with the device.
+        /// </summary>
+        public string Path => path; 
+        /// <summary>
+        /// Gets the frequency at which the sensor streams data.
+        /// </summary>
         public float Frequency { get; private set; }
+
+        /// <summary>
+        /// Gets the name identifier for the device.
+        /// </summary>
         public string Name { get; private set; }     // Device name for identification
 
         public SensorAdapter SensorAdapter => sensorAdapter;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Device"/> class with specified port, frequency, and name.
+        /// </summary>
+        /// <param name="path">COM port path.</param>
+        /// <param name="frequency">Data stream frequency.</param>
+        /// <param name="name">Device identification name.</param>
         public Device(string path, float frequency, string name)
         {
             this.path = path ?? throw new ArgumentNullException(nameof(path));
@@ -49,7 +88,9 @@ namespace DAid.Servers
             IsLeftSock = false;     // Default to right sock until determined
             InitializeSensorAdapter();
         }
-
+        /// <summary>
+        /// Initializes the SensorAdapter and subscribes to sensor events.
+        /// </summary>
         private void InitializeSensorAdapter()
         {
             sensorAdapter = new SensorAdapter(Name);
@@ -65,7 +106,9 @@ namespace DAid.Servers
                 logger.Info($"Device {ModuleName} updated: IsLeftSock={IsLeftSock}");
             };
         }
-
+        /// <summary>
+        /// Establishes connection to the sensor device.
+        /// </summary>
         public void Connect()
         {
             lock (_syncLock)
@@ -80,7 +123,7 @@ namespace DAid.Servers
                     sensorAdapter.RetrieveModuleName();
                     while (!sensorAdapter.moduleNameRetrieved)
                     {
-                        Thread.Sleep(500); // Wait for retrieval
+                        Thread.Sleep(500); 
                     }
                     ModuleName = sensorAdapter.ModuleName;
                     IsLeftSock = int.TryParse(ModuleName, out int moduleNumber) && moduleNumber % 2 != 0;
@@ -95,7 +138,9 @@ namespace DAid.Servers
                 }
             }
         }
-
+        /// <summary>
+        /// Starts data streaming and logging from the sensor device.
+        /// </summary>
         public void Start()
         {
             lock (_syncLock)
@@ -151,7 +196,10 @@ namespace DAid.Servers
                 }
             }
         }
-
+        /// <summary>
+        /// Initiates calibration procedure for the device.
+        /// </summary>
+        /// <param name="isLeftSock">True if calibrating a left sock, false otherwise.</param>
         public bool Calibrate(bool isLeftSock)
         {
             try
@@ -172,11 +220,14 @@ namespace DAid.Servers
                 return false;
             }
         }
-
+        /// <summary>
+        /// Starts asynchronous logging of sensor data into a CSV log file.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token to terminate logging.</param>
 private void StartLogging(CancellationToken cancellationToken)
 { 
     string logFilePath;
-        string activeLogFile = IsLeftSock ? "ActiveLogFile_Left.txt" : "ActiveLogFile_Right.txt"; // Pick correct file
+        string activeLogFile = IsLeftSock ? "ActiveLogFile_Left.txt" : "ActiveLogFile_Right.txt";
 
     try
     {
@@ -318,8 +369,7 @@ private void StartLogging(CancellationToken cancellationToken)
         {
             if (!IsStreaming) return;
 
-            // Add a timestamp to the raw data
-            string timestamp = DateTime.Now.ToString("o", CultureInfo.InvariantCulture); // ISO 8601 format
+            string timestamp = DateTime.Now.ToString("o", CultureInfo.InvariantCulture); 
             logQueue.Enqueue($"{timestamp},{rawData}");
 
             // Trigger RawDataReceived event for this device
@@ -340,7 +390,10 @@ private void StartLogging(CancellationToken cancellationToken)
                 Console.WriteLine("[Device]: CoP update received from an unknown source.");
             }
         }
-
+        /// <summary>
+        /// Retrieves the latest sensor pressure values.
+        /// </summary>
+        /// <returns>An array of sensor pressure values.</returns>
         public double[] GetSensorPressures()
         {
             if (!IsConnected || !IsStreaming)
