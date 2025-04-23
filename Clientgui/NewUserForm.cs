@@ -44,8 +44,8 @@ namespace ClientGUI
                 !string.IsNullOrWhiteSpace(textBoxHeight.Text) &&
                 !string.IsNullOrWhiteSpace(textBoxShoeSize.Text) &&
                 comboBoxLeg.SelectedIndex != -1 &&
-                comboBoxPosition.SelectedIndex != -1 &&
-                !string.IsNullOrWhiteSpace(textBoxInjury.Text);
+                comboBoxPosition.SelectedIndex != -1;
+
 
             btnSave.Enabled = allFilled;
         }

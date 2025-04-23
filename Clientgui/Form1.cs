@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -30,7 +31,7 @@ namespace ClientGUI
         public Form1()
         {
             InitializeComponent();
-
+            this.Icon = new Icon(Path.Combine(Application.StartupPath, "GuiLogo.ico"));
             // Initially hide the connect button and status label; they will show only after a user has been selected.
             connectButton.Visible = false;
             statusLabel.Visible = false;
@@ -55,7 +56,7 @@ namespace ClientGUI
                 Text = "Jauns lietotājs",
                 Width = 150,
                 Height = 30,
-                Margin = new Padding(5),
+                Margin = new Padding(10),
                 BackColor = System.Drawing.Color.LightBlue
             };
             newUserButton.Click += newUserButton_Click;
@@ -67,7 +68,7 @@ namespace ClientGUI
                 Text = "Turpināt ar esošu lietotāju",
                 Width = 200,
                 Height = 30,
-                Margin = new Padding(5),
+                Margin = new Padding(10),
                 BackColor = System.Drawing.Color.LightGreen
             };
             contButton.Click += continueButton_Click;
@@ -101,7 +102,7 @@ namespace ClientGUI
 
             Label selectLabel = new Label
             {
-                Text = "Select User:",
+                Text = "Izvēlēties lietotāju:",
                 AutoSize = true,
                 Margin = new Padding(5)
             };
@@ -198,7 +199,10 @@ namespace ClientGUI
             {
                 try
                 {
+                    
+
                     _server = new TcpListener(IPAddress.Loopback, 5555);
+                    //_server.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true); // new stuff
                     _server.Start();
                     AppendText("GUI Server started. Waiting for Client...");
 
@@ -376,7 +380,7 @@ namespace ClientGUI
                 Text = "Calibrate",
                 Width = 150,
                 Height = 40,
-                Margin = new Padding(5),
+                Margin = new Padding(10),
                 BackColor = System.Drawing.Color.LightGreen
             };
 
@@ -402,7 +406,7 @@ namespace ClientGUI
                     Text = "Start",
                     Width = 150,
                     Height = 40,
-                    Margin = new Padding(5),
+                    Margin = new Padding(10),
                     BackColor = System.Drawing.Color.LightGreen
                 };
 
@@ -418,7 +422,7 @@ namespace ClientGUI
                     Text = "Stop",
                     Width = 150,
                     Height = 40,
-                    Margin = new Padding(5),
+                    Margin = new Padding(10),
                     BackColor = System.Drawing.Color.IndianRed
                 };
 
@@ -433,8 +437,8 @@ namespace ClientGUI
                     Text = "Exit",
                     Width = 150,
                     Height = 40,
-                    Margin = new Padding(5),
-                    BackColor = System.Drawing.Color.DarkRed
+                    Margin = new Padding(10),
+                    BackColor = System.Drawing.Color.IndianRed
                 };
 
                 exitButton.Click += (sender, e) =>
@@ -575,5 +579,7 @@ namespace ClientGUI
                 AppendText($"Error while waiting for client response: {ex.Message}");
             }
         }
+
+       
     }
 }
