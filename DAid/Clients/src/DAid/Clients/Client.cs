@@ -40,6 +40,8 @@ namespace DAid.Clients
         private TcpClient _guiClient;
         private NetworkStream _guiStream;
         private int currentExerciseID = 0;
+
+        private CancellationTokenSource _exerciseCancellationTokenSource;
         public Client(Server server)
         {
             _server = server ?? throw new ArgumentNullException(nameof(server));
@@ -76,7 +78,7 @@ namespace DAid.Clients
                             HandleCalibrateCommand();
                             break;
                         case "start":
-                            await HandleStartCommand();
+                            _ = Task.Run(() => HandleStartCommand()); 
                             break;
                         case "stop":
                             HandleStopCommand();
@@ -99,6 +101,7 @@ namespace DAid.Clients
         private void HandleExitCommand()
         {
             Console.WriteLine("Stopping client...");
+            _exerciseCancellationTokenSource?.Cancel();
             _server.Stop();
             CloseHMD();
             DisconnectFromHMD();
@@ -151,24 +154,38 @@ namespace DAid.Clients
             Console.WriteLine($"[Client]: File '{filePath}' detected.");
         }
         private void HandleCalibrateCommand()
-        {
-            if (_isCalibrated)
-            {
-                Console.WriteLine("Sensors are already calibrated. Use 'start' to begin visualization.");
-                SendMessageToGUI("Sensors are already calibrated. Use 'start' to begin visualization.");
-                return;
-            }
-            Console.WriteLine("Requesting server to calibrate connected devices...");
-            SendMessageToGUI("Requesting server to calibrate connected devices...");
-            Console.WriteLine("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
-            SendMessageToGUI("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
-            
-            _server.HandleCalibrateCommand();
-            _isCalibrated = true;
-            Console.WriteLine("Calibration completed. Use 'start' to begin visualization.");
-        }
+ {
+     if (_isCalibrated)
+     {
+         Console.WriteLine("Sensors are already calibrated. Use 'start' to begin visualization.");
+         SendMessageToGUI("Sensors are already calibrated. Use 'start' to begin visualization.");
+         return;
+     }
+ 
+     Console.WriteLine("Requesting server to calibrate connected devices...");
+     SendMessageToGUI("Requesting server to calibrate connected devices...");
+ 
+     Console.WriteLine("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
+     SendMessageToGUI("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
+ 
+     _ = Task.Run(async () =>
+     {
+         await Task.Delay(10000); 
+         Console.WriteLine("[Calibration]: Repeat. Second foot calibration starts now.");
+         SendMessageToGUI("[Calibration]: Repeat. Second foot calibration starts now.");
+     });
+ 
+     _server.HandleCalibrateCommand(); 
+     _isCalibrated = true;
+ 
+     Console.WriteLine("Calibration completed. Use 'start' to begin visualization.");
+     SendMessageToGUI("Calibration completed. Use 'start' to begin visualization.");
+ }
         private async Task HandleStartCommand()
         {
+            _exerciseCancellationTokenSource = new CancellationTokenSource();
+             CancellationToken exerciseToken = _exerciseCancellationTokenSource.Token;
+
             if (!_isCalibrated)
             {
                 Console.WriteLine("Calibration is required before starting visualization. Use 'calibrate' first.");
@@ -183,7 +200,7 @@ namespace DAid.Clients
             }
             _server.StartDataStream();
             OpenVisualizationWindow();
-            ConnectToHMD(questip, 9002);
+            ConnectToHMD(questip, 9003);
             SubscribeToDeviceUpdates();
             _isVisualizing = true;
 
@@ -242,15 +259,15 @@ namespace DAid.Clients
                 {
                 if (exercise.PreparationCop > 0)
                 {
-                    await CheckPreparationCop(exercise.PreparationCop,exercise.LegsUsed);
+                    await CheckPreparationCop(exercise.PreparationCop,exercise.LegsUsed, exerciseToken);
                 }
                 Console.WriteLine($"Starting set {set + 1} of exercise {exercise.RepetitionID}");
                 SendMessageToGUI($"Starting set {set + 1} of exercise {exercise.RepetitionID}");
                 if (exercise.RepetitionID == 5 || exercise.RepetitionID == 6)
                 {
-                    await Run5and6Async(exercise, set).ConfigureAwait(false); //runs squats - walking lunges and lateral jumps in a separate method
+                    await Run5and6Async(exercise, set, exerciseToken).ConfigureAwait(false); //runs squats - walking lunges and lateral jumps in a separate method
                 }else{           
-                    await RunExerciseAsync(exercise, set).ConfigureAwait(false); //the rest of the repetitions
+                    await RunExerciseAsync(exercise, set, exerciseToken).ConfigureAwait(false); //the rest of the repetitions
                     }
                 }
             if (repeatSet.TryGetValue(exercise.RepetitionID, out var repeatExercises) && !completedExerciseSets.Contains(exercise.RepetitionID))
@@ -263,19 +280,19 @@ namespace DAid.Clients
                     var repeatExercise = exercises.FirstOrDefault(e => e.RepetitionID == repeatID);
                     if (repeatExercise != null)
                     {
-                        await CheckPreparationCop(repeatExercise.PreparationCop,repeatExercise.LegsUsed);
+                        await CheckPreparationCop(repeatExercise.PreparationCop,repeatExercise.LegsUsed, exerciseToken);
                         SendExerciseConfiguration(repeatExercise);
-                        await RunExerciseAsync(repeatExercise, 2).ConfigureAwait(false);
+                        await RunExerciseAsync(repeatExercise, 2, exerciseToken).ConfigureAwait(false);
                     }
                 }
             }
         }
         Console.WriteLine("All exercises completed!");
-        SendMessageToGUI("All exercises completed!");
+        //SendMessageToGUI("All exercises completed!");
         _isVisualizing = false;
     }
 
-    private async Task CheckPreparationCop(double duration, string activeLeg) { // int duration
+    private async Task CheckPreparationCop(double duration, string activeLeg, CancellationToken token) { // int duration
     Console.WriteLine($"[Preparation CoP]: Checking for {duration} sec (Active Leg: {activeLeg})...");
     SendMessageToGUI($"[Preparation CoP]: Checking for {duration} sec (Active Leg: {activeLeg})...");
     DateTime startTime = DateTime.Now;
@@ -317,14 +334,19 @@ namespace DAid.Clients
         }
         else
         {
+             if (activeLeg == "Left") SendFeedback(8, "Left");
+             else SendFeedback(8, "Right");
+             Console.WriteLine("Restarting preperation...");
+             SendMessageToGUI("Restarting preperation...");
             startTime = DateTime.Now; 
+            
         }
-
+        if (token.IsCancellationRequested) return;
         await Task.Delay(1000).ConfigureAwait(false); 
     }
 }
 
-private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and 5th exercises squats - walking lunges, lateral jumps
+private async Task Run5and6Async(ExerciseData exercise, int set, CancellationToken token) // runs 4th and 5th exercises squats - walking lunges, lateral jumps
 {
     Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
     SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
@@ -346,6 +368,11 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
     
     while ((DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
     {
+         if (token.IsCancellationRequested)
+         {
+             Console.WriteLine("[Exercise]: Stopped by user.");
+             return;
+         }
         int phaseIndex = -1;
         if (phaseRepeatCount < 20)
         {
@@ -475,7 +502,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
          }
 }
 
-        private async Task RunExerciseAsync(ExerciseData exercise, int set)
+        private async Task RunExerciseAsync(ExerciseData exercise, int set, CancellationToken token)
 {
         DateTime outOfZoneTimeLeft = DateTime.MinValue;
         DateTime outOfZoneTimeRight = DateTime.MinValue;
@@ -496,6 +523,11 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
 
         while ((DateTime.Now - exerciseStartTime).TotalSeconds < exercise.TimingCop)
         {
+             if (token.IsCancellationRequested)
+         {
+             Console.WriteLine("[Exercise]: Cancelled by user.");
+             return;
+         }
             var phase = exercise.ZoneSequence[phaseIndex];
             Console.WriteLine($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
             SendMessageToGUI($"[Phase {phaseIndex + 1}]: {phase.Duration} sec");
@@ -730,6 +762,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
             }
             Console.WriteLine("[Client]: Stopping visualization and data streams...");
             SendMessageToGUI("[Client]: Stopping visualization and data streams...");
+            _exerciseCancellationTokenSource?.Cancel();
             _server.StopDataStream();
             CloseVisualizationWindow();
             _isVisualizing = false;
@@ -825,7 +858,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
             Console.Write("> ");
             string input = Console.ReadLine()?.Trim();
             if (input == "1")
-                ConnectToHMD(questip, 9002);
+                ConnectToHMD(questip, 9003);
             else if (input == "2")
                 DisconnectFromHMD();
         }
@@ -1036,7 +1069,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
             else if (response.ToLower() == "start")
             {
                 Console.WriteLine("[Client]: Start command received from GUI.");
-                await HandleStartCommand();
+                _ = Task.Run(() => HandleStartCommand());
             }
             else if (response.ToLower() == "stop")
             {
@@ -1051,7 +1084,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set) // runs 4th and
             else if (response.ToLower() == "1")
             {
                 Console.WriteLine("[Client]: 1 command received from GUI.");
-                ConnectToHMD(questip, 9002);
+                ConnectToHMD(questip, 9003);
             }
             else if (response.ToLower() == "2")
             {
