@@ -337,6 +337,7 @@ namespace DAid.Clients
         {
             if (activeLeg == "Left") SendFeedback(8, "Left");
             else SendFeedback(8, "Right");
+            await Task.Delay(1000, token).ConfigureAwait(false);
             Console.WriteLine("Restarting exercise...");
             SendMessageToGUI("Restarting exercise...");
             startTime = DateTime.Now; 
