@@ -157,8 +157,10 @@ namespace DAid.Clients
  {
      if (_isCalibrated)
      {
-         Console.WriteLine("Sensors are already calibrated. Use 'start' to begin visualization.");
-         SendMessageToGUI("Sensors are already calibrated. Use 'start' to begin visualization.");
+         Console.WriteLine("Sensors are already calibrated.");
+         Console.WriteLine("Use 'start' to begin visualization.");
+         SendMessageToGUI("Sensors are already calibrated.");
+         SendMessageToGUI("Use 'start' to begin visualization.");
          return;
      }
  
@@ -178,8 +180,10 @@ namespace DAid.Clients
      _server.HandleCalibrateCommand(); 
      _isCalibrated = true;
  
-     Console.WriteLine("Calibration completed. Use 'start' to begin visualization.");
-     SendMessageToGUI("Calibration completed. Use 'start' to begin visualization.");
+     Console.WriteLine("Calibration completed.");
+     Console.WriteLine("Use 'start' to begin visualization.");
+     SendMessageToGUI("Calibration completed.");
+     SendMessageToGUI("Use 'start' to begin visualization.");
  }
         private async Task HandleStartCommand()
         {
@@ -292,11 +296,15 @@ namespace DAid.Clients
         _isVisualizing = false;
     }
 
-    private async Task CheckPreparationCop(double duration, string activeLeg, CancellationToken token) { // int duration
+     private async Task CheckPreparationCop(double duration, string activeLeg, CancellationToken token)
+{
     Console.WriteLine($"[Preparation CoP]: Checking for {duration} sec (Active Leg: {activeLeg})...");
     SendMessageToGUI($"[Preparation CoP]: Checking for {duration} sec (Active Leg: {activeLeg})...");
+
     DateTime startTime = DateTime.Now;
-    while (true) 
+    bool restarted = false;
+
+    while (true)
     {
         bool isFootValid = false;
         (double Min, double Max) copRangeX = (-2.0, 2.0);
@@ -315,7 +323,7 @@ namespace DAid.Clients
             isFootValid = copXRight >= copRangeX.Min && copXRight <= copRangeX.Max &&
                           copYRight >= copRangeY.Min && copYRight <= copRangeY.Max;
         }
-        else if (activeLeg == "both") 
+        else if (activeLeg == "both")
         {
             isFootValid = (copXLeft >= copRangeX.Min && copXLeft <= copRangeX.Max &&
                            copYLeft >= copRangeY.Min && copYLeft <= copRangeY.Max) &&
@@ -329,22 +337,29 @@ namespace DAid.Clients
             {
                 Console.WriteLine($"[Preparation CoP]: {activeLeg} foot correctly positioned for the required time.");
                 SendMessageToGUI($"[Preparation CoP]: {activeLeg} foot correctly positioned for the required time.");
+
+                if (restarted) await Task.Delay(1000, token).ConfigureAwait(false);
                 return;
             }
         }
         else
         {
-             if (activeLeg == "Left") SendFeedback(8, "Left");
-             else SendFeedback(8, "Right");
-             Console.WriteLine("Restarting preperation...");
-             SendMessageToGUI("Restarting preperation...");
-            startTime = DateTime.Now; 
-            
+            if (activeLeg == "left") SendFeedback(8, "Left");
+            else SendFeedback(8, "Right");
+
+            Console.WriteLine("[Preparation CoP]: Failed. Restarting...");
+            SendMessageToGUI("[Preparation CoP]: Failed. Restarting...");
+            restarted = true;
+            startTime = DateTime.Now;
         }
-        if (token.IsCancellationRequested) return;
-        await Task.Delay(1000).ConfigureAwait(false); 
+
+        if (token.IsCancellationRequested)
+            return;
+
+        await Task.Delay(1000, token).ConfigureAwait(false); // Normal check interval
     }
 }
+
 
 private async Task Run5and6Async(ExerciseData exercise, int set, CancellationToken token) // runs 4th and 5th exercises squats - walking lunges, lateral jumps
 {
