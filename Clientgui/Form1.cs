@@ -24,7 +24,7 @@ namespace ClientGUI
         private string selectedUserConfig = "";
         private Dictionary<string, string> userConfigDict = new Dictionary<string, string>();
 
-
+        private bool _portsParsed = false;
         // File name for storing users.
         private string usersFilePath = Path.Combine(Application.StartupPath, "users.txt");
 
@@ -241,16 +241,17 @@ namespace ClientGUI
                     string message = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
                     AppendText($"Client: {message}"); // Debugging log
 
-                    // If the message contains COM port information, extract it
-                    if (message.ToLower().Contains("com"))
+                    // Only treat the *very first* 'COM…' message as your port list.
+                    if (!_portsParsed && message.ToLower().Contains("com"))
                     {
+                        _portsParsed = true;          // never do this again
                         string portsString = message.Replace("Client:", "").Trim();
-                        string[] ports = portsString.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
+                        string[] ports = portsString
+                                          .Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         AppendText($"Parsed ports: {string.Join(", ", ports)}");
-
                         CreatePortButtons(ports);
                     }
+                    // any further messages—even if they contain "com"—just stay in AppendText()
                 }
                 catch (Exception ex)
                 {

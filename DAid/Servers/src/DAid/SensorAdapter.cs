@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 public class SensorAdapter
 {
@@ -12,34 +13,43 @@ public class SensorAdapter
     private const byte StartByte = 0xF0;
     private const byte StopByte = 0x55;
     private const int PacketLength = 47;
-
+    private const int MedianWindowSize = 10; //this?
+    private readonly Queue<double>[] pressureHistories = new Queue<double>[4];
     private readonly byte[] buffer = new byte[2048]; 
+    private int bufferPos = 0;
+    private double[] calibrationOffsets = new double[4];
+
+    private double[] calibrationOffsetsLeft = new double[4];
+    private double[] calibrationOffsetsRight = new double[4];
+    private bool isCalibrated = false;
 
     private string moduleName = "Unknown";
     public string ModuleName => moduleName; 
-    private int bufferPos = 0;
 
     private const int DefaultBaudRate = 92600;
-    private readonly int[] RightSensorPositions = { 30, 32, 38, 40 }; //30,32,38,40
-    private readonly int[] LeftSensorPositions = {  30, 32, 38, 40 }; //32, 30, 40, 38
+    private readonly int[] RightSensorPositions = { 30, 32, 38, 40 }; 
+    private readonly int[] LeftSensorPositions = {  32, 30, 40, 38 }; 
     private int[] SensorPositions;    
-    private readonly double[] XPositions = { 2.0, -2.0, 2.0, -2.0 }; //for right leg
-    private readonly double[] YPositions = { 6.0, 6.0, -6.0, -6.0 };
-    //double[] RESISTANCE_MULTIPLIER = new double[]{ 0.125, 0.25, 2.00, 4.00};
+    private readonly double[] XPositions = { 2.0, -2.0, 2.0, -2.0 }; //for left
+    private readonly double[] YPositions = { 4.0, 4.0, -4.0, -4.0 };
     private double[] sensorResistance = new double[4];
-    private (double x0, double y0) calibrationOffsetsLeft = (0, 0);
-    private (double x0, double y0) calibrationOffsetsRight = (0, 0);
-
+    private double[] sensorPressures = new double[3]; // 3 combined pressures
+    private double[] rawSensorPressures = new double[4]; // for debug window
+    private const int FilterWindowSize = 16;
     private bool isStreaming = false;
     private readonly object syncLock = new object();
     public string DeviceId { get; } 
-    private double minPressureStored = 0.0;
-    private double maxPressureStored = 0.0;
+    private bool isLeftSock; //checks for isleftsock based of module number
     private double[] sensorOffsets = new double[4];
 
     public bool moduleNameRetrieved = false;
+    private PressureDebugWindow _pressureDebugWindow;
+    private Thread _debugWindowThread;
+    private DateTime lastCoPUpdate = DateTime.MinValue;
+    private readonly TimeSpan CoPUpdateInterval = TimeSpan.FromMilliseconds(200);
+    public event EventHandler<string> ModuleNameRetrieved; 
     
-    public event EventHandler<(string ModuleName, bool IsLeftSock)> ModuleInfoUpdated;
+    public event EventHandler<(string ModuleName, bool IsLeftSock)> ModuleInfoUpdated; //this??
 
     public event EventHandler<string> RawDataReceived;
     public event EventHandler<(double CoPX, double CoPY, double[] Pressures)> CoPUpdated;
@@ -48,6 +58,9 @@ public class SensorAdapter
     {
         DeviceId = deviceId ?? throw new ArgumentNullException(nameof(deviceId));
         SensorPositions = RightSensorPositions;
+
+        for (int i = 0; i < pressureHistories.Length; i++)
+            pressureHistories[i] = new Queue<double>(FilterWindowSize); //maybe in datareceivedhandler?
     }
     public void Initialize(string comPort, int baudRate = DefaultBaudRate)
     {
@@ -68,12 +81,14 @@ public class SensorAdapter
                 WriteTimeout = 5000
             };
 
+            ConfigureBTS1("8");
+            ConfigureBTS234("1");
+            ConfigureBTS8("*,2");
+
             serialPort.DataReceived += DataReceivedHandler;
             serialPort.Open();
             Console.WriteLine($"[SensorAdapter]: Initialized on {comPort} at {baudRate} baud.");
-            //ConfigureBTS1("8");
-            //ConfigureBTS234("1");
-            //ConfigureBTS8("*,8");
+           // StartSensorStream(); this??
         }
         catch (Exception ex)
         {
@@ -102,153 +117,7 @@ public class SensorAdapter
         SendCommand($"BTS4={config}");
         }
 
-
-    public void Cleanup()
-    {
-        lock (syncLock)
-        {
-            if (serialPort != null && serialPort.IsOpen)
-            {
-                try
-                {
-                    StopSensorStream();
-                    serialPort.Close();
-                    Console.WriteLine($"[SensorAdapter {DeviceId}]: Serial port closed.");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[SensorAdapter {DeviceId}]: Error closing serial port: {ex.Message}");
-                }
-            }
-        }
-    }
-
-    public void StartSensorStream()
-    {
-        lock (syncLock)
-        {
-            if (serialPort?.IsOpen == true && !isStreaming)
-            {
-                SendCommand("BT^START");
-                isStreaming = true;
-            }
-        }
-    }
-
-    public void StopSensorStream()
-    {
-        lock (syncLock)
-        {
-            if (serialPort?.IsOpen == true && isStreaming)
-            {
-                SendCommand("BT^STOP");
-                isStreaming = false;
-                Console.WriteLine("[SensorAdapter]: Data stream stopped.");
-            }
-        }
-    }
-
-public double[] GetSensorPressures()
-{
-    lock (syncLock)
-    {
-        return (double[])sensorResistance.Clone();
-    }
-}
-
-private (double x0, double y0) calibrationOffsets = (0, 0);
-
-
-
-public bool Calibrate(bool isLeftSock)
-{
-    double maxPressure = double.MinValue, minPressure = double.MaxValue;
-    double totalX = 0, totalY = 0;
-    int sampleCount = 0;
-    DateTime startTime = DateTime.Now;
-
-    Console.WriteLine("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
-
-    while ((DateTime.Now - startTime).TotalSeconds < 10)
-    {
-        lock (syncLock)
-        {
-            double totalPressure = sensorResistance.Sum();
-            //Console.WriteLine($"total pressure: {totalPressure}");
-
-            for (int i = 0; i < sensorResistance.Length; i++)
-                {
-                    //Console.Write($"S{i + 1}: {sensorResistance[i]:F6} | ");
-                }
-                //Console.WriteLine($"Total: {totalPressure:F6}");
-            if (totalPressure > 0 && sensorResistance.All(r => r > 0))
-            {
-                maxPressure = Math.Max(maxPressure, totalPressure);
-                minPressure = Math.Min(minPressure, totalPressure);
-
-                double copX = sensorResistance.Zip(XPositions, (p, x) => p * x).Sum() / totalPressure;
-                double copY = sensorResistance.Zip(YPositions, (p, y) => p * y).Sum() / totalPressure;
-
-                totalX += copX;
-                totalY += copY;
-                sampleCount++;
-            }
-        }
-
-        Thread.Sleep(100);
-    }
-    double pressureRange = maxPressure - minPressure;
-    if (pressureRange <= 0 || sampleCount == 0)
-    {
-        Console.WriteLine("[Calibration]: Calibration failed. Invalid pressure range.");
-        return false;
-    }
-    minPressureStored = minPressure;
-    maxPressureStored = maxPressure;
-    if (isLeftSock)
-    {
-        calibrationOffsetsLeft = (totalX / sampleCount, totalY / sampleCount);
-        Console.WriteLine($"[Calibration]: Left Foot Offset X: {calibrationOffsetsLeft.x0}, Y: {calibrationOffsetsLeft.y0}");
-    }
-    else
-    {
-        calibrationOffsetsRight = (totalX / sampleCount, totalY / sampleCount);
-        Console.WriteLine($"[Calibration]: Right Foot Offset X: {calibrationOffsetsRight.x0}, Y: {calibrationOffsetsRight.y0}");
-    }
-    Console.WriteLine($"[Calibration]: Completed. Pmax: {maxPressure}, Pmin: {minPressure}");
-    return true;
-}
-
-private double[] MovingAverageFilter(double[] rawData, int windowSize)
-{
-    double[] filteredData = new double[rawData.Length];
-    int halfWindowSize = windowSize / 2;
-
-    for (int i = 0; i < rawData.Length; i++)
-    {
-        double sum = 0;
-        double weightSum = 0;
-        int count = 0;
-
-        for (int j = i - halfWindowSize; j <= i + halfWindowSize; j++)
-        {
-            if (j >= 0 && j < rawData.Length)
-            {
-                double weight = 1.0 / (Math.Abs(i - j) + 1); // Closer values have higher weight
-                sum += rawData[j] * weight;
-                weightSum += weight;
-                count++;
-            }
-        }
-
-        filteredData[i] = sum / weightSum;
-    }
-
-    return filteredData;
-}
-
-
-    private void SendCommand(string command)
+        private void SendCommand(string command)
     {
           lock (syncLock)
         {
@@ -267,6 +136,72 @@ private double[] MovingAverageFilter(double[] rawData, int windowSize)
     }
 
 
+
+    public void StartSensorStream()
+    {
+        lock (syncLock)
+        {
+            if (serialPort?.IsOpen == true && !isStreaming)
+            {
+                SendCommand("BT^START");
+                isStreaming = true;
+
+                if (_pressureDebugWindow == null || _pressureDebugWindow.IsDisposed)
+                {
+                    _debugWindowThread = new Thread(() =>
+                    {
+                        _pressureDebugWindow = new PressureDebugWindow();
+                        _pressureDebugWindow.Text = $"Pressure Debug - {(isLeftSock ? "Left" : "Right")}";
+                        Application.Run(_pressureDebugWindow);
+                    });
+                    _debugWindowThread.SetApartmentState(ApartmentState.STA);
+                    _debugWindowThread.IsBackground = true;
+                    _debugWindowThread.Start();
+                }
+            }
+        }
+    }
+
+    public void StopSensorStream()
+    {
+        lock (syncLock)
+        {
+            if (serialPort?.IsOpen == true && isStreaming)
+            {
+                SendCommand("BT^STOP");
+                isStreaming = false;
+                Console.WriteLine("[SensorAdapter]: Data stream stopped.");
+            }
+        }
+    }
+
+    private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+{
+    try
+    {
+        int bytesToRead = serialPort.BytesToRead;
+        byte[] incomingData = new byte[bytesToRead];
+        serialPort.Read(incomingData, 0, bytesToRead);
+        
+        RawDataReceived?.Invoke(this, BitConverter.ToString(incomingData));
+        ProcessIncomingData(incomingData);
+
+        if (!moduleNameRetrieved)
+        {
+            RetrieveModuleName();
+
+            if (moduleName != "Unknown") 
+            {
+                moduleNameRetrieved = true;
+                ModuleNameRetrieved?.Invoke(this, moduleName); // Notify listeners
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[SensorAdapter]: Error receiving data: {ex.Message}");
+    }
+}
 public void RetrieveModuleName()
 {
     if (moduleNameRetrieved) return;
@@ -329,35 +264,6 @@ public void RetrieveModuleName()
     }
 }
 
-public event EventHandler<string> ModuleNameRetrieved; 
-
-private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
-{
-    try
-    {
-        int bytesToRead = serialPort.BytesToRead;
-        byte[] incomingData = new byte[bytesToRead];
-        serialPort.Read(incomingData, 0, bytesToRead);
-        RawDataReceived?.Invoke(this, BitConverter.ToString(incomingData));
-        ProcessIncomingData(incomingData);
-
-        if (!moduleNameRetrieved)
-        {
-            RetrieveModuleName();
-
-            if (moduleName != "Unknown") 
-            {
-                moduleNameRetrieved = true;
-                ModuleNameRetrieved?.Invoke(this, moduleName); // Notify listeners
-            }
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"[SensorAdapter]: Error receiving data: {ex.Message}");
-    }
-}
-
 
     private void ProcessIncomingData(byte[] incomingData)
     {
@@ -383,7 +289,7 @@ private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
                     Array.Copy(buffer, startIndex, packet, 0, PacketLength);
                     //Console.WriteLine($"[SensorAdapter]: Extracted Packet (HEX): {BitConverter.ToString(packet).Replace("-", " ")}");
 
-                    if (ValidatePacket(packet)) //print out in console the raw data
+                    if (ValidatePacket(packet)) 
                     {
                         ExtractSensorValues(packet);
                         CalculateAndNotifyCoP();
@@ -392,74 +298,204 @@ private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
                     bufferPos -= startIndex + PacketLength;
                     Array.Copy(buffer, startIndex + PacketLength, buffer, 0, bufferPos);
                 }
-                else
-                {
-                    break;
-                }
+                else break;
             }
         }
-    }
-
-    private bool ValidatePacket(byte[] packet)
-    {
-        byte calculatedChecksum = CalculateChecksum(packet, PacketLength - 2);
-        byte receivedChecksum = packet[PacketLength - 2];
-        return calculatedChecksum == receivedChecksum && packet[PacketLength - 1] == StopByte;
     }
 
 private void ExtractSensorValues(byte[] packet)
 {
     lock (syncLock)
     {
-        double[] rawSensorValues = new double[sensorResistance.Length];
+        double[] rawSensorValues = new double[4];
+        //double[] rawSensorValues = new double[sensorResistance.Length]; 
 
         for (int i = 0; i < SensorPositions.Length; i++)
         {
             int pos = SensorPositions[i];
             int rawValue = (packet[pos] << 8) | packet[pos + 1];
-            //double resistanceMultiplier = RESISTANCE_MULTIPLIER[Math.Min(i, RESISTANCE_MULTIPLIER.Length - 1)];
-            rawSensorValues[i] = rawValue > 0 ? (1.0 / rawValue) : 0.0;
-            //Console.WriteLine($"Sensor {i + 1}: Raw Value = {rawValue}, Multiplier = {resistanceMultiplier:F4}, Resistance = {rawSensorValues[i]:F6}");
+            rawSensorValues[i] = rawValue > 0 ? (1000.0 / rawValue) : 0.0;
        }
-        sensorResistance = MovingAverageFilter(rawSensorValues, 4);
+        //var medianFiltered = ApplyRollingMedian(rawSensorValues);
+        //sensorResistance = MovingAverageFilter(medianFiltered, 4);
+        for (int i = 0; i < 4; i++)
+    {//calibration offsets!!! should they be divided for left and right?
+        double adjustedValue = isCalibrated ? (rawSensorValues[i] - calibrationOffsets[Math.Min(i, 2)]) : rawSensorValues[i]; 
+        adjustedValue = Math.Max(adjustedValue, 0.0);
+
+        pressureHistories[i].Enqueue(adjustedValue);
+        if (pressureHistories[i].Count > FilterWindowSize)
+            pressureHistories[i].Dequeue();
+    }
+
+    double frontRight = pressureHistories[0].Average();
+    double frontLeft = pressureHistories[1].Average();
+    double rearRight = MedianFilter(pressureHistories[2]);
+    double rearLeft = MedianFilter(pressureHistories[3]);
+
+    // Weighted average for rear
+    double rearTotal = rearRight + rearLeft;
+    double rearWeighted = rearTotal > 0.00001
+    ? ((rearRight * rearRight) + (rearLeft * rearLeft)) / rearTotal
+    : 0.0;
+
+    sensorPressures[0] = frontRight;
+    sensorPressures[1] = frontLeft;
+    sensorPressures[2] = rearWeighted;
+    //sensorPressures[2] = (rearRight + rearLeft) / 2;
+
+    for (int i = 0; i < 4; i++)
+        rawSensorPressures[i] = rawSensorValues[i];
+}
+
+    }
+
+public double[] GetSensorPressures()
+{
+    lock (syncLock)
+    {
+        return (double[])sensorResistance.Clone();
     }
 }
+
+
+public bool Calibrate(bool isLeftSock)
+{
+    int seconds = 10;
+    double[] sampleSum = new double[4]; //sum of samples
+    //double maxPressure = double.MinValue, minPressure = double.MaxValue;
+    //double totalX = 0, totalY = 0;
+    int sampleCount = 0;
+    DateTime startTime = DateTime.Now;
+
+    Console.WriteLine("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
+
+    while ((DateTime.Now - startTime).TotalSeconds < seconds)
+    {
+        lock (syncLock)
+        {
+            for (int i = 0; i < rawSensorPressures.Length; i++)
+                {
+                    Console.Write($"S{i + 1}: {rawSensorPressures[i]:F4} | ");
+                    sampleSum[i] += rawSensorPressures[i];
+                }
+                sampleCount++;
+                Thread.Sleep(50);
+            }
+            lock (syncLock)
+        {
+            for (int i = 0; i < calibrationOffsets.Length; i++)
+                calibrationOffsets[i] = sampleSum[i] / sampleCount;
+
+            isCalibrated = true;
+        }
+    }
+    if (sampleCount == 0)
+    {
+        Console.WriteLine("[Calibration]: Calibration failed. Invalid pressure range.");
+        return false;
+    }
+    if (isLeftSock)
+    {
+        calibrationOffsetsLeft = calibrationOffsets;
+        //Console.WriteLine($"[Calibration]: Left Foot Offset X: {calibrationOffsetsLeft.x0}, Y: {calibrationOffsetsLeft.y0}");
+    }
+    else
+    {
+        calibrationOffsetsRight = calibrationOffsets;
+       // Console.WriteLine($"[Calibration]: Right Foot Offset X: {calibrationOffsetsRight.x0}, Y: {calibrationOffsetsRight.y0}");
+    }
+    Console.WriteLine($"[Calibration]: Completed.");
+    return true;
+}
+
+private double MedianFilter(Queue<double> history)
+    {
+        var arraySorted = history.OrderBy(x => x).ToList();
+        int count = arraySorted.Count;
+        return (count % 2 == 1)
+            ? arraySorted[count / 2]
+            : (arraySorted[(count - 1) / 2] + arraySorted[count / 2]) / 2.0;
+    }
 
 
 private void CalculateAndNotifyCoP()
 {
     lock (syncLock)
     {
-        double totalPressure = sensorResistance.Sum(); 
+        if ((DateTime.Now - lastCoPUpdate) < CoPUpdateInterval)
+                return;
+
+        double[] cleanPressures = new double[3];
+        for (int i = 0; i < 3; i++)
+        cleanPressures[i] = (sensorPressures[i] < 0.0005) ? 0.0 : sensorPressures[i];
         double[] adjustedXPositions = SensorPositions == RightSensorPositions 
             ? XPositions.Select(x =>-x).ToArray()  
             : XPositions;
 
-        if (totalPressure <= 0)
-        {
-            Console.WriteLine("[CoP]: No valid pressure detected, CoP remains at (0,0).");
-            Task.Run(() => CoPUpdated?.Invoke(this, (0, 0, sensorResistance)));
-            return;
+        double totalPressure = sensorPressures.Sum(); 
+
+            if (totalPressure <= 0.00001)
+            {
+                Task.Run(() => CoPUpdated?.Invoke(this, (0.0, 0.0, cleanPressures)));
+                Console.WriteLine("[CoP]: No valid pressure detected, CoP remains at (0,0).");
+
+                return;
+            }
+            double copX = 0.0, copY = 0.0;
+
+            for (int i = 0; i < sensorPressures.Length; i++)
+            {
+                copX += cleanPressures[i] * adjustedXPositions[i];
+                copY += cleanPressures[i] * YPositions[i];
+            }
+
+            copX /= totalPressure;
+            copY /= totalPressure;
+            lastCoPUpdate = DateTime.Now;
+
+            _pressureDebugWindow?.UpdatePressures(
+                isLeftSock ? rawSensorPressures : Array.Empty<double>(),
+                !isLeftSock ? rawSensorPressures : Array.Empty<double>());
+
+            Task.Run(() => CoPUpdated?.Invoke(this, (copX, copY, (double[])cleanPressures.Clone())));
         }
-        double Pnorm = (totalPressure - minPressureStored) / (maxPressureStored - minPressureStored);
-        Pnorm = Math.Max(0, Math.Min(1, Pnorm));
-        double CoPX = sensorResistance.Zip(adjustedXPositions, (p, x) => (p * x )).Sum() / totalPressure; //y*Pnorm
-        double CoPY = sensorResistance.Zip(YPositions, (p, y) => (p * y )).Sum() / totalPressure; //x*Pnorm
-        if (SensorPositions == LeftSensorPositions)
-        {
-            CoPX -= calibrationOffsetsLeft.x0;
-            CoPY -= calibrationOffsetsLeft.y0;        }
-        else
-        {
-            CoPX -= calibrationOffsetsRight.x0;
-            CoPY -= calibrationOffsetsRight.y0;        }
-        Task.Run(() => CoPUpdated?.Invoke(this, (CoPX, CoPY, sensorResistance)));
-    }
 }
+    private bool ValidatePacket(byte[] packet)
+    {
+        if (packet.Length < PacketLength) return false;
+        byte calculatedChecksum = CalculateChecksum(packet, PacketLength - 2);
+        return calculatedChecksum == packet[PacketLength - 2] && packet[PacketLength - 1] == StopByte;
+    }
 
     private byte CalculateChecksum(byte[] data, int length)
     {
         int sum = data.Take(length).Sum(b => b);
         return (byte)(sum & 0xFF);
+    }
+    public void Cleanup()
+    {
+        lock (syncLock)
+        {
+            if (serialPort != null && serialPort.IsOpen)
+            {
+                try
+                {
+                    StopSensorStream();
+                    serialPort.Close();
+                    Console.WriteLine($"[SensorAdapter {DeviceId}]: Serial port closed.");
+
+                    if (_pressureDebugWindow != null && !_pressureDebugWindow.IsDisposed)
+                    {
+                        _pressureDebugWindow.Invoke(new Action(() => _pressureDebugWindow.Close()));
+                        _pressureDebugWindow = null;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[SensorAdapter {DeviceId}]: Error closing serial port: {ex.Message}");
+                }
+            }
+        }
     }
 }

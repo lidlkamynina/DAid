@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -8,56 +9,64 @@ namespace DAid.Clients
     public class VisualizationWindow : Form
     {
         private const int CanvasSize = 400;
-        private const int SockSpacing = CanvasSize + 50; // Spacing between socks
-        private const int DataTimeoutMilliseconds = 2000; // Timeout to consider data stale
+        private const int SockSpacing = CanvasSize + 100;
+        private const int DataTimeoutMilliseconds = 2000;
+        private const int MaxTrailLength = 100;
 
-        private double copXLeft = 0, copYLeft = 0;
-        private double[] sensorPressuresLeft = Array.Empty<double>();
+        private (double X, double Y, double TotalPressure) _copLeft;
+        private (double X, double Y, double TotalPressure) _copRight;
         private DateTime lastLeftDataUpdate = DateTime.MinValue;
-
-        private double copXRight = 0, copYRight = 0;
-        private double[] sensorPressuresRight = Array.Empty<double>();
         private DateTime lastRightDataUpdate = DateTime.MinValue;
+
+        private readonly List<PointF> _copTrailLeft = new List<PointF>();
+        private readonly List<PointF> _copTrailRight = new List<PointF>();
+
+        private readonly float scaleX = CanvasSize / 8f;  
+        private readonly float scaleY = CanvasSize / 14f; 
 
         public VisualizationWindow()
         {
-            this.Text = "Real-Time CoP Visualization";
-            this.Size = new Size(SockSpacing * 2, CanvasSize + 150); // Adjusted height
-            this.DoubleBuffered = true;
+            Text = "Real-Time CoP Visualization with Expanded Graph";
+            Size = new Size(SockSpacing * 2, CanvasSize + 200);
+            DoubleBuffered = true;
 
-            this.FormClosing += (sender, e) => Application.Exit();
-            this.Shown += (sender, e) => Console.WriteLine("[VisualizationWindow]: Visualization started.");
+            FormClosing += (sender, e) => Application.Exit();
+            Shown += (sender, e) => Console.WriteLine("[VisualizationWindow]: Visualization started.");
         }
 
-        public void UpdateVisualization(
-            double xLeft, double yLeft, double[] pressuresLeft,
-            double xRight, double yRight, double[] pressuresRight)
+        public void UpdateVisualization((double X, double Y, double TotalPressure) copLeft,
+                                        (double X, double Y, double TotalPressure) copRight)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new Action(() => UpdateVisualization(xLeft, yLeft, pressuresLeft, xRight, yRight, pressuresRight)));
+                BeginInvoke(new Action(() => UpdateVisualization(copLeft, copRight)));
                 return;
             }
 
-            // Update left sock data
-            if (pressuresLeft.Length > 0)
-            {
-                copXLeft = xLeft;
-                copYLeft = yLeft;
-                sensorPressuresLeft = pressuresLeft;
-                lastLeftDataUpdate = DateTime.Now;
-            }
+            _copLeft = copLeft;
+            lastLeftDataUpdate = DateTime.Now;
+            UpdateTrail(_copTrailLeft, copLeft);
 
-            // Update right sock data
-            if (pressuresRight.Length > 0)
-            {
-                copXRight = xRight;
-                copYRight = yRight;
-                sensorPressuresRight = pressuresRight;
-                lastRightDataUpdate = DateTime.Now;
-            }
+            _copRight = copRight;
+            lastRightDataUpdate = DateTime.Now;
+            UpdateTrail(_copTrailRight, copRight);
 
-            Invalidate(); // Always trigger a repaint
+            Invalidate(); 
+        }
+
+        private void UpdateTrail(List<PointF> trail, (double X, double Y, double TotalPressure) cop)
+        {
+            if (cop.TotalPressure > 0.0001)
+            {
+                PointF point = new PointF(
+                    (float)(cop.X * scaleX),
+                    (float)(-cop.Y * scaleY));
+
+                trail.Add(point);
+
+                if (trail.Count > MaxTrailLength)
+                    trail.RemoveAt(0);
+            }
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -66,96 +75,68 @@ namespace DAid.Clients
             var graphics = e.Graphics;
             graphics.Clear(Color.White);
 
-            bool hasLeftData = (DateTime.Now - lastLeftDataUpdate).TotalMilliseconds < DataTimeoutMilliseconds;
-            bool hasRightData = (DateTime.Now - lastRightDataUpdate).TotalMilliseconds < DataTimeoutMilliseconds;
-            //Console.WriteLine($"[Debug]:Pressures: {string.Join(", ", sensorPressuresLeft)}");
-
-
-     if (hasLeftData)
-    DrawSockVisualization(graphics, copXLeft, copYLeft, sensorPressuresLeft.Select(p => p * 10).ToArray(), SockSpacing / 2, false);
-else
-    DrawNoDataMessage(graphics, SockSpacing / 2);
-
-if (hasRightData)
-    DrawSockVisualization(graphics, copXRight, copYRight, sensorPressuresRight.Select(p => p * 10).ToArray(), SockSpacing + SockSpacing / 2, true);
-else
-    DrawNoDataMessage(graphics, SockSpacing + SockSpacing / 2);
+            DrawFootPanel(graphics, SockSpacing / 2, "Left Foot", _copLeft, _copTrailLeft, lastLeftDataUpdate);
+            DrawFootPanel(graphics, SockSpacing + SockSpacing / 2, "Right Foot", _copRight, _copTrailRight, lastRightDataUpdate);
         }
 
-        private void DrawSockVisualization(Graphics graphics, double copX, double copY, double[] pressures, int xOffset, bool isRightSock)
-{
-    DrawGrid(graphics, xOffset);
-
-    if (pressures.Length == 0)
-        return;
-    float scaleFactor = CanvasSize / 4.0f; 
-    
-    float scaledX = (float)(xOffset + CanvasSize / 2 + copX * scaleFactor);
-    float scaledY = (float)(CanvasSize / 2 - copY * scaleFactor);
-    graphics.FillEllipse(Brushes.Red, scaledX - 8, scaledY - 8, 16, 16);
-    graphics.DrawString($"CoP X: {copX:F2}, Y: {copY:F2}", new Font("Arial", 10, FontStyle.Bold), Brushes.Black, scaledX + 10, scaledY);
-    // DrawPressures(graphics, pressures, xOffset, isRightSock);
-}
-
-private void DrawGrid(Graphics graphics, int xOffset)
-{
-    Pen gridPen = new Pen(Color.LightGray, 1);
-    Pen highlightPen = new Pen(Color.Green, 2); 
-    Font font = new Font("Arial", 8);
-    Font highlightFont = new Font("Arial", 10, FontStyle.Bold);
-    Brush textBrush = Brushes.Black;
-    Brush highlightBrush = Brushes.Green;
-
-    graphics.DrawLine(Pens.Gray, xOffset, CanvasSize / 2, xOffset + CanvasSize, CanvasSize / 2);
-    graphics.DrawLine(Pens.Gray, xOffset + CanvasSize / 2, 0, xOffset + CanvasSize / 2, CanvasSize);
-    float scaleFactor = CanvasSize / 4.0f;
-
-    for (double i = -2; i <= 2; i += 0.5) 
-    {
-        int x = (int)(xOffset + CanvasSize / 2 + i * scaleFactor);
-        int y = (int)(CanvasSize / 2 - i * scaleFactor);
-
-        bool isHighlighted = Math.Abs(i) == 0.5; 
-
-        // Use a bold color for ±0.5
-        graphics.DrawLine(isHighlighted ? highlightPen : gridPen, x, CanvasSize / 2 - 5, x, CanvasSize / 2 + 5);
-        graphics.DrawLine(isHighlighted ? highlightPen : gridPen, xOffset + CanvasSize / 2 - 5, y, xOffset + CanvasSize / 2 + 5, y);
-        graphics.DrawString(i.ToString("0.0"), isHighlighted ? highlightFont : font, isHighlighted ? highlightBrush : textBrush, x - 5, CanvasSize / 2 + 10);
-        graphics.DrawString(i.ToString("0.0"), isHighlighted ? highlightFont : font, isHighlighted ? highlightBrush : textBrush, xOffset + CanvasSize / 2 - 25, y - 5);
-    }
-}
-
-        private void DrawPressures(Graphics graphics, double[] pressures, int xOffset, bool isRightSock)
+        private void DrawFootPanel(Graphics graphics, int xOffset, string title,
+            (double X, double Y, double TotalPressure) cop, List<PointF> trail, DateTime lastUpdate)
         {
-            double[] XPositions = { 3.0, -3.0, 3.0, -3.0 };
-            double[] YPositions = { 6.0, 6.0, -6.0, -6.0 };
+            graphics.TranslateTransform(xOffset, CanvasSize / 2 + 50);
 
-    if (!isRightSock)
-    {
-        XPositions = XPositions.Select(x => -x).ToArray();
-    }
+            DrawAxes(graphics);
+            graphics.DrawString(title, new Font("Arial", 12, FontStyle.Bold), Brushes.Black, -40, -CanvasSize / 2 - 40);
 
-    double maxPressure = pressures.Length > 0 ? pressures.Max() : 1.0;
-    if (maxPressure <= 0.001) maxPressure = 1.0;
+            bool hasRecentData = (DateTime.Now - lastUpdate).TotalMilliseconds < DataTimeoutMilliseconds;
 
-    for (int i = 0; i < pressures.Length; i++)
-    {
-        float intensity = (float)(pressures[i] / maxPressure);
-        intensity = Math.Max(0, Math.Min(1, intensity));
+            if (hasRecentData)
+            {
+                DrawTrail(graphics, trail);
+                DrawCurrentCoP(graphics, cop);
+            }
+            else
+            {
+                graphics.DrawString("No Data", new Font("Arial", 14, FontStyle.Bold), Brushes.Gray, -30, -20);
+            }
 
-        Color pressureColor = Color.FromArgb((int)(255 * intensity), 0, 0);
-        float scaledX = (float)(xOffset + CanvasSize / 2 + XPositions[i] * (CanvasSize / 16));
-        float scaledY = (float)(CanvasSize / 2 - YPositions[i] * (CanvasSize / 16));
-
-        graphics.FillEllipse(new SolidBrush(pressureColor), scaledX - 12, scaledY - 12, 24, 24);
-        graphics.DrawString($"S{i + 1}", new Font("Arial", 8), Brushes.Black, scaledX - 5, scaledY - 15);
-    }
+            graphics.ResetTransform();
         }
 
-        private void DrawNoDataMessage(Graphics graphics, int xOffset)
+        private void DrawAxes(Graphics graphics)
         {
-            graphics.DrawString("No Data", new Font("Arial", 16, FontStyle.Bold), Brushes.Gray,
-                new PointF(xOffset + CanvasSize / 4 - 50, CanvasSize / 2 - 20));
+            Pen axisPen = new Pen(Color.LightGray, 1);
+
+            graphics.DrawLine(axisPen, -4.0f * scaleX, 0, 4.0f * scaleX, 0);
+
+            graphics.DrawLine(axisPen, 0, -7.0f * scaleY, 0, 7.0f * scaleY);
+
+            graphics.DrawString("-4.0", new Font("Arial", 8), Brushes.Gray, -4.0f * scaleX - 20, 5);
+            graphics.DrawString("4.0", new Font("Arial", 8), Brushes.Gray, 4.0f * scaleX + 5, 5);
+            graphics.DrawString("X", new Font("Arial", 9, FontStyle.Bold), Brushes.Black, 4.0f * scaleX + 15, -15);
+
+            graphics.DrawString("7.0", new Font("Arial", 8), Brushes.Gray, 5, -7.0f * scaleY - 15);
+            graphics.DrawString("-7.0", new Font("Arial", 8), Brushes.Gray, 5, 7.0f * scaleY + 5);
+            graphics.DrawString("Y", new Font("Arial", 9, FontStyle.Bold), Brushes.Black, -20, -7.0f * scaleY - 25);
+        }
+
+        private void DrawTrail(Graphics graphics, List<PointF> trail)
+        {
+            if (trail.Count < 2) return;
+
+            Pen trailPen = new Pen(Color.Blue, 2);
+            for (int i = 1; i < trail.Count; i++)
+            {
+                graphics.DrawLine(trailPen, trail[i - 1], trail[i]);
+            }
+        }
+
+        private void DrawCurrentCoP(Graphics graphics, (double X, double Y, double TotalPressure) cop)
+        {
+            float x = (float)(cop.X * scaleX);
+            float y = (float)(-cop.Y * scaleY);
+
+            graphics.FillEllipse(Brushes.Red, x - 5, y - 5, 10, 10);
+            graphics.DrawString($"X: {cop.X:F2}\nY: {cop.Y:F2}", new Font("Arial", 10), Brushes.Black, x + 8, y - 15);
         }
     }
 }

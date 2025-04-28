@@ -343,7 +343,7 @@ namespace DAid.Clients
         }
 
         if (token.IsCancellationRequested) return;
-        await Task.Delay(1000).ConfigureAwait(false); 
+        await Task.Delay(1000, token).ConfigureAwait(false); 
     }
 }
 
@@ -353,7 +353,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
     SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
     if (exercise.RepetitionID > 2)
     {
-        await Task.Delay(2000).ConfigureAwait(false);  // shows exercise text for 2 seconds so both client and HMD wait
+        await Task.Delay(2000, token).ConfigureAwait(false);  // shows exercise text for 2 seconds so both client and HMD wait
     }
     DateTime exerciseStartTime = DateTime.Now;
     int phase1Completed = 0; 
@@ -462,7 +462,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
                     break;
                 }
             }
-            await Task.Delay(500).ConfigureAwait(false);;
+            await Task.Delay(500, token).ConfigureAwait(false);;
         }
         if (lostBalance)
         {
@@ -474,7 +474,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
 
             Console.WriteLine("Pausing for 5 seconds before restarting...");
             SendMessageToGUI("Pausing for 5 seconds before restarting...");
-            await Task.Delay(5000).ConfigureAwait(false);
+            await Task.Delay(5000, token).ConfigureAwait(false);
             
             phaseRepeatCount = 0;
             previousZoneLeft = -1;
@@ -639,7 +639,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
                 }
                 Console.WriteLine("Pausing for 5 seconds before restarting...");
                 SendMessageToGUI("Pausing for 5 seconds before restarting...");
-                await Task.Delay(5000).ConfigureAwait(false);
+                await Task.Delay(5000, token).ConfigureAwait(false);
                 phaseIndex = 0;
                 previousZoneLeft = -1;
                 previousZoneRight = -1;
@@ -669,7 +669,6 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
              await Task.Delay(exercise.Release * 1000);
          }
 }
-
 
         private int Feedback(double copX, double copY,  
                           (double Min, double Max) greenZoneX, (double Min, double Max) greenZoneY, 
@@ -796,12 +795,13 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
 
     if (sender is Device device)
     {
-         if ((_currentExercise?.RepetitionID == 5 || _currentExercise?.RepetitionID == 6) && _currentPhase == 4)
+        if ((_currentExercise?.RepetitionID == 5 || _currentExercise?.RepetitionID == 6) && _currentPhase == 4)
         {
             Console.WriteLine($"[Client]: Skipping CoP check for Exercise {_currentExercise.RepetitionID}, Phase 4.");
             SendMessageToGUI($"[Client]: Skipping CoP check for Exercise {_currentExercise.RepetitionID}, Phase 4.");
             return; 
         }
+
         if (device.IsLeftSock)
         {
             _copXLeft = copData.CoPX;
@@ -814,12 +814,8 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
         }
 
         _visualizationWindow.UpdateVisualization(
-            xLeft: _copXLeft,
-            yLeft: _copYLeft,
-            pressuresLeft: device.IsLeftSock ? copData.Pressures : Array.Empty<double>(),
-            xRight: _copXRight,
-            yRight: _copYRight,
-            pressuresRight: !device.IsLeftSock ? copData.Pressures : Array.Empty<double>()
+            (_copXLeft, _copYLeft, device.IsLeftSock ? copData.Pressures.Sum() : 0.0),
+            (_copXRight, _copYRight, !device.IsLeftSock ? copData.Pressures.Sum() : 0.0)
         );
     }
 }

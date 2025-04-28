@@ -59,7 +59,7 @@
             this.statusLabel.Name = "statusLabel";
             this.statusLabel.Size = new System.Drawing.Size(500, 30);
             this.statusLabel.TabIndex = 3;
-            this.statusLabel.Text = "Status: Waiting for action...";
+            this.statusLabel.Text = "";
             this.statusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // Form1
