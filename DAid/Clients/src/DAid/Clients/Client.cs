@@ -164,6 +164,8 @@ namespace DAid.Clients
 
     Console.WriteLine("Requesting server to calibrate connected devices...");
     SendMessageToGUI("Requesting server to calibrate connected devices...");
+    Console.WriteLine($"[Calibration]: Preparing to calibrate left foot...");
+    SendMessageToGUI($"[Calibration]: Preparing to calibrate left foot...");
 
     Console.WriteLine("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
     SendMessageToGUI("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
@@ -171,8 +173,8 @@ namespace DAid.Clients
     _ = Task.Run(async () =>
     {
         await Task.Delay(10000); 
-        Console.WriteLine("[Calibration]: Repeat. Second foot calibration starts now.");
-        SendMessageToGUI("[Calibration]: Repeat. Second foot calibration starts now.");
+        Console.WriteLine("[Calibration]: Repeat. Right foot calibration starts now.");
+        SendMessageToGUI("[Calibration]: Repeat. Right foot calibration starts now.");
     });
 
     _server.HandleCalibrateCommand(); 

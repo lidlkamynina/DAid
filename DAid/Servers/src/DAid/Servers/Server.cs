@@ -143,61 +143,73 @@ namespace DAid.Servers
         /// <summary>
         /// Handles the calibrate command.
         /// </summary>
-        public void HandleCalibrateCommand()
+       public void HandleCalibrateCommand()
+{
+    lock (syncLock)
+    {
+        if (!connectedDevices.Any())
         {
-            lock (syncLock)
-            {
-                if (!connectedDevices.Any())
-                {
-                    Console.WriteLine("[Server]: No devices connected. Use 'connect' command first.");
-                    return;
-                }
-
-                if (isCalibrating)
-                {
-                    Console.WriteLine("[Server]: Calibration is already in progress.");
-                    return;
-                }
-
-                if (!isAcquiringData) // Start the data stream if not already running
-                {
-                    StartDataStream();
-                }
-
-                isCalibrating = true; // Set calibration flag inside the lock
-            }
-
-            try
-            {
-                foreach (var device in connectedDevices)
-                {
-                    try
-                    {
-                        bool calibrationSuccessful = device.Calibrate(device.IsLeftSock);
-
-                        if (calibrationSuccessful)
-                        {
-                            Console.WriteLine($"[Server]: Calibration completed successfully for device {device.ModuleName}.");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"[Server]: Calibration failed for device {device.ModuleName}. No valid samples collected.");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[Server]: Calibration failed for device {device.ModuleName}. Error: {ex.Message}");
-                    }
-                }
-            }
-            finally
-            {
-                lock (syncLock)
-                {
-                    isCalibrating = false; // Reset calibration flag inside the lock
-                }
-            }
+            Console.WriteLine("[Server]: No devices connected. Use 'connect' command first.");
+            return;
         }
+
+        if (isCalibrating)
+        {
+            Console.WriteLine("[Server]: Calibration is already in progress.");
+            return;
+        }
+
+        if (!isAcquiringData) 
+        {
+            StartDataStream(); 
+        }
+
+        isCalibrating = true;
+    }
+
+    try
+    {
+        var sortedDevices = connectedDevices.OrderBy(d => d.IsLeftSock ? 0 : 1).ToList(); // Left first
+
+        foreach (var device in sortedDevices)
+        {
+            foreach (var d in connectedDevices)
+            {
+                if (d.IsStreaming) 
+                    d.SensorAdapter.StopSensorStream();
+            }
+
+            device.SensorAdapter.StartSensorStream();
+
+            string side = device.IsLeftSock ? "Left" : "Right";
+            Console.WriteLine($"[Server]: Now calibrating {side} foot (Device {device.ModuleName})...");
+
+            bool calibrationSuccessful = device.Calibrate(device.IsLeftSock);
+
+            if (calibrationSuccessful)
+            {
+                Console.WriteLine($"[Server]: Calibration successful for {side} foot (Device {device.ModuleName}).");
+            }
+            else
+            {
+                Console.WriteLine($"[Server]: Calibration FAILED for {side} foot (Device {device.ModuleName}).");
+            }
+
+            device.SensorAdapter.StopSensorStream();
+        }
+        foreach (var d in connectedDevices)
+        {
+            d.SensorAdapter.StartSensorStream();
+        }
+    }
+    finally
+    {
+        lock (syncLock)
+        {
+            isCalibrating = false;
+        }
+    }
+}
 
         /// <summary>
         /// Starts data acquisition for all connected devices.
