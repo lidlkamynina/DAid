@@ -15,10 +15,10 @@ namespace DAid.Clients
 {
     public class Client
     {
-        string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
-        string guipath = "D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
-        string portFilePath = "D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt" 
-        string questip = "192.168.8.118"; // CHANGE AS NEEDED 192.168.8.118
+ string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
+        string guipath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
+        string portFilePath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"  
+        string questip = "127.0.0.1"; // CHANGE AS NEEDED 192.168.8.118
         private Process _hmdProcess;
         private readonly Server _server;
         private VisualizationWindow _visualizationWindow;
@@ -51,7 +51,7 @@ namespace DAid.Clients
         {
             Console.WriteLine("Client started. Enter commands: connect, calibrate, start, stop, hmd, gui, exit");
             OpenGUI(5555);
-            _bypassHMD = true; // Bypass HMD connection for now
+            _bypassHMD = false; // Bypass HMD connection for now
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -153,7 +153,7 @@ namespace DAid.Clients
                 await Task.Delay(500);
             Console.WriteLine($"[Client]: File '{filePath}' detected.");
         }
-       private void HandleCalibrateCommand()
+      private void HandleCalibrateCommand()
 {
     if (_isCalibrated)
     {
@@ -164,26 +164,34 @@ namespace DAid.Clients
 
     Console.WriteLine("Requesting server to calibrate connected devices...");
     SendMessageToGUI("Requesting server to calibrate connected devices...");
-    Console.WriteLine($"[Calibration]: Preparing to calibrate left foot...");
-    SendMessageToGUI($"[Calibration]: Preparing to calibrate left foot...");
-
-    Console.WriteLine("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
-    SendMessageToGUI("[Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.");
+    Console.WriteLine($"[Calibration]: Preparing to calibrate ...");
+    SendMessageToGUI($"[Calibration]: Preparing to calibrate...");
+    Console.WriteLine("[Calibration]: Lift RIGHT foot for 10 seconds.");
+    SendMessageToGUI($"[Calibration]: Lift RIGHT foot for 10 seconds.");
+    
+    Console.WriteLine("[Calibration]: Calibrating LEFT foot.");
+    SendMessageToGUI($"[Calibration]: Calibrating LEFT foot.");
+     Console.WriteLine("[Calibration]: Stand on both feet.");
+    SendMessageToGUI($"[Calibration]: Stand on both feet.");
+    
 
     _ = Task.Run(async () =>
     {
-        await Task.Delay(10000); 
-        Console.WriteLine("[Calibration]: Repeat. Right foot calibration starts now.");
-        SendMessageToGUI("[Calibration]: Repeat. Right foot calibration starts now.");
+        await Task.Delay(11000);
+        Console.WriteLine("[Calibration]: Lift LEFT foot for 10 seconds.");
+        SendMessageToGUI("[Calibration]: Lift LEFT foot for 10 seconds."); 
+        Console.WriteLine("[Calibration]: Calibrating RIGHT foot.");
+        SendMessageToGUI("[Calibration]: Calibrating RIGHT foot.");
     });
 
     _server.HandleCalibrateCommand(); 
     _isCalibrated = true;
+    Console.WriteLine("Calibration completed.");
+    SendMessageToGUI("Calibration completed.");
 
-    Console.WriteLine("Calibration completed. Use 'start' to begin visualization.");
-    SendMessageToGUI("Calibration completed. Use 'start' to begin visualization.");
+    Console.WriteLine("Use 'start' to begin visualization.");
+    SendMessageToGUI("Use 'start' to begin visualization.");
 }
-
         private async Task HandleStartCommand()
         {
             _exerciseCancellationTokenSource = new CancellationTokenSource();
@@ -203,7 +211,7 @@ namespace DAid.Clients
             }
             _server.StartDataStream();
             OpenVisualizationWindow();
-            ConnectToHMD(questip, 9001);
+            ConnectToHMD(questip, 9003);
             SubscribeToDeviceUpdates();
             _isVisualizing = true;
 
@@ -306,8 +314,8 @@ namespace DAid.Clients
     while (true)
     {
         bool isFootValid = false;
-        (double Min, double Max) copRangeX = (-2.0, 2.0);
-        (double Min, double Max) copRangeY = (-2.0, 2.0);
+        (double Min, double Max) copRangeX = (-2, 2); // -2 ; 2
+        (double Min, double Max) copRangeY = (-4, 4); // -2 ; 2
 
         double copXLeft = _copXLeft, copYLeft = _copYLeft;
         double copXRight = _copXRight, copYRight = _copYRight;
@@ -870,7 +878,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
             Console.Write("> ");
             string input = Console.ReadLine()?.Trim();
             if (input == "1")
-                ConnectToHMD(questip, 9001);
+                ConnectToHMD(questip, 9003);
             else if (input == "2")
                 DisconnectFromHMD();
         }
@@ -1096,7 +1104,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
             else if (response.ToLower() == "1")
             {
                 Console.WriteLine("[Client]: 1 command received from GUI.");
-                ConnectToHMD(questip, 9001);
+                ConnectToHMD(questip, 9003);
             }
             else if (response.ToLower() == "2")
             {

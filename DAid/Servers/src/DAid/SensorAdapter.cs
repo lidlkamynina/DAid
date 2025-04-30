@@ -30,8 +30,8 @@ public class SensorAdapter
     private readonly int[] RightSensorPositions = { 30, 32, 38, 40 }; 
     private readonly int[] LeftSensorPositions = {  32, 30, 40, 38 }; 
     private int[] SensorPositions;    
-    private readonly double[] XPositions = { 2.0, -2.0, 2.0, -2.0 }; //for left
-    private readonly double[] YPositions = { 4.0, 4.0, -4.0, -4.0 };
+    private readonly double[] XPositions = { 2.0, -2.0, 0.0 }; //for left 2.0,-2.0
+    private readonly double[] YPositions = { 4.0, 4.0, -4.0 }; // r
     private double[] sensorResistance = new double[4];
     private double[] sensorPressures = new double[3]; // 3 combined pressures
     private double[] rawSensorPressures = new double[4]; // for debug window
@@ -46,7 +46,7 @@ public class SensorAdapter
     private PressureDebugWindow _pressureDebugWindow;
     private Thread _debugWindowThread;
     private DateTime lastCoPUpdate = DateTime.MinValue;
-    private readonly TimeSpan CoPUpdateInterval = TimeSpan.FromMilliseconds(200);
+    private readonly TimeSpan CoPUpdateInterval = TimeSpan.FromMilliseconds(100);
     public event EventHandler<string> ModuleNameRetrieved; 
     
     public event EventHandler<(string ModuleName, bool IsLeftSock)> ModuleInfoUpdated; //this??

@@ -6,3 +6,5 @@ obj
 # Dependencies
 
 lib
+DAid/Clients/ActiveLogFile_Left.txt
+DAid/Clients/ActiveLogFile_Right.txt
