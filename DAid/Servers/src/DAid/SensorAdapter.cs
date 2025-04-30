@@ -30,8 +30,8 @@ public class SensorAdapter
     private readonly int[] RightSensorPositions = { 30, 32, 38, 40 }; 
     private readonly int[] LeftSensorPositions = {  32, 30, 40, 38 }; 
     private int[] SensorPositions;    
-    private readonly double[] XPositions = { 2.0, -2.0, 0.0 }; //for left 2.0,-2.0
-    private readonly double[] YPositions = { 4.0, 4.0, -4.0 }; // r
+    private readonly double[] XPositions = { 2.0, -2.0, 2.0, -2.0 }; //for left
+    private readonly double[] YPositions = { 4.0, 4.0, -4.0, -4.0 };
     private double[] sensorResistance = new double[4];
     private double[] sensorPressures = new double[3]; // 3 combined pressures
     private double[] rawSensorPressures = new double[4]; // for debug window
@@ -49,7 +49,7 @@ public class SensorAdapter
     private readonly TimeSpan CoPUpdateInterval = TimeSpan.FromMilliseconds(100);
     public event EventHandler<string> ModuleNameRetrieved; 
     
-    public event EventHandler<(string ModuleName, bool IsLeftSock)> ModuleInfoUpdated; //this??
+    public event EventHandler<(string ModuleName, bool IsLeftSock)> ModuleInfoUpdated; 
 
     public event EventHandler<string> RawDataReceived;
     public event EventHandler<(double CoPX, double CoPY, double[] Pressures)> CoPUpdated;
@@ -60,7 +60,7 @@ public class SensorAdapter
         SensorPositions = RightSensorPositions;
 
         for (int i = 0; i < pressureHistories.Length; i++)
-            pressureHistories[i] = new Queue<double>(FilterWindowSize); //maybe in datareceivedhandler?
+            pressureHistories[i] = new Queue<double>(FilterWindowSize); 
     }
     public void Initialize(string comPort, int baudRate = DefaultBaudRate)
     {
@@ -88,7 +88,6 @@ public class SensorAdapter
             serialPort.DataReceived += DataReceivedHandler;
             serialPort.Open();
             Console.WriteLine($"[SensorAdapter]: Initialized on {comPort} at {baudRate} baud.");
-           // StartSensorStream(); this??
         }
         catch (Exception ex)
         {
@@ -319,7 +318,7 @@ private void ExtractSensorValues(byte[] packet)
         //var medianFiltered = ApplyRollingMedian(rawSensorValues);
         //sensorResistance = MovingAverageFilter(medianFiltered, 4);
         for (int i = 0; i < 4; i++)
-    {//calibration offsets!!! should they be divided for left and right?
+    {
         double adjustedValue = isCalibrated ? (rawSensorValues[i] - calibrationOffsets[Math.Min(i, 2)]) : rawSensorValues[i]; 
         adjustedValue = Math.Max(adjustedValue, 0.0);
 

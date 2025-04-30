@@ -314,8 +314,8 @@ namespace DAid.Clients
     while (true)
     {
         bool isFootValid = false;
-        (double Min, double Max) copRangeX = (-2, 2); // -2 ; 2
-        (double Min, double Max) copRangeY = (-4, 4); // -2 ; 2
+        (double Min, double Max) copRangeX = (-2.0, 2.0);
+        (double Min, double Max) copRangeY = (-2.0, 2.0);
 
         double copXLeft = _copXLeft, copYLeft = _copYLeft;
         double copXRight = _copXRight, copYRight = _copYRight;
