@@ -2,3 +2,11 @@
 2,Kristaps,20,F,120,190,43,R,LW,none
 3,Abduls,19,Vīrietis,76,180,43,Labā,Defensīvais puslodzis (CDM),nav
 4,s d,asd,Sieviete,asd,sd,asd,Kreisā,Mala aizsargs (LB / RB),asd
+5,asd,sd,Vīrietis,asd,asd,asd,Labā,Mala aizsargs (LB / RB),
+6,haralds,18,Vīrietis,180,190,43,Labā,Aizsargu (CB),
+7,Andris,18,Vīrietis,90,175,41,Labā,Kreisais puslodzis (LM),
+8,asd,asd,Vīrietis,asd,asd,asd,Labā,Mala aizsargs (LB / RB),
+9,asd,asd,Sieviete,asd,asd,asd,Labā,Mala aizsargs (LB / RB),
+10,andis,iev,Vīrietis,123,123,42,Labā,Aizsargu (CB),
+11,Andis,15,Vīrietis,80,180,42,Kreisā,Spārnains aizsargs (LWB / RWB),
+12,plans,15,Sieviete,67,157,43,Labā,Vārtsargs (GK),

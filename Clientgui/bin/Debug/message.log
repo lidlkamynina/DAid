@@ -1,0 +1,1475 @@
+2025-04-29T14:47:00.317  GUI Server started. Waiting for Client...
+2025-04-29T14:47:01.713  User selected: ID: 1 - Andis
+2025-04-29T14:47:01.719  User confirmed. Now you may connect to the client.
+2025-04-29T14:47:02.194  Client connected!
+2025-04-29T14:47:02.196  Client: connect
+2025-04-29T14:47:02.626  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-29T14:47:02.630  Selected user's config sent to client.
+2025-04-29T14:47:02.631  SEND → connect
+2025-04-29T14:47:02.633  Connect command sent to client. Waiting for port list...
+2025-04-29T14:47:02.639  Connect button disabled. Awaiting port information.
+2025-04-29T14:47:02.658  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-29T14:47:02.664  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-29T14:47:02.668  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-29T14:47:02.671  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-29T14:47:02.675  [DEBUG] Creating button for: COM1
+2025-04-29T14:47:02.681  [DEBUG] Added button for COM1.
+2025-04-29T14:47:02.684  [DEBUG] Creating button for: COM7
+2025-04-29T14:47:02.690  [DEBUG] Added button for COM7.
+2025-04-29T14:47:02.693  [DEBUG] Creating button for: COM8
+2025-04-29T14:47:02.701  [DEBUG] Added button for COM8.
+2025-04-29T14:47:02.704  [DEBUG] Creating button for: COM6
+2025-04-29T14:47:02.713  [DEBUG] Added button for COM6.
+2025-04-29T14:47:02.717  [DEBUG] Creating button for: COM9
+2025-04-29T14:47:02.726  [DEBUG] Added button for COM9.
+2025-04-29T14:47:02.729  [DEBUG] Created 5 buttons.
+2025-04-29T14:47:03.264  Selected: COM6
+2025-04-29T14:47:03.538  Selected: COM9
+2025-04-29T14:47:03.542  Sent selected ports to client: COM6,COM9
+2025-04-29T14:47:03.544  Written selected ports to file.
+2025-04-29T14:47:03.550  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-29T14:47:15.148  SEND → calibrate
+2025-04-29T14:47:15.149  Client: Requesting server to calibrate connected devices...
+2025-04-29T14:47:15.149  Client: [Calibration]: Preparing to calibrate left foot...
+2025-04-29T14:47:15.154  Calibrate command sent to client.
+2025-04-29T14:47:15.176  Client: [Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.
+2025-04-29T14:47:25.153  Client: [Calibration]: Repeat. Right foot calibration starts now.
+2025-04-29T14:47:35.269  Client: Calibration completed.
+2025-04-29T14:47:35.269  Client: Use 'start' to begin visualization.
+2025-04-29T14:47:37.512  SEND → exit
+2025-04-29T14:47:37.514  Client: HMD Disconnected.
+2025-04-29T14:47:37.514  Exit command sent to client.
+2025-04-29T14:47:37.517  Client connection lost. No data received.
+2025-04-30T07:24:23.590  GUI Server started. Waiting for Client...
+2025-04-30T07:24:25.214  User selected: ID: 1 - Andis
+2025-04-30T07:24:25.220  User confirmed. Now you may connect to the client.
+2025-04-30T07:24:25.433  Client connected!
+2025-04-30T07:24:25.436  Client: connect
+2025-04-30T07:24:26.121  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T07:24:26.123  Selected user's config sent to client.
+2025-04-30T07:24:26.124  SEND → connect
+2025-04-30T07:24:26.126  Connect command sent to client. Waiting for port list...
+2025-04-30T07:24:26.133  Connect button disabled. Awaiting port information.
+2025-04-30T07:24:26.258  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T07:24:26.265  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T07:24:26.272  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T07:24:26.276  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T07:24:26.280  [DEBUG] Creating button for: COM1
+2025-04-30T07:24:26.287  [DEBUG] Added button for COM1.
+2025-04-30T07:24:26.291  [DEBUG] Creating button for: COM7
+2025-04-30T07:24:26.299  [DEBUG] Added button for COM7.
+2025-04-30T07:24:26.303  [DEBUG] Creating button for: COM8
+2025-04-30T07:24:26.311  [DEBUG] Added button for COM8.
+2025-04-30T07:24:26.314  [DEBUG] Creating button for: COM6
+2025-04-30T07:24:26.326  [DEBUG] Added button for COM6.
+2025-04-30T07:24:26.329  [DEBUG] Creating button for: COM9
+2025-04-30T07:24:26.338  [DEBUG] Added button for COM9.
+2025-04-30T07:24:26.341  [DEBUG] Created 5 buttons.
+2025-04-30T07:24:27.116  Selected: COM6
+2025-04-30T07:24:27.617  Selected: COM9
+2025-04-30T07:24:27.621  Sent selected ports to client: COM6,COM9
+2025-04-30T07:24:27.624  Written selected ports to file.
+2025-04-30T07:24:27.629  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T07:24:38.275  SEND → calibrate
+2025-04-30T07:24:38.276  Client: Requesting server to calibrate connected devices...
+2025-04-30T07:24:38.276  Client: [Calibration]: Preparing to calibrate left foot...
+2025-04-30T07:24:38.280  Calibrate command sent to client.
+2025-04-30T07:24:38.319  Client: [Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.
+2025-04-30T07:24:48.285  Client: [Calibration]: Repeat. Right foot calibration starts now.
+2025-04-30T07:24:58.411  Client: Calibration completed.
+2025-04-30T07:24:58.411  Client: Use 'start' to begin visualization.
+2025-04-30T07:25:00.534  SEND → start
+2025-04-30T07:25:00.538  Start command sent to client.
+2025-04-30T07:25:00.553  Client: Starting HMD application...
+2025-04-30T07:25:02.592  Client: Connection attempt 1 failed: No connection could be made because the target machine actively refused it 127.0.0.1:9003. Retrying...
+2025-04-30T07:25:07.649  Client: Connection attempt 2 failed: No connection could be made because the target machine actively refused it 127.0.0.1:9003. Retrying...
+2025-04-30T07:25:12.701  Client: Connection attempt 3 failed: No connection could be made because the target machine actively refused it 127.0.0.1:9003. Retrying...
+2025-04-30T07:25:17.763  Client: Connection attempt 4 failed: No connection could be made because the target machine actively refused it 127.0.0.1:9003. Retrying...
+2025-04-30T07:25:20.773  Client: HMD Connected.
+2025-04-30T07:25:20.774  Client: [Feedback]: Sending exercise configuration for exercise 1
+2025-04-30T07:25:23.038  Client: [Intro]: Waiting 4 sec...
+2025-04-30T07:25:27.043  Client: [Demo]: Showing 4 sec...
+2025-04-30T07:25:31.048  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: right)...
+2025-04-30T07:25:34.073  Client: [Preparation CoP]: right foot correctly positioned for the required time.
+2025-04-30T07:25:34.073  Client: Starting set 1 of exercise 1
+2025-04-30T07:25:36.029  Client: [Exercise]: Single-Leg Stance - Right Leg started for 30 seconds...
+2025-04-30T07:25:36.029  Client: [Phase 1]: 30 sec
+2025-04-30T07:25:42.999  Client: [Exercise]: Right Foot Changed to Zone 6
+2025-04-30T07:25:43.000  Client: [Feedback]: Received feedback code for Right foot: 6
+2025-04-30T07:26:06.030  Client: [Client]: Put leg down
+2025-04-30T07:26:09.030  Client: [Feedback]: Sending exercise configuration for exercise 2
+2025-04-30T07:26:10.038  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: left)...
+2025-04-30T07:26:13.067  Client: [Preparation CoP]: left foot correctly positioned for the required time.
+2025-04-30T07:26:13.067  Client: Starting set 1 of exercise 2
+2025-04-30T07:26:15.009  Client: [Exercise]: Single-Leg Stance - Left Leg started for 30 seconds...
+2025-04-30T07:26:15.009  Client: [Phase 1]: 30 sec
+2025-04-30T07:26:35.851  Client: [Exercise]: Left Foot Changed to Zone 1
+2025-04-30T07:26:35.852  Client: [Feedback]: Received feedback code for Left foot: 1
+2025-04-30T07:26:45.009  Client: [Client]: Put leg down
+2025-04-30T07:26:48.018  Client: Repeating Exercises: 1, 2...
+2025-04-30T07:26:48.018  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: right)...
+2025-04-30T07:26:51.043  Client: [Preparation CoP]: right foot correctly positioned for the required time.
+2025-04-30T07:26:51.043  Client: [Feedback]: Sending exercise configuration for exercise 1
+2025-04-30T07:26:52.983  Client: [Exercise]: Single-Leg Stance - Right Leg started for 30 seconds...
+2025-04-30T07:26:52.983  Client: [Phase 1]: 30 sec
+2025-04-30T07:27:06.373  SEND → stop
+2025-04-30T07:27:06.374  Client: [Client]: Stopping visualization and data streams...
+2025-04-30T07:27:06.376  Stop command sent to client.
+2025-04-30T07:27:06.392  Client: [Client]: Visualization and data streams stopped.
+2025-04-30T07:27:07.429  SEND → exit
+2025-04-30T07:27:07.430  Client: HMD Disconnected.
+2025-04-30T07:27:07.431  Exit command sent to client.
+2025-04-30T07:27:07.435  Client connection lost. No data received.
+2025-04-30T07:27:28.367  GUI Server started. Waiting for Client...
+2025-04-30T07:27:29.632  User selected: ID: 1 - Andis
+2025-04-30T07:27:29.638  User confirmed. Now you may connect to the client.
+2025-04-30T07:27:30.233  Client connected!
+2025-04-30T07:27:30.235  Client: connect
+2025-04-30T07:27:30.570  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T07:27:30.572  Selected user's config sent to client.
+2025-04-30T07:27:30.573  SEND → connect
+2025-04-30T07:27:30.575  Connect command sent to client. Waiting for port list...
+2025-04-30T07:27:30.581  Connect button disabled. Awaiting port information.
+2025-04-30T07:27:30.631  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T07:27:30.635  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T07:27:30.640  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T07:27:30.643  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T07:27:30.646  [DEBUG] Creating button for: COM1
+2025-04-30T07:27:30.652  [DEBUG] Added button for COM1.
+2025-04-30T07:27:30.656  [DEBUG] Creating button for: COM7
+2025-04-30T07:27:30.662  [DEBUG] Added button for COM7.
+2025-04-30T07:27:30.666  [DEBUG] Creating button for: COM8
+2025-04-30T07:27:30.672  [DEBUG] Added button for COM8.
+2025-04-30T07:27:30.675  [DEBUG] Creating button for: COM6
+2025-04-30T07:27:30.684  [DEBUG] Added button for COM6.
+2025-04-30T07:27:30.687  [DEBUG] Creating button for: COM9
+2025-04-30T07:27:30.696  [DEBUG] Added button for COM9.
+2025-04-30T07:27:30.699  [DEBUG] Created 5 buttons.
+2025-04-30T07:27:31.112  Selected: COM6
+2025-04-30T07:27:31.385  Selected: COM9
+2025-04-30T07:27:31.389  Sent selected ports to client: COM6,COM9
+2025-04-30T07:27:31.392  Written selected ports to file.
+2025-04-30T07:27:31.397  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T07:27:42.921  SEND → calibrate
+2025-04-30T07:27:42.922  Client: Requesting server to calibrate connected devices...
+2025-04-30T07:27:42.922  Client: [Calibration]: Preparing to calibrate left foot...
+2025-04-30T07:27:42.925  Calibrate command sent to client.
+2025-04-30T07:27:42.980  Client: [Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.
+2025-04-30T07:27:52.926  Client: [Calibration]: Repeat. Right foot calibration starts now.
+2025-04-30T07:28:03.112  Client: Calibration completed.
+2025-04-30T07:28:03.113  Client: Use 'start' to begin visualization.
+2025-04-30T07:28:12.756  GUI Server started. Waiting for Client...
+2025-04-30T07:28:14.650  Client connected!
+2025-04-30T07:28:14.652  Client: connect
+2025-04-30T07:28:14.732  User selected: ID: 1 - Andis
+2025-04-30T07:28:14.738  User confirmed. Now you may connect to the client.
+2025-04-30T07:28:15.900  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T07:28:15.902  Selected user's config sent to client.
+2025-04-30T07:28:15.903  SEND → connect
+2025-04-30T07:28:15.905  Connect command sent to client. Waiting for port list...
+2025-04-30T07:28:15.911  Connect button disabled. Awaiting port information.
+2025-04-30T07:28:15.932  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T07:28:15.936  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T07:28:15.939  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T07:28:15.942  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T07:28:15.945  [DEBUG] Creating button for: COM1
+2025-04-30T07:28:15.951  [DEBUG] Added button for COM1.
+2025-04-30T07:28:15.954  [DEBUG] Creating button for: COM7
+2025-04-30T07:28:15.960  [DEBUG] Added button for COM7.
+2025-04-30T07:28:15.963  [DEBUG] Creating button for: COM8
+2025-04-30T07:28:15.970  [DEBUG] Added button for COM8.
+2025-04-30T07:28:15.973  [DEBUG] Creating button for: COM6
+2025-04-30T07:28:15.982  [DEBUG] Added button for COM6.
+2025-04-30T07:28:15.985  [DEBUG] Creating button for: COM9
+2025-04-30T07:28:15.995  [DEBUG] Added button for COM9.
+2025-04-30T07:28:15.998  [DEBUG] Created 5 buttons.
+2025-04-30T07:28:16.463  Selected: COM6
+2025-04-30T07:28:16.987  Selected: COM9
+2025-04-30T07:28:16.992  Sent selected ports to client: COM6,COM9
+2025-04-30T07:28:16.995  Written selected ports to file.
+2025-04-30T07:28:17.000  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T07:28:27.913  SEND → calibrate
+2025-04-30T07:28:27.914  Client: Requesting server to calibrate connected devices...
+2025-04-30T07:28:27.914  Client: [Calibration]: Preparing to calibrate left foot...
+2025-04-30T07:28:27.917  Calibrate command sent to client.
+2025-04-30T07:28:27.977  Client: [Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.
+2025-04-30T07:28:37.918  Client: [Calibration]: Repeat. Right foot calibration starts now.
+2025-04-30T07:28:47.985  Client: Calibration completed.
+2025-04-30T07:28:47.985  Client: Use 'start' to begin visualization.
+2025-04-30T07:28:58.286  SEND → start
+2025-04-30T07:28:58.292  Start command sent to client.
+2025-04-30T07:28:58.308  Client: Starting HMD application...
+2025-04-30T07:28:58.308  Client: HMD Connected.
+2025-04-30T07:28:58.316  Client: [Feedback]: Sending exercise configuration for exercise 1
+2025-04-30T07:29:00.523  Client: [Intro]: Waiting 4 sec...
+2025-04-30T07:29:04.527  Client: [Demo]: Showing 4 sec...
+2025-04-30T07:29:08.533  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: right)...
+2025-04-30T07:29:08.534  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:08.538  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:09.540  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:09.540  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:10.549  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:10.549  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:11.556  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:11.556  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:12.565  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:12.565  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:13.573  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:13.573  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:14.580  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:14.580  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:15.590  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:15.590  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:16.616  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:16.616  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:17.623  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:17.623  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:18.632  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:18.632  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:19.640  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:19.640  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:20.649  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:20.649  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:21.657  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:21.657  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:22.668  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:22.668  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:23.677  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:23.677  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:24.687  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:24.687  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:25.698  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:25.698  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:26.707  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:26.707  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:27.716  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:27.716  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:28.725  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:28.725  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:29.733  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:29.733  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:30.742  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:30.742  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:31.750  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:31.750  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:32.759  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:32.759  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:33.767  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:33.767  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:34.776  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:29:34.776  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:29:51.107  GUI Server started. Waiting for Client...
+2025-04-30T07:29:52.489  User selected: ID: 1 - Andis
+2025-04-30T07:29:52.495  User confirmed. Now you may connect to the client.
+2025-04-30T07:29:52.997  Client connected!
+2025-04-30T07:29:52.999  Client: connect
+2025-04-30T07:29:53.501  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T07:29:53.503  Selected user's config sent to client.
+2025-04-30T07:29:53.504  SEND → connect
+2025-04-30T07:29:53.505  Connect command sent to client. Waiting for port list...
+2025-04-30T07:29:53.512  Connect button disabled. Awaiting port information.
+2025-04-30T07:29:53.536  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T07:29:53.541  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T07:29:53.544  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T07:29:53.547  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T07:29:53.550  [DEBUG] Creating button for: COM1
+2025-04-30T07:29:53.556  [DEBUG] Added button for COM1.
+2025-04-30T07:29:53.559  [DEBUG] Creating button for: COM7
+2025-04-30T07:29:53.565  [DEBUG] Added button for COM7.
+2025-04-30T07:29:53.568  [DEBUG] Creating button for: COM8
+2025-04-30T07:29:53.574  [DEBUG] Added button for COM8.
+2025-04-30T07:29:53.577  [DEBUG] Creating button for: COM6
+2025-04-30T07:29:53.585  [DEBUG] Added button for COM6.
+2025-04-30T07:29:53.589  [DEBUG] Creating button for: COM9
+2025-04-30T07:29:53.597  [DEBUG] Added button for COM9.
+2025-04-30T07:29:53.600  [DEBUG] Created 5 buttons.
+2025-04-30T07:29:54.186  Selected: COM6
+2025-04-30T07:29:54.468  Selected: COM9
+2025-04-30T07:29:54.472  Sent selected ports to client: COM6,COM9
+2025-04-30T07:29:54.475  Written selected ports to file.
+2025-04-30T07:29:54.481  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T07:30:02.002  SEND → calibrate
+2025-04-30T07:30:02.003  Client: Requesting server to calibrate connected devices...
+2025-04-30T07:30:02.003  Client: [Calibration]: Preparing to calibrate left foot...
+2025-04-30T07:30:02.007  Calibrate command sent to client.
+2025-04-30T07:30:02.068  Client: [Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.
+2025-04-30T07:30:12.013  Client: [Calibration]: Repeat. Right foot calibration starts now.
+2025-04-30T07:30:22.136  Client: Calibration completed.
+2025-04-30T07:30:22.136  Client: Use 'start' to begin visualization.
+2025-04-30T07:30:37.999  SEND → start
+2025-04-30T07:30:38.003  Start command sent to client.
+2025-04-30T07:30:38.020  Client: Starting HMD application...
+2025-04-30T07:30:38.020  Client: HMD Connected.
+2025-04-30T07:30:38.028  Client: [Feedback]: Sending exercise configuration for exercise 1
+2025-04-30T07:30:40.229  Client: [Intro]: Waiting 4 sec...
+2025-04-30T07:30:44.233  Client: [Demo]: Showing 4 sec...
+2025-04-30T07:30:48.241  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: right)...
+2025-04-30T07:30:48.241  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:30:48.246  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:30:49.249  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:30:49.249  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:30:50.258  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:30:50.258  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:30:51.268  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:30:51.268  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:30:52.276  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:30:52.276  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:30:53.284  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:30:53.284  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:30:55.301  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:30:55.301  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:30:56.310  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:30:56.310  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:30:57.318  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:30:57.318  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:30:58.327  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:30:58.327  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:30:59.337  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:30:59.337  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:31:00.345  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:31:00.345  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:31:01.353  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:31:01.354  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:31:02.362  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:31:02.362  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:31:03.372  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:31:03.372  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:31:04.397  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:31:04.397  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:31:05.408  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:31:05.408  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:31:06.417  Client: [Feedback]: Received feedback code for Right foot: 8
+2025-04-30T07:31:06.417  Client: [Preparation CoP]: Failed. Restarting...
+2025-04-30T07:31:27.139  GUI Server started. Waiting for Client...
+2025-04-30T07:31:28.764  User selected: ID: 1 - Andis
+2025-04-30T07:31:28.771  User confirmed. Now you may connect to the client.
+2025-04-30T07:31:29.025  Client connected!
+2025-04-30T07:31:29.027  Client: connect
+2025-04-30T07:31:29.730  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T07:31:29.732  Selected user's config sent to client.
+2025-04-30T07:31:29.733  SEND → connect
+2025-04-30T07:31:29.734  Connect command sent to client. Waiting for port list...
+2025-04-30T07:31:29.741  Connect button disabled. Awaiting port information.
+2025-04-30T07:31:29.764  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T07:31:29.770  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T07:31:29.774  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T07:31:29.777  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T07:31:29.780  [DEBUG] Creating button for: COM1
+2025-04-30T07:31:29.787  [DEBUG] Added button for COM1.
+2025-04-30T07:31:29.790  [DEBUG] Creating button for: COM7
+2025-04-30T07:31:29.796  [DEBUG] Added button for COM7.
+2025-04-30T07:31:29.800  [DEBUG] Creating button for: COM8
+2025-04-30T07:31:29.806  [DEBUG] Added button for COM8.
+2025-04-30T07:31:29.809  [DEBUG] Creating button for: COM6
+2025-04-30T07:31:29.819  [DEBUG] Added button for COM6.
+2025-04-30T07:31:29.822  [DEBUG] Creating button for: COM9
+2025-04-30T07:31:29.831  [DEBUG] Added button for COM9.
+2025-04-30T07:31:29.834  [DEBUG] Created 5 buttons.
+2025-04-30T07:31:30.393  Selected: COM6
+2025-04-30T07:31:30.887  Selected: COM9
+2025-04-30T07:31:30.891  Sent selected ports to client: COM6,COM9
+2025-04-30T07:31:30.895  Written selected ports to file.
+2025-04-30T07:31:30.900  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T07:31:40.927  SEND → calibrate
+2025-04-30T07:31:40.928  Client: Requesting server to calibrate connected devices...
+2025-04-30T07:31:40.928  Client: [Calibration]: Preparing to calibrate left foot...
+2025-04-30T07:31:40.932  Calibrate command sent to client.
+2025-04-30T07:31:40.952  Client: [Calibration]: Stand with both feet. Lift each foot one at a time after 1 second.
+2025-04-30T07:31:50.940  Client: [Calibration]: Repeat. Right foot calibration starts now.
+2025-04-30T07:32:01.064  Client: Calibration completed.
+2025-04-30T07:32:01.064  Client: Use 'start' to begin visualization.
+2025-04-30T07:32:09.807  SEND → start
+2025-04-30T07:32:09.812  Start command sent to client.
+2025-04-30T07:32:09.827  Client: Starting HMD application...
+2025-04-30T07:32:09.828  Client: HMD Connected.
+2025-04-30T07:32:09.835  Client: [Feedback]: Sending exercise configuration for exercise 1
+2025-04-30T07:32:12.030  Client: [Intro]: Waiting 4 sec...
+2025-04-30T07:32:16.036  Client: [Demo]: Showing 4 sec...
+2025-04-30T07:32:20.039  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: right)...
+2025-04-30T07:32:23.068  Client: [Preparation CoP]: right foot correctly positioned for the required time.
+2025-04-30T07:32:23.068  Client: Starting set 1 of exercise 1
+2025-04-30T07:32:25.026  Client: [Exercise]: Single-Leg Stance - Right Leg started for 30 seconds...
+2025-04-30T07:32:25.026  Client: [Phase 1]: 30 sec
+2025-04-30T07:32:55.027  Client: [Client]: Put leg down
+2025-04-30T07:32:58.041  Client: [Feedback]: Sending exercise configuration for exercise 2
+2025-04-30T07:32:59.049  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: left)...
+2025-04-30T07:33:02.076  Client: [Preparation CoP]: left foot correctly positioned for the required time.
+2025-04-30T07:33:02.076  Client: Starting set 1 of exercise 2
+2025-04-30T07:33:04.031  Client: [Exercise]: Single-Leg Stance - Left Leg started for 30 seconds...
+2025-04-30T07:33:04.031  Client: [Phase 1]: 30 sec
+2025-04-30T07:33:13.112  Client: [Exercise]: Left Foot Changed to Zone 1
+2025-04-30T07:33:13.113  Client: [Feedback]: Received feedback code for Left foot: 1
+2025-04-30T07:33:13.799  Client: [Exercise]: Left Foot Changed to Zone 5
+2025-04-30T07:33:13.799  Client: [Feedback]: Received feedback code for Left foot: 5
+2025-04-30T07:33:14.708  Client: [Exercise]: Left Foot Changed to Zone 1
+2025-04-30T07:33:14.708  Client: [Feedback]: Received feedback code for Left foot: 1
+2025-04-30T07:33:23.546  Client: [Exercise]: Left Foot Changed to Zone 5
+2025-04-30T07:33:23.546  Client: [Feedback]: Received feedback code for Left foot: 5
+2025-04-30T07:33:28.108  Client: [Exercise]: Left Foot Changed to Zone 4
+2025-04-30T07:33:28.108  Client: [Feedback]: Received feedback code for Left foot: 4
+2025-04-30T07:33:28.319  Client: [Exercise]: Left Foot Changed to Zone 1
+2025-04-30T07:33:28.319  Client: [Feedback]: Received feedback code for Left foot: 1
+2025-04-30T07:33:34.031  Client: [Client]: Put leg down
+2025-04-30T07:33:37.043  Client: Repeating Exercises: 1, 2...
+2025-04-30T07:33:37.044  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: right)...
+2025-04-30T07:33:40.084  Client: [Preparation CoP]: right foot correctly positioned for the required time.
+2025-04-30T07:33:40.084  Client: [Feedback]: Sending exercise configuration for exercise 1
+2025-04-30T07:33:42.026  Client: [Exercise]: Single-Leg Stance - Right Leg started for 30 seconds...
+2025-04-30T07:33:42.026  Client: [Phase 1]: 30 sec
+2025-04-30T07:34:03.282  Client: [Exercise]: Right Foot Changed to Zone 1
+2025-04-30T07:34:03.282  Client: [Feedback]: Received feedback code for Right foot: 1
+2025-04-30T07:34:12.027  Client: [Client]: Put leg down
+2025-04-30T07:34:15.041  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: left)...
+2025-04-30T07:34:18.070  Client: [Preparation CoP]: left foot correctly positioned for the required time.
+2025-04-30T07:34:18.070  Client: [Feedback]: Sending exercise configuration for exercise 2
+2025-04-30T07:34:20.012  Client: [Exercise]: Single-Leg Stance - Left Leg started for 30 seconds...
+2025-04-30T07:34:20.012  Client: [Phase 1]: 30 sec
+2025-04-30T07:34:21.100  Client: [Exercise]: Left Foot Changed to Zone 1
+2025-04-30T07:34:21.102  Client: [Feedback]: Received feedback code for Left foot: 1
+2025-04-30T07:34:21.879  Client: [Exercise]: Left Foot Changed to Zone 5
+2025-04-30T07:34:21.879  Client: [Feedback]: Received feedback code for Left foot: 5
+2025-04-30T07:34:23.156  Client: [Exercise]: Left Foot Changed to Zone 4
+2025-04-30T07:34:23.157  Client: [Feedback]: Received feedback code for Left foot: 4
+2025-04-30T07:34:23.386  Client: [Exercise]: Left Foot Changed to Zone 5
+2025-04-30T07:34:23.387  Client: [Feedback]: Received feedback code for Left foot: 5
+2025-04-30T07:34:29.076  SEND → stop
+2025-04-30T07:34:29.077  Client: [Client]: Stopping visualization and data streams...
+2025-04-30T07:34:29.078  Stop command sent to client.
+2025-04-30T07:34:29.090  Client: [Client]: Visualization and data streams stopped.
+2025-04-30T07:34:29.719  SEND → exit
+2025-04-30T07:34:29.721  Client: HMD Disconnected.
+2025-04-30T07:34:29.721  Exit command sent to client.
+2025-04-30T07:34:29.725  Client connection lost. No data received.
+2025-04-30T07:43:25.260  GUI Server started. Waiting for Client...
+2025-04-30T07:43:26.714  User selected: ID: 1 - Andis
+2025-04-30T07:43:26.720  User confirmed. Now you may connect to the client.
+2025-04-30T07:43:27.143  Client connected!
+2025-04-30T07:43:27.145  Client: connect
+2025-04-30T07:43:27.641  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T07:43:27.643  Selected user's config sent to client.
+2025-04-30T07:43:27.644  SEND → connect
+2025-04-30T07:43:27.646  Connect command sent to client. Waiting for port list...
+2025-04-30T07:43:27.652  Connect button disabled. Awaiting port information.
+2025-04-30T07:43:27.675  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T07:43:27.679  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T07:43:27.682  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T07:43:27.685  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T07:43:27.688  [DEBUG] Creating button for: COM1
+2025-04-30T07:43:27.695  [DEBUG] Added button for COM1.
+2025-04-30T07:43:27.698  [DEBUG] Creating button for: COM7
+2025-04-30T07:43:27.703  [DEBUG] Added button for COM7.
+2025-04-30T07:43:27.706  [DEBUG] Creating button for: COM8
+2025-04-30T07:43:27.713  [DEBUG] Added button for COM8.
+2025-04-30T07:43:27.716  [DEBUG] Creating button for: COM6
+2025-04-30T07:43:27.727  [DEBUG] Added button for COM6.
+2025-04-30T07:43:27.731  [DEBUG] Creating button for: COM9
+2025-04-30T07:43:27.745  [DEBUG] Added button for COM9.
+2025-04-30T07:43:27.750  [DEBUG] Created 5 buttons.
+2025-04-30T07:43:28.266  Selected: COM6
+2025-04-30T07:43:29.508  Selected: COM9
+2025-04-30T07:43:29.512  Sent selected ports to client: COM6,COM9
+2025-04-30T07:43:29.515  Written selected ports to file.
+2025-04-30T07:43:29.520  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T07:43:41.394  SEND → calibrate
+2025-04-30T07:43:41.395  Client: Requesting server to calibrate connected devices...
+2025-04-30T07:43:41.395  Client: [Calibration]: Lift LEFT foot
+2025-04-30T07:43:41.399  Calibrate command sent to client.
+2025-04-30T07:43:41.419  Client: [Calibration]: Calibrating LEFT foot
+2025-04-30T07:43:51.407  Client: [Calibration]: Lift RIGHT foot
+2025-04-30T07:43:51.407  Client: [Calibration]: Calibrating RIGHT foot
+2025-04-30T07:44:01.513  Client: Calibration completed.
+2025-04-30T07:44:01.513  Client: Use 'start' to begin visualization.
+2025-04-30T07:44:16.930  Error while waiting for client response: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T07:44:16.931  Error reading message: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T09:49:09.074  GUI Server started. Waiting for Client...
+2025-04-30T09:49:10.604  User selected: ID: 1 - Andis
+2025-04-30T09:49:10.613  User confirmed. Now you may connect to the client.
+2025-04-30T09:49:10.970  Client connected!
+2025-04-30T09:49:10.974  Client: connect
+2025-04-30T09:49:12.872  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T09:49:12.873  Selected user's config sent to client.
+2025-04-30T09:49:12.875  SEND → connect
+2025-04-30T09:49:12.876  Connect command sent to client. Waiting for port list...
+2025-04-30T09:49:12.883  Connect button disabled. Awaiting port information.
+2025-04-30T09:49:12.935  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T09:49:12.939  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T09:49:12.943  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T09:49:12.947  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T09:49:12.950  [DEBUG] Creating button for: COM1
+2025-04-30T09:49:12.956  [DEBUG] Added button for COM1.
+2025-04-30T09:49:12.960  [DEBUG] Creating button for: COM7
+2025-04-30T09:49:12.965  [DEBUG] Added button for COM7.
+2025-04-30T09:49:12.969  [DEBUG] Creating button for: COM8
+2025-04-30T09:49:12.976  [DEBUG] Added button for COM8.
+2025-04-30T09:49:12.979  [DEBUG] Creating button for: COM6
+2025-04-30T09:49:12.987  [DEBUG] Added button for COM6.
+2025-04-30T09:49:12.990  [DEBUG] Creating button for: COM9
+2025-04-30T09:49:12.998  [DEBUG] Added button for COM9.
+2025-04-30T09:49:13.002  [DEBUG] Created 5 buttons.
+2025-04-30T09:49:13.678  Selected: COM6
+2025-04-30T09:49:14.101  Selected: COM9
+2025-04-30T09:49:14.105  Sent selected ports to client: COM6,COM9
+2025-04-30T09:49:14.108  Written selected ports to file.
+2025-04-30T09:49:14.114  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T09:49:26.825  SEND → calibrate
+2025-04-30T09:49:26.826  Client: Requesting server to calibrate connected devices...
+2025-04-30T09:49:26.826  Client: [Calibration]: Lift LEFT foot
+2025-04-30T09:49:26.829  Calibrate command sent to client.
+2025-04-30T09:49:26.850  Client: [Calibration]: Calibrating LEFT foot
+2025-04-30T09:49:36.841  Client: [Calibration]: Lift RIGHT foot
+2025-04-30T09:49:36.841  Client: [Calibration]: Calibrating RIGHT foot
+2025-04-30T09:49:46.944  Client: Calibration completed.
+2025-04-30T09:49:46.944  Client: Use 'start' to begin visualization.
+2025-04-30T09:50:24.453  Error reading message: Unable to read data from the transport connection: An existing connection was forcibly closed by the remote host.
+2025-04-30T09:50:24.453  Error while waiting for client response: Unable to read data from the transport connection: An existing connection was forcibly closed by the remote host.
+2025-04-30T09:51:38.735  GUI Server started. Waiting for Client...
+2025-04-30T09:51:39.854  User selected: ID: 1 - Andis
+2025-04-30T09:51:39.862  User confirmed. Now you may connect to the client.
+2025-04-30T09:51:40.622  Client connected!
+2025-04-30T09:51:40.624  Client: connect
+2025-04-30T09:51:41.059  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T09:51:41.060  Selected user's config sent to client.
+2025-04-30T09:51:41.062  SEND → connect
+2025-04-30T09:51:41.063  Connect command sent to client. Waiting for port list...
+2025-04-30T09:51:41.070  Connect button disabled. Awaiting port information.
+2025-04-30T09:51:41.092  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T09:51:41.096  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T09:51:41.100  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T09:51:41.103  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T09:51:41.106  [DEBUG] Creating button for: COM1
+2025-04-30T09:51:41.112  [DEBUG] Added button for COM1.
+2025-04-30T09:51:41.115  [DEBUG] Creating button for: COM7
+2025-04-30T09:51:41.121  [DEBUG] Added button for COM7.
+2025-04-30T09:51:41.124  [DEBUG] Creating button for: COM8
+2025-04-30T09:51:41.131  [DEBUG] Added button for COM8.
+2025-04-30T09:51:41.134  [DEBUG] Creating button for: COM6
+2025-04-30T09:51:41.143  [DEBUG] Added button for COM6.
+2025-04-30T09:51:41.146  [DEBUG] Creating button for: COM9
+2025-04-30T09:51:41.159  [DEBUG] Added button for COM9.
+2025-04-30T09:51:41.164  [DEBUG] Created 5 buttons.
+2025-04-30T09:51:41.564  Selected: COM6
+2025-04-30T09:51:41.817  Selected: COM9
+2025-04-30T09:51:41.821  Sent selected ports to client: COM6,COM9
+2025-04-30T09:51:41.824  Written selected ports to file.
+2025-04-30T09:51:41.830  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T09:51:54.174  SEND → calibrate
+2025-04-30T09:51:54.174  Client: Requesting server to calibrate connected devices...
+2025-04-30T09:51:54.175  Client: [Calibration]: Lift LEFT foot
+2025-04-30T09:51:54.178  Calibrate command sent to client.
+2025-04-30T09:51:54.198  Client: [Calibration]: Calibrating LEFT foot[Calibration]: After 10 seconds, put LEFT foot down and stand on both feet
+2025-04-30T09:52:04.186  Client: [Calibration]: Lift RIGHT foot
+2025-04-30T09:52:04.186  Client: [Calibration]: Calibrating RIGHT foot
+2025-04-30T09:52:04.189  Client: [Calibration]: After 10 seconds, put RIGHT foot down and stand on both feet
+2025-04-30T09:52:14.291  Client: Calibration completed.
+2025-04-30T09:52:14.291  Client: Use 'start' to begin visualization.
+2025-04-30T09:52:53.901  SEND → exit
+2025-04-30T09:52:53.903  Client: HMD Disconnected.
+2025-04-30T09:52:53.904  Exit command sent to client.
+2025-04-30T09:52:53.907  Client connection lost. No data received.
+2025-04-30T09:52:58.122  GUI Server started. Waiting for Client...
+2025-04-30T09:52:59.328  User selected: ID: 1 - Andis
+2025-04-30T09:52:59.334  User confirmed. Now you may connect to the client.
+2025-04-30T09:53:00.013  Client connected!
+2025-04-30T09:53:00.016  Client: connect
+2025-04-30T09:53:00.591  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T09:53:00.593  Selected user's config sent to client.
+2025-04-30T09:53:00.594  SEND → connect
+2025-04-30T09:53:00.596  Connect command sent to client. Waiting for port list...
+2025-04-30T09:53:00.602  Connect button disabled. Awaiting port information.
+2025-04-30T09:53:00.627  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T09:53:00.632  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T09:53:00.636  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T09:53:00.639  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T09:53:00.642  [DEBUG] Creating button for: COM1
+2025-04-30T09:53:00.648  [DEBUG] Added button for COM1.
+2025-04-30T09:53:00.651  [DEBUG] Creating button for: COM7
+2025-04-30T09:53:00.657  [DEBUG] Added button for COM7.
+2025-04-30T09:53:00.659  [DEBUG] Creating button for: COM8
+2025-04-30T09:53:00.666  [DEBUG] Added button for COM8.
+2025-04-30T09:53:00.669  [DEBUG] Creating button for: COM6
+2025-04-30T09:53:00.678  [DEBUG] Added button for COM6.
+2025-04-30T09:53:00.681  [DEBUG] Creating button for: COM9
+2025-04-30T09:53:00.690  [DEBUG] Added button for COM9.
+2025-04-30T09:53:00.693  [DEBUG] Created 5 buttons.
+2025-04-30T09:53:01.227  Selected: COM6
+2025-04-30T09:53:01.492  Selected: COM9
+2025-04-30T09:53:01.496  Sent selected ports to client: COM6,COM9
+2025-04-30T09:53:01.499  Written selected ports to file.
+2025-04-30T09:53:01.504  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T09:53:02.336  SEND → calibrate
+2025-04-30T09:53:02.340  Calibrate command sent to client.
+2025-04-30T09:53:11.960  Client: Requesting server to calibrate connected devices...
+2025-04-30T09:53:11.960  Client: [Calibration]: Lift LEFT foot
+2025-04-30T09:53:11.964  Client: [Calibration]: Calibrating LEFT foot[Calibration]: After 10 seconds, put LEFT foot down and stand on both feet
+2025-04-30T09:53:21.969  Client: [Calibration]: Lift RIGHT foot
+2025-04-30T09:53:21.969  Client: [Calibration]: Calibrating RIGHT foot
+2025-04-30T09:53:21.972  Client: [Calibration]: After 10 seconds, put RIGHT foot down and stand on both feet
+2025-04-30T09:53:32.075  Client: Calibration completed.
+2025-04-30T09:53:32.075  Client: Use 'start' to begin visualization.
+2025-04-30T09:53:45.360  GUI Server started. Waiting for Client...
+2025-04-30T09:53:46.643  User selected: ID: 1 - Andis
+2025-04-30T09:53:46.649  User confirmed. Now you may connect to the client.
+2025-04-30T09:53:47.237  Client connected!
+2025-04-30T09:53:47.240  Client: connect
+2025-04-30T09:53:47.727  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T09:53:47.729  Selected user's config sent to client.
+2025-04-30T09:53:47.730  SEND → connect
+2025-04-30T09:53:47.732  Connect command sent to client. Waiting for port list...
+2025-04-30T09:53:47.738  Connect button disabled. Awaiting port information.
+2025-04-30T09:53:47.761  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T09:53:47.766  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T09:53:47.770  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T09:53:47.774  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T09:53:47.777  [DEBUG] Creating button for: COM1
+2025-04-30T09:53:47.783  [DEBUG] Added button for COM1.
+2025-04-30T09:53:47.787  [DEBUG] Creating button for: COM7
+2025-04-30T09:53:47.793  [DEBUG] Added button for COM7.
+2025-04-30T09:53:47.796  [DEBUG] Creating button for: COM8
+2025-04-30T09:53:47.802  [DEBUG] Added button for COM8.
+2025-04-30T09:53:47.805  [DEBUG] Creating button for: COM6
+2025-04-30T09:53:47.815  [DEBUG] Added button for COM6.
+2025-04-30T09:53:47.818  [DEBUG] Creating button for: COM9
+2025-04-30T09:53:47.828  [DEBUG] Added button for COM9.
+2025-04-30T09:53:47.831  [DEBUG] Created 5 buttons.
+2025-04-30T09:53:48.750  Selected: COM6
+2025-04-30T09:53:48.966  Selected: COM9
+2025-04-30T09:53:48.970  Sent selected ports to client: COM6,COM9
+2025-04-30T09:53:48.973  Written selected ports to file.
+2025-04-30T09:53:48.979  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T09:53:49.425  SEND → calibrate
+2025-04-30T09:53:49.429  Calibrate command sent to client.
+2025-04-30T09:53:59.617  Client: Requesting server to calibrate connected devices...
+2025-04-30T09:53:59.617  Client: [Calibration]: Lift LEFT foot
+2025-04-30T09:53:59.619  Client: [Calibration]: Calibrating LEFT foot
+2025-04-30T09:54:09.631  Client: [Calibration]:put LEFT foot down and stand on both feet
+2025-04-30T09:54:09.631  Client: [Calibration]: Lift RIGHT foot
+2025-04-30T09:54:09.633  Client: [Calibration]: Calibrating RIGHT foot[Calibration]: After 10 seconds, put RIGHT foot down and stand on both feet
+2025-04-30T09:54:19.733  Client: Calibration completed.
+2025-04-30T09:54:19.733  Client: Use 'start' to begin visualization.
+2025-04-30T09:54:39.034  Error while waiting for client response: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T09:54:39.034  Error reading message: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T09:55:10.846  GUI Server started. Waiting for Client...
+2025-04-30T09:55:15.052  GUI Server started. Waiting for Client...
+2025-04-30T09:55:16.026  User selected: ID: 1 - Andis
+2025-04-30T09:55:16.033  User confirmed. Now you may connect to the client.
+2025-04-30T09:55:16.942  Client connected!
+2025-04-30T09:55:16.944  Client: connect
+2025-04-30T09:55:17.304  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T09:55:17.306  Selected user's config sent to client.
+2025-04-30T09:55:17.307  SEND → connect
+2025-04-30T09:55:17.308  Connect command sent to client. Waiting for port list...
+2025-04-30T09:55:17.315  Connect button disabled. Awaiting port information.
+2025-04-30T09:55:17.337  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T09:55:17.341  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T09:55:17.344  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T09:55:17.348  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T09:55:17.351  [DEBUG] Creating button for: COM1
+2025-04-30T09:55:17.356  [DEBUG] Added button for COM1.
+2025-04-30T09:55:17.359  [DEBUG] Creating button for: COM7
+2025-04-30T09:55:17.364  [DEBUG] Added button for COM7.
+2025-04-30T09:55:17.367  [DEBUG] Creating button for: COM8
+2025-04-30T09:55:17.374  [DEBUG] Added button for COM8.
+2025-04-30T09:55:17.378  [DEBUG] Creating button for: COM6
+2025-04-30T09:55:17.386  [DEBUG] Added button for COM6.
+2025-04-30T09:55:17.389  [DEBUG] Creating button for: COM9
+2025-04-30T09:55:17.398  [DEBUG] Added button for COM9.
+2025-04-30T09:55:17.401  [DEBUG] Created 5 buttons.
+2025-04-30T09:55:17.802  Selected: COM6
+2025-04-30T09:55:18.066  Selected: COM9
+2025-04-30T09:55:18.070  Sent selected ports to client: COM6,COM9
+2025-04-30T09:55:18.072  Written selected ports to file.
+2025-04-30T09:55:18.078  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T09:55:24.499  SEND → calibrate
+2025-04-30T09:55:24.504  Calibrate command sent to client.
+2025-04-30T09:55:28.657  Client: Requesting server to calibrate connected devices...
+2025-04-30T09:55:28.657  Client: [Calibration]: Lift LEFT foot
+2025-04-30T09:55:28.661  Client: [Calibration]: Calibrating LEFT foot[Calibration]: put RIGHT foot down and stand on both feet
+2025-04-30T09:55:38.672  Client: [Calibration]:put LEFT foot down and stand on both feet
+2025-04-30T09:55:38.672  Client: [Calibration]: Lift RIGHT foot
+2025-04-30T09:55:38.675  Client: [Calibration]: Calibrating RIGHT foot
+2025-04-30T09:55:48.719  Client: Calibration completed.
+2025-04-30T09:55:48.719  Client: Use 'start' to begin visualization.
+2025-04-30T09:55:58.785  Error reading message: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T09:55:58.785  Error while waiting for client response: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T09:56:27.778  GUI Server started. Waiting for Client...
+2025-04-30T09:56:28.977  User selected: ID: 1 - Andis
+2025-04-30T09:56:28.982  User confirmed. Now you may connect to the client.
+2025-04-30T09:56:29.658  Client connected!
+2025-04-30T09:56:29.660  Client: connect
+2025-04-30T09:56:30.011  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T09:56:30.012  Selected user's config sent to client.
+2025-04-30T09:56:30.014  SEND → connect
+2025-04-30T09:56:30.015  Connect command sent to client. Waiting for port list...
+2025-04-30T09:56:30.021  Connect button disabled. Awaiting port information.
+2025-04-30T09:56:30.045  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T09:56:30.049  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T09:56:30.053  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T09:56:30.056  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T09:56:30.061  [DEBUG] Creating button for: COM1
+2025-04-30T09:56:30.067  [DEBUG] Added button for COM1.
+2025-04-30T09:56:30.070  [DEBUG] Creating button for: COM7
+2025-04-30T09:56:30.076  [DEBUG] Added button for COM7.
+2025-04-30T09:56:30.080  [DEBUG] Creating button for: COM8
+2025-04-30T09:56:30.086  [DEBUG] Added button for COM8.
+2025-04-30T09:56:30.089  [DEBUG] Creating button for: COM6
+2025-04-30T09:56:30.099  [DEBUG] Added button for COM6.
+2025-04-30T09:56:30.103  [DEBUG] Creating button for: COM9
+2025-04-30T09:56:30.112  [DEBUG] Added button for COM9.
+2025-04-30T09:56:30.115  [DEBUG] Created 5 buttons.
+2025-04-30T09:56:30.563  Selected: COM6
+2025-04-30T09:56:30.793  Selected: COM9
+2025-04-30T09:56:30.797  Sent selected ports to client: COM6,COM9
+2025-04-30T09:56:30.800  Written selected ports to file.
+2025-04-30T09:56:30.805  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T09:56:31.538  SEND → calibrate
+2025-04-30T09:56:31.541  Calibrate command sent to client.
+2025-04-30T09:56:41.382  Client: Requesting server to calibrate connected devices...
+2025-04-30T09:56:41.382  Client: [Calibration]: Lift LEFT foot
+2025-04-30T09:56:41.385  Client: [Calibration]: Calibrating LEFT foot
+2025-04-30T09:56:51.396  Client: [Calibration]:put LEFT foot down and stand on both feet
+2025-04-30T09:56:51.396  Client: [Calibration]: Lift RIGHT foot
+2025-04-30T09:56:51.398  Client: [Calibration]: Calibrating RIGHT foot 
+ Stand on both feet.
+2025-04-30T09:57:01.499  Client: Calibration completed.
+2025-04-30T09:57:01.499  Client: Use 'start' to begin visualization.
+2025-04-30T10:33:51.559  SEND → exit
+2025-04-30T10:33:51.561  Exit command sent to client.
+2025-04-30T10:33:51.561  Client: HMD Disconnected.
+2025-04-30T10:33:51.565  Client connection lost. No data received.
+2025-04-30T11:43:31.134  GUI Server started. Waiting for Client...
+2025-04-30T11:43:32.949  Client connected!
+2025-04-30T11:43:32.951  Client: connect
+2025-04-30T11:43:58.830  User selected: ID: 1 - Andis
+2025-04-30T11:43:58.836  User confirmed. Now you may connect to the client.
+2025-04-30T11:44:13.440  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T11:44:13.441  Selected user's config sent to client.
+2025-04-30T11:44:13.443  SEND → connect
+2025-04-30T11:44:13.445  Connect command sent to client. Waiting for port list...
+2025-04-30T11:44:13.451  Connect button disabled. Awaiting port information.
+2025-04-30T11:44:13.479  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T11:44:13.484  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T11:44:13.487  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T11:44:13.490  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T11:44:13.494  [DEBUG] Creating button for: COM1
+2025-04-30T11:44:13.500  [DEBUG] Added button for COM1.
+2025-04-30T11:44:13.503  [DEBUG] Creating button for: COM7
+2025-04-30T11:44:13.510  [DEBUG] Added button for COM7.
+2025-04-30T11:44:13.514  [DEBUG] Creating button for: COM8
+2025-04-30T11:44:13.522  [DEBUG] Added button for COM8.
+2025-04-30T11:44:13.525  [DEBUG] Creating button for: COM6
+2025-04-30T11:44:13.532  [DEBUG] Added button for COM6.
+2025-04-30T11:44:13.535  [DEBUG] Creating button for: COM9
+2025-04-30T11:44:13.542  [DEBUG] Added button for COM9.
+2025-04-30T11:44:13.546  [DEBUG] Created 5 buttons.
+2025-04-30T11:44:16.064  Selected: COM6
+2025-04-30T11:44:16.661  Selected: COM9
+2025-04-30T11:44:16.665  Sent selected ports to client: COM6,COM9
+2025-04-30T11:44:16.669  Written selected ports to file.
+2025-04-30T11:44:16.675  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T11:45:17.628  SEND → calibrate
+2025-04-30T11:45:17.629  Client: Requesting server to calibrate connected devices...
+2025-04-30T11:45:17.629  Client: [Calibration]: Lift LEFT foot
+2025-04-30T11:45:17.633  Calibrate command sent to client.
+2025-04-30T11:45:17.655  Client: [Calibration]: Calibrating LEFT foot
+2025-04-30T11:45:27.639  Client: [Calibration]:put LEFT foot down and stand on both feet
+2025-04-30T11:45:27.639  Client: [Calibration]: Lift RIGHT foot
+2025-04-30T11:45:27.643  Client: [Calibration]: Calibrating RIGHT foot 
+ Stand on both feet.
+2025-04-30T11:45:37.815  Client: Calibration completed.
+2025-04-30T11:45:37.815  Client: Use 'start' to begin visualization.
+2025-04-30T11:46:24.956  SEND → start
+2025-04-30T11:46:24.961  Start command sent to client.
+2025-04-30T11:46:24.980  Client: Starting HMD application...
+2025-04-30T11:46:24.980  Client: HMD Connected.
+2025-04-30T11:46:24.990  Client: [Feedback]: Sending exercise configuration for exercise 1
+2025-04-30T11:46:27.379  Client: [Intro]: Waiting 4 sec...
+2025-04-30T11:46:31.382  Client: [Demo]: Showing 4 sec...
+2025-04-30T11:46:35.386  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: right)...
+2025-04-30T11:46:38.410  Client: [Preparation CoP]: right foot correctly positioned for the required time.
+2025-04-30T11:46:38.410  Client: Starting set 1 of exercise 1
+2025-04-30T11:46:40.381  Client: [Exercise]: Single-Leg Stance - Right Leg started for 30 seconds...
+2025-04-30T11:46:40.381  Client: [Phase 1]: 30 sec
+2025-04-30T11:46:48.891  Client: [Exercise]: Right Foot Changed to Zone 1
+2025-04-30T11:46:48.891  Client: [Feedback]: Received feedback code for Right foot: 1
+2025-04-30T11:47:10.381  Client: [Client]: Put leg down
+2025-04-30T11:47:13.389  Client: [Feedback]: Sending exercise configuration for exercise 2
+2025-04-30T11:47:14.397  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: left)...
+2025-04-30T11:47:17.422  Client: [Preparation CoP]: left foot correctly positioned for the required time.
+2025-04-30T11:47:17.422  Client: Starting set 1 of exercise 2
+2025-04-30T11:47:19.377  Client: [Exercise]: Single-Leg Stance - Left Leg started for 30 seconds...
+2025-04-30T11:47:19.377  Client: [Phase 1]: 30 sec
+2025-04-30T11:47:20.850  Client: [Exercise]: Left Foot Changed to Zone 1
+2025-04-30T11:47:20.850  Client: [Feedback]: Received feedback code for Left foot: 1
+2025-04-30T11:47:29.418  Client: [Exercise]: Left Foot Changed to Zone 5
+2025-04-30T11:47:29.419  Client: [Feedback]: Received feedback code for Left foot: 5
+2025-04-30T11:47:49.377  Client: [Client]: Put leg down
+2025-04-30T11:47:52.389  Client: Repeating Exercises: 1, 2...
+2025-04-30T11:47:52.389  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: right)...
+2025-04-30T11:47:55.412  Client: [Preparation CoP]: right foot correctly positioned for the required time.
+2025-04-30T11:47:55.412  Client: [Feedback]: Sending exercise configuration for exercise 1
+2025-04-30T11:47:57.353  Client: [Exercise]: Single-Leg Stance - Right Leg started for 30 seconds...
+2025-04-30T11:47:57.353  Client: [Phase 1]: 30 sec
+2025-04-30T11:47:57.628  Client: [Exercise]: Right Foot Changed to Zone 1
+2025-04-30T11:47:57.629  Client: [Feedback]: Received feedback code for Right foot: 1
+2025-04-30T11:48:24.747  SEND → stop
+2025-04-30T11:48:24.748  Client: [Client]: Stopping visualization and data streams...
+2025-04-30T11:48:24.749  Stop command sent to client.
+2025-04-30T11:48:24.765  Client: [Client]: Visualization and data streams stopped.
+2025-04-30T11:48:26.355  SEND → exit
+2025-04-30T11:48:26.356  Client: HMD Disconnected.
+2025-04-30T11:48:26.357  Exit command sent to client.
+2025-04-30T11:48:26.360  Client connection lost. No data received.
+2025-04-30T11:49:15.029  GUI Server started. Waiting for Client...
+2025-04-30T11:49:16.898  Client connected!
+2025-04-30T11:49:16.900  Client: connect
+2025-04-30T11:49:17.944  User selected: ID: 1 - Andis
+2025-04-30T11:49:17.952  User confirmed. Now you may connect to the client.
+2025-04-30T11:49:23.117  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T11:49:23.119  Selected user's config sent to client.
+2025-04-30T11:49:23.121  SEND → connect
+2025-04-30T11:49:23.122  Connect command sent to client. Waiting for port list...
+2025-04-30T11:49:23.129  Connect button disabled. Awaiting port information.
+2025-04-30T11:49:23.152  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T11:49:23.158  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T11:49:23.161  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T11:49:23.164  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T11:49:23.167  [DEBUG] Creating button for: COM1
+2025-04-30T11:49:23.173  [DEBUG] Added button for COM1.
+2025-04-30T11:49:23.176  [DEBUG] Creating button for: COM7
+2025-04-30T11:49:23.181  [DEBUG] Added button for COM7.
+2025-04-30T11:49:23.184  [DEBUG] Creating button for: COM8
+2025-04-30T11:49:23.191  [DEBUG] Added button for COM8.
+2025-04-30T11:49:23.195  [DEBUG] Creating button for: COM6
+2025-04-30T11:49:23.203  [DEBUG] Added button for COM6.
+2025-04-30T11:49:23.206  [DEBUG] Creating button for: COM9
+2025-04-30T11:49:23.214  [DEBUG] Added button for COM9.
+2025-04-30T11:49:23.217  [DEBUG] Created 5 buttons.
+2025-04-30T11:49:23.973  Selected: COM6
+2025-04-30T11:49:24.343  Selected: COM9
+2025-04-30T11:49:24.347  Sent selected ports to client: COM6,COM9
+2025-04-30T11:49:24.351  Written selected ports to file.
+2025-04-30T11:49:24.357  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T11:49:35.449  SEND → calibrate
+2025-04-30T11:49:35.450  Client: Requesting server to calibrate connected devices...
+2025-04-30T11:49:35.450  Client: [Calibration]: Lift LEFT foot
+2025-04-30T11:49:35.454  Calibrate command sent to client.
+2025-04-30T11:49:35.530  Client: [Calibration]: Calibrating LEFT foot
+2025-04-30T11:49:45.462  Client: [Calibration]:put LEFT foot down and stand on both feet
+2025-04-30T11:49:45.462  Client: [Calibration]: Lift RIGHT foot
+2025-04-30T11:49:45.465  Client: [Calibration]: Calibrating RIGHT foot 
+ Stand on both feet.
+2025-04-30T11:49:55.552  Client: Calibration completed.
+2025-04-30T11:49:55.552  Client: Use 'start' to begin visualization.
+2025-04-30T11:50:00.109  SEND → start
+2025-04-30T11:50:00.113  Start command sent to client.
+2025-04-30T11:50:00.130  Client: Starting HMD application...
+2025-04-30T11:50:02.179  Client: Connection attempt 1 failed: No connection could be made because the target machine actively refused it 127.0.0.1:9003. Retrying...
+2025-04-30T11:50:07.231  Client: Connection attempt 2 failed: No connection could be made because the target machine actively refused it 127.0.0.1:9003. Retrying...
+2025-04-30T11:50:10.236  Client: HMD Connected.
+2025-04-30T11:50:10.238  Client: [Feedback]: Sending exercise configuration for exercise 1
+2025-04-30T11:50:12.453  Client: [Intro]: Waiting 4 sec...
+2025-04-30T11:50:16.453  Client: [Demo]: Showing 4 sec...
+2025-04-30T11:50:20.458  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: right)...
+2025-04-30T11:50:23.476  Client: [Preparation CoP]: right foot correctly positioned for the required time.
+2025-04-30T11:50:23.476  Client: Starting set 1 of exercise 1
+2025-04-30T11:50:25.429  Client: [Exercise]: Single-Leg Stance - Right Leg started for 30 seconds...
+2025-04-30T11:50:25.429  Client: [Phase 1]: 30 sec
+2025-04-30T11:50:25.617  Client: [Exercise]: Right Foot Changed to Zone 1
+2025-04-30T11:50:25.619  Client: [Feedback]: Received feedback code for Right foot: 1
+2025-04-30T11:50:55.429  Client: [Client]: Put leg down
+2025-04-30T11:50:58.460  Client: [Feedback]: Sending exercise configuration for exercise 2
+2025-04-30T11:50:59.468  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: left)...
+2025-04-30T11:51:02.493  Client: [Preparation CoP]: left foot correctly positioned for the required time.
+2025-04-30T11:51:02.493  Client: Starting set 1 of exercise 2
+2025-04-30T11:51:04.446  Client: [Exercise]: Single-Leg Stance - Left Leg started for 30 seconds...
+2025-04-30T11:51:04.446  Client: [Phase 1]: 30 sec
+2025-04-30T11:51:05.774  Client: [Exercise]: Left Foot Changed to Zone 1
+2025-04-30T11:51:05.774  Client: [Feedback]: Received feedback code for Left foot: 1
+2025-04-30T11:51:34.447  Client: [Client]: Put leg down
+2025-04-30T11:51:37.461  Client: Repeating Exercises: 1, 2...
+2025-04-30T11:51:37.462  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: right)...
+2025-04-30T11:51:40.484  Client: [Preparation CoP]: right foot correctly positioned for the required time.
+2025-04-30T11:51:40.484  Client: [Feedback]: Sending exercise configuration for exercise 1
+2025-04-30T11:51:42.440  Client: [Exercise]: Single-Leg Stance - Right Leg started for 30 seconds...
+2025-04-30T11:51:42.440  Client: [Phase 1]: 30 sec
+2025-04-30T11:51:42.442  Client: [Exercise]: Right Foot Changed to Zone 1[Feedback]: Received feedback code for Right foot: 1
+2025-04-30T11:51:49.509  SEND → exit
+2025-04-30T11:51:49.511  Exit command sent to client.
+2025-04-30T11:51:49.512  Client: HMD Disconnected.
+2025-04-30T11:51:49.513  Client connection lost. No data received.
+2025-04-30T11:52:14.271  GUI Server started. Waiting for Client...
+2025-04-30T11:52:15.666  User selected: ID: 1 - Andis
+2025-04-30T11:52:15.672  User confirmed. Now you may connect to the client.
+2025-04-30T11:52:16.144  Client connected!
+2025-04-30T11:52:16.146  Client: connect
+2025-04-30T11:52:17.012  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T11:52:17.013  Selected user's config sent to client.
+2025-04-30T11:52:17.015  SEND → connect
+2025-04-30T11:52:17.016  Connect command sent to client. Waiting for port list...
+2025-04-30T11:52:17.023  Connect button disabled. Awaiting port information.
+2025-04-30T11:52:17.053  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T11:52:17.058  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T11:52:17.064  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T11:52:17.067  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T11:52:17.070  [DEBUG] Creating button for: COM1
+2025-04-30T11:52:17.079  [DEBUG] Added button for COM1.
+2025-04-30T11:52:17.082  [DEBUG] Creating button for: COM7
+2025-04-30T11:52:17.089  [DEBUG] Added button for COM7.
+2025-04-30T11:52:17.092  [DEBUG] Creating button for: COM8
+2025-04-30T11:52:17.101  [DEBUG] Added button for COM8.
+2025-04-30T11:52:17.105  [DEBUG] Creating button for: COM6
+2025-04-30T11:52:17.113  [DEBUG] Added button for COM6.
+2025-04-30T11:52:17.117  [DEBUG] Creating button for: COM9
+2025-04-30T11:52:17.126  [DEBUG] Added button for COM9.
+2025-04-30T11:52:17.130  [DEBUG] Created 5 buttons.
+2025-04-30T11:52:17.739  Selected: COM6
+2025-04-30T11:52:18.081  Selected: COM9
+2025-04-30T11:52:18.086  Sent selected ports to client: COM6,COM9
+2025-04-30T11:52:18.089  Written selected ports to file.
+2025-04-30T11:52:18.094  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T11:52:29.105  SEND → calibrate
+2025-04-30T11:52:29.106  Client: Requesting server to calibrate connected devices...
+2025-04-30T11:52:29.106  Client: [Calibration]: Lift LEFT foot
+2025-04-30T11:52:29.111  Calibrate command sent to client.
+2025-04-30T11:52:29.133  Client: [Calibration]: Calibrating LEFT foot
+2025-04-30T11:52:39.117  Client: [Calibration]:put LEFT foot down and stand on both feet
+2025-04-30T11:52:39.117  Client: [Calibration]: Lift RIGHT foot
+2025-04-30T11:52:39.121  Client: [Calibration]: Calibrating RIGHT foot 
+ Stand on both feet.
+2025-04-30T11:52:49.270  Client: Calibration completed.
+2025-04-30T11:52:49.270  Client: Use 'start' to begin visualization.
+2025-04-30T11:52:53.887  SEND → start
+2025-04-30T11:52:53.893  Start command sent to client.
+2025-04-30T11:52:53.911  Client: Starting HMD application...
+2025-04-30T11:52:53.912  Client: HMD Connected.
+2025-04-30T11:52:53.919  Client: [Feedback]: Sending exercise configuration for exercise 1
+2025-04-30T11:52:56.120  Client: [Intro]: Waiting 4 sec...
+2025-04-30T11:53:00.135  Client: [Demo]: Showing 4 sec...
+2025-04-30T11:53:04.149  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: right)...
+2025-04-30T11:53:07.185  Client: [Preparation CoP]: right foot correctly positioned for the required time.
+2025-04-30T11:53:07.185  Client: Starting set 1 of exercise 1
+2025-04-30T11:53:09.141  Client: [Exercise]: Single-Leg Stance - Right Leg started for 30 seconds...
+2025-04-30T11:53:09.141  Client: [Phase 1]: 30 sec
+2025-04-30T11:53:10.753  Client: [Exercise]: Right Foot Changed to Zone 1
+2025-04-30T11:53:10.753  Client: [Feedback]: Received feedback code for Right foot: 1
+2025-04-30T11:53:39.141  Client: [Client]: Put leg down
+2025-04-30T11:53:42.148  Client: [Feedback]: Sending exercise configuration for exercise 2
+2025-04-30T11:53:43.157  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: left)...
+2025-04-30T11:53:46.185  Client: [Preparation CoP]: left foot correctly positioned for the required time.
+2025-04-30T11:53:46.185  Client: Starting set 1 of exercise 2
+2025-04-30T11:53:48.137  Client: [Exercise]: Single-Leg Stance - Left Leg started for 30 seconds...
+2025-04-30T11:53:48.137  Client: [Phase 1]: 30 sec
+2025-04-30T11:53:53.659  Client: [Exercise]: Left Foot Changed to Zone 1
+2025-04-30T11:53:53.661  Client: [Feedback]: Received feedback code for Left foot: 1
+2025-04-30T11:53:55.005  Client: [Exercise]: Left Foot Changed to Zone 6
+2025-04-30T11:53:55.005  Client: [Feedback]: Received feedback code for Left foot: 6
+2025-04-30T11:53:55.347  Client: [Exercise]: Left Foot Changed to Zone 1
+2025-04-30T11:53:55.347  Client: [Feedback]: Received feedback code for Left foot: 1
+2025-04-30T11:54:01.139  Client: [Exercise]: Left Foot Changed to Zone 6
+2025-04-30T11:54:01.139  Client: [Feedback]: Received feedback code for Left foot: 6
+2025-04-30T11:54:18.137  Client: [Client]: Put leg down
+2025-04-30T11:54:21.152  Client: Repeating Exercises: 1, 2...
+2025-04-30T11:54:21.152  Client: [Preparation CoP]: Checking for 3 sec (Active Leg: right)...
+2025-04-30T11:54:24.176  Client: [Preparation CoP]: right foot correctly positioned for the required time.
+2025-04-30T11:54:24.176  Client: [Feedback]: Sending exercise configuration for exercise 1
+2025-04-30T11:54:26.127  Client: [Exercise]: Single-Leg Stance - Right Leg started for 30 seconds...
+2025-04-30T11:54:26.127  Client: [Phase 1]: 30 sec
+2025-04-30T11:54:26.329  Client: [Exercise]: Right Foot Changed to Zone 1
+2025-04-30T11:54:26.330  Client: [Feedback]: Received feedback code for Right foot: 1
+2025-04-30T12:04:13.818  GUI Server started. Waiting for Client...
+2025-04-30T12:04:20.739  GUI Server started. Waiting for Client...
+2025-04-30T12:04:22.601  Client connected!
+2025-04-30T12:04:22.603   connect
+2025-04-30T12:04:23.703  User selected: ID: 1 - Andis
+2025-04-30T12:04:23.711  User confirmed. Now you may connect to the client.
+2025-04-30T12:04:27.805  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:04:27.807  Selected user's config sent to client.
+2025-04-30T12:04:27.808  SEND → connect
+2025-04-30T12:04:27.810  Connect command sent to client. Waiting for port list...
+2025-04-30T12:04:27.817  Connect button disabled. Awaiting port information.
+2025-04-30T12:04:27.845   COM1,COM7,COM8,COM6,COM9
+2025-04-30T12:04:27.849  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T12:04:27.853  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T12:04:27.856  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T12:04:27.859  [DEBUG] Creating button for: COM1
+2025-04-30T12:04:27.866  [DEBUG] Added button for COM1.
+2025-04-30T12:04:27.869  [DEBUG] Creating button for: COM7
+2025-04-30T12:04:27.875  [DEBUG] Added button for COM7.
+2025-04-30T12:04:27.878  [DEBUG] Creating button for: COM8
+2025-04-30T12:04:27.884  [DEBUG] Added button for COM8.
+2025-04-30T12:04:27.887  [DEBUG] Creating button for: COM6
+2025-04-30T12:04:27.895  [DEBUG] Added button for COM6.
+2025-04-30T12:04:27.899  [DEBUG] Creating button for: COM9
+2025-04-30T12:04:27.907  [DEBUG] Added button for COM9.
+2025-04-30T12:04:27.911  [DEBUG] Created 5 buttons.
+2025-04-30T12:04:28.885  Selected: COM6
+2025-04-30T12:04:29.387  Selected: COM9
+2025-04-30T12:04:29.391  Sent selected ports to client: COM6,COM9
+2025-04-30T12:04:29.395  Written selected ports to file.
+2025-04-30T12:04:29.400  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T12:04:43.334  SEND → calibrate
+2025-04-30T12:04:43.335  Client: Requesting server to calibrate connected devices...
+2025-04-30T12:04:43.335   [Calibration]: Lift LEFT foot
+2025-04-30T12:04:43.340  Calibrate command sent to client.
+2025-04-30T12:04:43.361  Client: [Calibration]: Calibrating LEFT foot
+2025-04-30T12:04:53.336   [Calibration]:put LEFT foot down and stand on both feet
+2025-04-30T12:04:53.336  Client: [Calibration]: Lift RIGHT foot
+2025-04-30T12:04:53.339   [Calibration]: Calibrating RIGHT foot 
+ Stand on both feet.
+2025-04-30T12:05:03.412  Client: Calibration completed.
+2025-04-30T12:05:03.412   Use 'start' to begin visualization.
+2025-04-30T12:05:29.772  Error reading message: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T12:05:29.772  Error while waiting for client response: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T12:05:33.518  GUI Server started. Waiting for Client...
+2025-04-30T12:05:40.865  GUI Server started. Waiting for Client...
+2025-04-30T12:05:50.646  GUI Server started. Waiting for Client...
+2025-04-30T12:05:52.528  Client connected!
+2025-04-30T12:05:52.530  Client: connect
+2025-04-30T12:05:52.682  User selected: ID: 1 - Andis
+2025-04-30T12:05:52.688  User confirmed. Now you may connect to the client.
+2025-04-30T12:05:55.356  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:05:55.358  Selected user's config sent to client.
+2025-04-30T12:05:55.359  SEND → connect
+2025-04-30T12:05:55.361  Connect command sent to client. Waiting for port list...
+2025-04-30T12:05:55.368  Connect button disabled. Awaiting port information.
+2025-04-30T12:05:55.393  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T12:05:55.398  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T12:05:55.402  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T12:05:55.405  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T12:05:55.408  [DEBUG] Creating button for: COM1
+2025-04-30T12:05:55.414  [DEBUG] Added button for COM1.
+2025-04-30T12:05:55.417  [DEBUG] Creating button for: COM7
+2025-04-30T12:05:55.423  [DEBUG] Added button for COM7.
+2025-04-30T12:05:55.427  [DEBUG] Creating button for: COM8
+2025-04-30T12:05:55.434  [DEBUG] Added button for COM8.
+2025-04-30T12:05:55.437  [DEBUG] Creating button for: COM6
+2025-04-30T12:05:55.447  [DEBUG] Added button for COM6.
+2025-04-30T12:05:55.450  [DEBUG] Creating button for: COM9
+2025-04-30T12:05:55.461  [DEBUG] Added button for COM9.
+2025-04-30T12:05:55.464  [DEBUG] Created 5 buttons.
+2025-04-30T12:05:55.926  Selected: COM6
+2025-04-30T12:05:56.180  Selected: COM9
+2025-04-30T12:05:56.184  Sent selected ports to client: COM6,COM9
+2025-04-30T12:05:56.187  Written selected ports to file.
+2025-04-30T12:05:56.193  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T12:06:00.778  SEND → calibrate
+2025-04-30T12:06:00.782  Calibrate command sent to client.
+2025-04-30T12:06:06.732  Client: Requesting server to calibrate connected devices...
+2025-04-30T12:06:06.732  Client: [Calibration]: Lift LEFT foot
+2025-04-30T12:06:06.736  Client: [Calibration]: Calibrating LEFT foot
+2025-04-30T12:06:16.742  Client: [Calibration]:put LEFT foot down and stand on both feet
+2025-04-30T12:06:16.742  Client: [Calibration]: Lift RIGHT foot
+2025-04-30T12:06:16.745  Client: [Calibration]: Calibrating RIGHT foot 
+ Stand on both feet.
+2025-04-30T12:06:26.808  Client: Calibration completed.
+2025-04-30T12:06:26.809  Client: Use 'start' to begin visualization.
+2025-04-30T12:07:04.257  SEND → exit
+2025-04-30T12:07:04.259  Client: HMD Disconnected.
+2025-04-30T12:07:04.260  Exit command sent to client.
+2025-04-30T12:07:04.263  Client connection lost. No data received.
+2025-04-30T12:07:42.141  GUI Server started. Waiting for Client...
+2025-04-30T12:07:43.753  User selected: ID: 1 - Andis
+2025-04-30T12:07:43.760  User confirmed. Now you may connect to the client.
+2025-04-30T12:07:44.008  Client connected!
+2025-04-30T12:07:44.010  Client: connect
+2025-04-30T12:07:45.164  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:07:45.165  Selected user's config sent to client.
+2025-04-30T12:07:45.167  SEND → connect
+2025-04-30T12:07:45.168  Connect command sent to client. Waiting for port list...
+2025-04-30T12:07:45.174  Connect button disabled. Awaiting port information.
+2025-04-30T12:07:45.199  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T12:07:45.204  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T12:07:45.208  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T12:07:45.211  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T12:07:45.214  [DEBUG] Creating button for: COM1
+2025-04-30T12:07:45.221  [DEBUG] Added button for COM1.
+2025-04-30T12:07:45.223  [DEBUG] Creating button for: COM7
+2025-04-30T12:07:45.229  [DEBUG] Added button for COM7.
+2025-04-30T12:07:45.233  [DEBUG] Creating button for: COM8
+2025-04-30T12:07:45.240  [DEBUG] Added button for COM8.
+2025-04-30T12:07:45.243  [DEBUG] Creating button for: COM6
+2025-04-30T12:07:45.257  [DEBUG] Added button for COM6.
+2025-04-30T12:07:45.261  [DEBUG] Creating button for: COM9
+2025-04-30T12:07:45.271  [DEBUG] Added button for COM9.
+2025-04-30T12:07:45.275  [DEBUG] Created 5 buttons.
+2025-04-30T12:07:45.866  Selected: COM6
+2025-04-30T12:07:46.780  Selected: COM9
+2025-04-30T12:07:46.784  Sent selected ports to client: COM6,COM9
+2025-04-30T12:07:46.787  Written selected ports to file.
+2025-04-30T12:07:46.792  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T12:07:52.715  SEND → calibrate
+2025-04-30T12:07:52.719  Calibrate command sent to client.
+2025-04-30T12:07:57.564  Client: Requesting server to calibrate connected devices...
+2025-04-30T12:07:57.564  Client: [Calibration]: Preparing to calibrate...
+2025-04-30T12:07:57.568  Client: [Calibration]: Lift RIGHT foot for 10 seconds.[Calibration]: Calibrating LEFT foot.
+2025-04-30T12:08:07.576  Client: [Calibration]: Lift LEFT foot for 10 seconds.
+2025-04-30T12:08:07.576  Client: [Calibration]: Calibrating RIGHT foot.
+2025-04-30T12:08:17.668  Client: Calibration completed.
+2025-04-30T12:08:17.668  Client: Use 'start' to begin visualization.
+2025-04-30T12:09:25.377  GUI Server started. Waiting for Client...
+2025-04-30T12:09:26.987  User selected: ID: 1 - Andis
+2025-04-30T12:09:26.993  User confirmed. Now you may connect to the client.
+2025-04-30T12:09:27.235  Client connected!
+2025-04-30T12:09:27.238  Client: connect
+2025-04-30T12:09:28.102  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:09:28.104  Selected user's config sent to client.
+2025-04-30T12:09:28.105  SEND → connect
+2025-04-30T12:09:28.106  Connect command sent to client. Waiting for port list...
+2025-04-30T12:09:28.113  Connect button disabled. Awaiting port information.
+2025-04-30T12:09:28.141  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T12:09:28.145  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T12:09:28.148  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T12:09:28.151  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T12:09:28.155  [DEBUG] Creating button for: COM1
+2025-04-30T12:09:28.161  [DEBUG] Added button for COM1.
+2025-04-30T12:09:28.164  [DEBUG] Creating button for: COM7
+2025-04-30T12:09:28.169  [DEBUG] Added button for COM7.
+2025-04-30T12:09:28.172  [DEBUG] Creating button for: COM8
+2025-04-30T12:09:28.178  [DEBUG] Added button for COM8.
+2025-04-30T12:09:28.181  [DEBUG] Creating button for: COM6
+2025-04-30T12:09:28.191  [DEBUG] Added button for COM6.
+2025-04-30T12:09:28.194  [DEBUG] Creating button for: COM9
+2025-04-30T12:09:28.203  [DEBUG] Added button for COM9.
+2025-04-30T12:09:28.206  [DEBUG] Created 5 buttons.
+2025-04-30T12:09:28.804  Selected: COM6
+2025-04-30T12:09:29.099  Selected: COM9
+2025-04-30T12:09:29.103  Sent selected ports to client: COM6,COM9
+2025-04-30T12:09:29.106  Written selected ports to file.
+2025-04-30T12:09:29.112  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T12:09:34.919  SEND → calibrate
+2025-04-30T12:09:34.923  Calibrate command sent to client.
+2025-04-30T12:09:39.480  Client: Requesting server to calibrate connected devices...
+2025-04-30T12:09:39.480  Client: [Calibration]: Preparing to calibrate...
+2025-04-30T12:09:39.483  Client: [Calibration]: Lift RIGHT foot for 10 seconds.[Calibration]: Calibrating LEFT foot.
+2025-04-30T12:09:49.495  Client: [Calibration]: Lift LEFT foot for 10 seconds.
+2025-04-30T12:09:49.495  Client: [Calibration]: Calibrating RIGHT foot.
+2025-04-30T12:09:49.763  SEND → start
+2025-04-30T12:09:49.767  Start command sent to client.
+2025-04-30T12:09:50.592  SEND → stop
+2025-04-30T12:09:50.593  Stop command sent to client.
+2025-04-30T12:09:51.263  SEND → exit
+2025-04-30T12:09:51.265  Exit command sent to client.
+2025-04-30T12:11:59.329  GUI Server started. Waiting for Client...
+2025-04-30T12:12:00.826  User selected: ID: 1 - Andis
+2025-04-30T12:12:00.833  User confirmed. Now you may connect to the client.
+2025-04-30T12:12:01.203  Client connected!
+2025-04-30T12:12:01.205  Client: connect
+2025-04-30T12:12:01.784  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:12:01.786  Selected user's config sent to client.
+2025-04-30T12:12:01.788  SEND → connect
+2025-04-30T12:12:01.790  Connect command sent to client. Waiting for port list...
+2025-04-30T12:12:01.796  Connect button disabled. Awaiting port information.
+2025-04-30T12:12:01.821  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T12:12:01.826  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T12:12:01.829  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T12:12:01.833  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T12:12:01.836  [DEBUG] Creating button for: COM1
+2025-04-30T12:12:01.842  [DEBUG] Added button for COM1.
+2025-04-30T12:12:01.845  [DEBUG] Creating button for: COM7
+2025-04-30T12:12:01.850  [DEBUG] Added button for COM7.
+2025-04-30T12:12:01.854  [DEBUG] Creating button for: COM8
+2025-04-30T12:12:01.861  [DEBUG] Added button for COM8.
+2025-04-30T12:12:01.866  [DEBUG] Creating button for: COM6
+2025-04-30T12:12:01.875  [DEBUG] Added button for COM6.
+2025-04-30T12:12:01.879  [DEBUG] Creating button for: COM9
+2025-04-30T12:12:01.889  [DEBUG] Added button for COM9.
+2025-04-30T12:12:01.893  [DEBUG] Created 5 buttons.
+2025-04-30T12:12:02.389  Selected: COM6
+2025-04-30T12:12:02.635  Selected: COM9
+2025-04-30T12:12:02.640  Sent selected ports to client: COM6,COM9
+2025-04-30T12:12:02.643  Written selected ports to file.
+2025-04-30T12:12:02.648  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T12:12:20.466  SEND → calibrate
+2025-04-30T12:12:20.467  Client: Requesting server to calibrate connected devices...
+2025-04-30T12:12:20.467  Client: [Calibration]: Preparing to calibrate...
+2025-04-30T12:12:20.471  Calibrate command sent to client.
+2025-04-30T12:12:20.493  Client: [Calibration]: Lift RIGHT foot for 10 seconds.[Calibration]: Calibrating LEFT foot.
+2025-04-30T12:12:30.479  Client: [Calibration]: Lift LEFT foot for 10 seconds.
+2025-04-30T12:12:30.479  Client: [Calibration]: Calibrating RIGHT foot.
+2025-04-30T12:12:40.543  Client: Calibration completed.
+2025-04-30T12:12:40.543  Client: Use 'start' to begin visualization.
+2025-04-30T12:16:36.370  SEND → exit
+2025-04-30T12:16:36.372  Client: HMD Disconnected.
+2025-04-30T12:16:36.373  Client connection lost. No data received.
+2025-04-30T12:16:36.372  Exit command sent to client.
+2025-04-30T12:16:37.615  GUI Server started. Waiting for Client...
+2025-04-30T12:16:49.744  GUI Server started. Waiting for Client...
+2025-04-30T12:16:50.888  User selected: ID: 1 - Andis
+2025-04-30T12:16:50.895  User confirmed. Now you may connect to the client.
+2025-04-30T12:16:51.623  Client connected!
+2025-04-30T12:16:52.029  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:16:52.031  Selected user's config sent to client.
+2025-04-30T12:16:52.033  SEND → connect
+2025-04-30T12:16:52.034  Connect command sent to client. Waiting for port list...
+2025-04-30T12:16:52.040  Connect button disabled. Awaiting port information.
+2025-04-30T12:17:06.647  GUI Server started. Waiting for Client...
+2025-04-30T12:17:08.474  User selected: ID: 1 - Andis
+2025-04-30T12:17:08.480  User confirmed. Now you may connect to the client.
+2025-04-30T12:17:08.531  Client connected!
+2025-04-30T12:17:11.594  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:17:11.596  Selected user's config sent to client.
+2025-04-30T12:17:11.598  SEND → connect
+2025-04-30T12:17:11.599  Connect command sent to client. Waiting for port list...
+2025-04-30T12:17:11.606  Connect button disabled. Awaiting port information.
+2025-04-30T12:21:08.585  GUI Server started. Waiting for Client...
+2025-04-30T12:21:19.617  GUI Server started. Waiting for Client...
+2025-04-30T12:21:29.443  GUI Server started. Waiting for Client...
+2025-04-30T12:21:31.316  Client connected!
+2025-04-30T12:21:34.101  User selected: ID: 1 - Andis
+2025-04-30T12:21:34.107  User confirmed. Now you may connect to the client.
+2025-04-30T12:21:35.717  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:21:35.718  Selected user's config sent to client.
+2025-04-30T12:21:35.720  SEND → connect
+2025-04-30T12:21:35.721  Connect command sent to client. Waiting for port list...
+2025-04-30T12:21:35.728  Connect button disabled. Awaiting port information.
+2025-04-30T12:21:45.920  GUI Server started. Waiting for Client...
+2025-04-30T12:21:55.011  GUI Server started. Waiting for Client...
+2025-04-30T12:21:56.322  User selected: ID: 1 - Andis
+2025-04-30T12:21:56.328  User confirmed. Now you may connect to the client.
+2025-04-30T12:21:56.894  Client connected!
+2025-04-30T12:21:58.014  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:21:58.016  Selected user's config sent to client.
+2025-04-30T12:21:58.017  SEND → connect
+2025-04-30T12:21:58.018  Connect command sent to client. Waiting for port list...
+2025-04-30T12:21:58.026  Connect button disabled. Awaiting port information.
+2025-04-30T12:22:14.749  GUI Server started. Waiting for Client...
+2025-04-30T12:22:21.100  GUI Server started. Waiting for Client...
+2025-04-30T12:22:22.084  User selected: ID: 1 - Andis
+2025-04-30T12:22:22.091  User confirmed. Now you may connect to the client.
+2025-04-30T12:22:22.965  Client connected!
+2025-04-30T12:22:22.967  Client: connect
+2025-04-30T12:22:23.540  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:22:23.542  Selected user's config sent to client.
+2025-04-30T12:22:23.543  SEND → connect
+2025-04-30T12:22:23.545  Connect command sent to client. Waiting for port list...
+2025-04-30T12:22:23.551  Connect button disabled. Awaiting port information.
+2025-04-30T12:22:23.575  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T12:22:23.579  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T12:22:23.583  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T12:22:23.587  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T12:22:23.590  [DEBUG] Creating button for: COM1
+2025-04-30T12:22:23.596  [DEBUG] Added button for COM1.
+2025-04-30T12:22:23.599  [DEBUG] Creating button for: COM7
+2025-04-30T12:22:23.606  [DEBUG] Added button for COM7.
+2025-04-30T12:22:23.610  [DEBUG] Creating button for: COM8
+2025-04-30T12:22:23.618  [DEBUG] Added button for COM8.
+2025-04-30T12:22:23.621  [DEBUG] Creating button for: COM6
+2025-04-30T12:22:23.629  [DEBUG] Added button for COM6.
+2025-04-30T12:22:23.632  [DEBUG] Creating button for: COM9
+2025-04-30T12:22:23.643  [DEBUG] Added button for COM9.
+2025-04-30T12:22:23.647  [DEBUG] Created 5 buttons.
+2025-04-30T12:22:31.870  Selected: COM6
+2025-04-30T12:22:32.094  Selected: COM9
+2025-04-30T12:22:32.098  Sent selected ports to client: COM6,COM9
+2025-04-30T12:22:32.101  Written selected ports to file.
+2025-04-30T12:22:32.106  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T12:23:07.837  Error while waiting for client response: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T12:23:07.837  Error reading message: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T12:25:41.052  GUI Server started. Waiting for Client...
+2025-04-30T12:25:48.800  GUI Server started. Waiting for Client...
+2025-04-30T12:25:50.362  User selected: ID: 1 - Andis
+2025-04-30T12:25:50.368  User confirmed. Now you may connect to the client.
+2025-04-30T12:25:50.677  Client connected!
+2025-04-30T12:25:52.836  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:25:52.837  Selected user's config sent to client.
+2025-04-30T12:25:52.839  SEND → connect
+2025-04-30T12:25:52.840  Connect command sent to client. Waiting for port list...
+2025-04-30T12:25:52.847  Connect button disabled. Awaiting port information.
+2025-04-30T12:26:07.654  Error while waiting for client response: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T12:26:07.654  Error reading message: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T12:28:27.383  GUI Server started. Waiting for Client...
+2025-04-30T12:28:38.715  GUI Server started. Waiting for Client...
+2025-04-30T12:28:39.773  User selected: ID: 1 - Andis
+2025-04-30T12:28:39.779  User confirmed. Now you may connect to the client.
+2025-04-30T12:28:40.595  Client connected!
+2025-04-30T12:28:41.887  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:28:41.888  Selected user's config sent to client.
+2025-04-30T12:28:41.890  SEND → connect
+2025-04-30T12:28:41.891  Connect command sent to client. Waiting for port list...
+2025-04-30T12:28:41.897  Connect button disabled. Awaiting port information.
+2025-04-30T12:29:23.664  GUI Server started. Waiting for Client...
+2025-04-30T12:30:31.656  GUI Server started. Waiting for Client...
+2025-04-30T12:30:32.804  User selected: ID: 1 - Andis
+2025-04-30T12:30:32.811  User confirmed. Now you may connect to the client.
+2025-04-30T12:30:33.526  Client connected!
+2025-04-30T12:30:33.528  C connect
+2025-04-30T12:30:34.755  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:30:34.758  Selected user's config sent to client.
+2025-04-30T12:30:34.760  SEND → connect
+2025-04-30T12:30:34.761  Connect command sent to client. Waiting for port list...
+2025-04-30T12:30:34.768  Connect button disabled. Awaiting port information.
+2025-04-30T12:30:34.793  C COM1,COM7,COM8,COM6,COM9
+2025-04-30T12:30:34.798  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T12:30:34.802  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T12:30:34.805  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T12:30:34.809  [DEBUG] Creating button for: COM1
+2025-04-30T12:30:34.815  [DEBUG] Added button for COM1.
+2025-04-30T12:30:34.818  [DEBUG] Creating button for: COM7
+2025-04-30T12:30:34.827  [DEBUG] Added button for COM7.
+2025-04-30T12:30:34.830  [DEBUG] Creating button for: COM8
+2025-04-30T12:30:34.838  [DEBUG] Added button for COM8.
+2025-04-30T12:30:34.843  [DEBUG] Creating button for: COM6
+2025-04-30T12:30:34.852  [DEBUG] Added button for COM6.
+2025-04-30T12:30:34.856  [DEBUG] Creating button for: COM9
+2025-04-30T12:30:34.869  [DEBUG] Added button for COM9.
+2025-04-30T12:30:34.872  [DEBUG] Created 5 buttons.
+2025-04-30T12:30:35.910  Selected: COM6
+2025-04-30T12:30:36.245  Selected: COM9
+2025-04-30T12:30:36.248  Sent selected ports to client: COM6,COM9
+2025-04-30T12:30:36.251  Written selected ports to file.
+2025-04-30T12:30:36.258  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T12:30:47.699  SEND → calibrate
+2025-04-30T12:30:47.699  Client: Requesting server to calibrate connected devices...
+2025-04-30T12:30:47.700  C [Calibration]: Preparing to calibrate...
+2025-04-30T12:30:47.703  Calibrate command sent to client.
+2025-04-30T12:30:47.724  Client: [Calibration]: Lift RIGHT foot for 10 seconds.
+[Calibration]: Calibrating LEFT foot.
+2025-04-30T12:30:57.710  C [Calibration]: Lift LEFT foot for 10 seconds.
+2025-04-30T12:30:57.710  Client: [Calibration]: Calibrating RIGHT foot.
+2025-04-30T12:31:07.770  C Calibration completed.
+2025-04-30T12:31:07.770  Client: Use 'start' to begin visualization.
+2025-04-30T12:32:42.491  SEND → exit
+2025-04-30T12:32:42.493  C HMD Disconnected.
+2025-04-30T12:32:42.493  Client connection lost. No data received.
+2025-04-30T12:32:42.494  Exit command sent to client.
+2025-04-30T12:33:45.945  GUI Server started. Waiting for Client...
+2025-04-30T12:33:55.551  GUI Server started. Waiting for Client...
+2025-04-30T12:33:57.324  User selected: ID: 1 - Andis
+2025-04-30T12:33:57.332  User confirmed. Now you may connect to the client.
+2025-04-30T12:33:57.427  Client connected!
+2025-04-30T12:33:57.431  C connect
+2025-04-30T12:34:00.332  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:34:00.334  Selected user's config sent to client.
+2025-04-30T12:34:00.335  SEND → connect
+2025-04-30T12:34:00.337  Connect command sent to client. Waiting for port list...
+2025-04-30T12:34:00.343  Connect button disabled. Awaiting port information.
+2025-04-30T12:34:00.370  C COM1,COM7,COM8,COM6,COM9
+2025-04-30T12:34:00.375  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T12:34:00.378  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T12:34:00.381  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T12:34:00.384  [DEBUG] Creating button for: COM1
+2025-04-30T12:34:00.391  [DEBUG] Added button for COM1.
+2025-04-30T12:34:00.394  [DEBUG] Creating button for: COM7
+2025-04-30T12:34:00.400  [DEBUG] Added button for COM7.
+2025-04-30T12:34:00.403  [DEBUG] Creating button for: COM8
+2025-04-30T12:34:00.411  [DEBUG] Added button for COM8.
+2025-04-30T12:34:00.414  [DEBUG] Creating button for: COM6
+2025-04-30T12:34:00.423  [DEBUG] Added button for COM6.
+2025-04-30T12:34:00.427  [DEBUG] Creating button for: COM9
+2025-04-30T12:34:00.437  [DEBUG] Added button for COM9.
+2025-04-30T12:34:00.441  [DEBUG] Created 5 buttons.
+2025-04-30T12:34:01.887  Selected: COM6
+2025-04-30T12:34:02.127  Selected: COM9
+2025-04-30T12:34:02.131  Sent selected ports to client: COM6,COM9
+2025-04-30T12:34:02.134  Written selected ports to file.
+2025-04-30T12:34:02.140  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T12:34:13.750  SEND → calibrate
+2025-04-30T12:34:13.751  Client: Requesting server to calibrate connected devices...
+2025-04-30T12:34:13.751  C [Calibration]: Preparing to calibrate...
+2025-04-30T12:34:13.755  Calibrate command sent to client.
+2025-04-30T12:34:13.777  Client: [Calibration]: Lift RIGHT foot for 10 seconds.
+[Calibration]: Calibrating LEFT foot.
+2025-04-30T12:34:23.763  C [Calibration]: Lift LEFT foot for 10 seconds.
+2025-04-30T12:34:23.763  Client: [Calibration]: Calibrating RIGHT foot.
+2025-04-30T12:34:43.562  GUI Server started. Waiting for Client...
+2025-04-30T12:34:51.099  GUI Server started. Waiting for Client...
+2025-04-30T12:34:52.975  Client connected!
+2025-04-30T12:34:54.961  User selected: ID: 1 - Andis
+2025-04-30T12:34:54.967  User confirmed. Now you may connect to the client.
+2025-04-30T12:34:56.632  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:34:56.634  Selected user's config sent to client.
+2025-04-30T12:34:56.635  SEND → connect
+2025-04-30T12:34:56.637  Connect command sent to client. Waiting for port list...
+2025-04-30T12:34:56.643  Connect button disabled. Awaiting port information.
+2025-04-30T12:34:59.126  Error while waiting for client response: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T12:34:59.126  Error reading message: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-04-30T12:36:29.211  GUI Server started. Waiting for Client...
+2025-04-30T12:36:30.506  User selected: ID: 1 - Andis
+2025-04-30T12:36:30.513  User confirmed. Now you may connect to the client.
+2025-04-30T12:36:37.653  GUI Server started. Waiting for Client...
+2025-04-30T12:36:38.877  User selected: ID: 1 - Andis
+2025-04-30T12:36:38.884  User confirmed. Now you may connect to the client.
+2025-04-30T12:36:39.535  Client connected!
+2025-04-30T12:36:39.537  C connect
+2025-04-30T12:36:41.056  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:36:41.058  Selected user's config sent to client.
+2025-04-30T12:36:41.059  SEND → connect
+2025-04-30T12:36:41.061  Connect command sent to client. Waiting for port list...
+2025-04-30T12:36:41.067  Connect button disabled. Awaiting port information.
+2025-04-30T12:36:41.092  C COM1,COM7,COM8,COM6,COM9
+2025-04-30T12:36:41.096  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T12:36:41.099  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T12:36:41.103  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T12:36:41.106  [DEBUG] Creating button for: COM1
+2025-04-30T12:36:41.113  [DEBUG] Added button for COM1.
+2025-04-30T12:36:41.116  [DEBUG] Creating button for: COM7
+2025-04-30T12:36:41.121  [DEBUG] Added button for COM7.
+2025-04-30T12:36:41.124  [DEBUG] Creating button for: COM8
+2025-04-30T12:36:41.131  [DEBUG] Added button for COM8.
+2025-04-30T12:36:41.134  [DEBUG] Creating button for: COM6
+2025-04-30T12:36:41.141  [DEBUG] Added button for COM6.
+2025-04-30T12:36:41.144  [DEBUG] Creating button for: COM9
+2025-04-30T12:36:41.154  [DEBUG] Added button for COM9.
+2025-04-30T12:36:41.157  [DEBUG] Created 5 buttons.
+2025-04-30T12:36:42.019  Selected: COM6
+2025-04-30T12:36:42.369  Selected: COM9
+2025-04-30T12:36:42.373  Sent selected ports to client: COM6,COM9
+2025-04-30T12:36:42.376  Written selected ports to file.
+2025-04-30T12:36:42.382  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T12:36:48.381  SEND → calibrate
+2025-04-30T12:36:48.385  Calibrate command sent to client.
+2025-04-30T12:36:52.938  Client: Requesting server to calibrate connected devices...
+2025-04-30T12:36:52.938  C [Calibration]: Preparing to calibrate...
+2025-04-30T12:36:52.941  Client: [Calibration]: Lift RIGHT foot for 10 seconds.[Calibration]: Calibrating LEFT foot.
+2025-04-30T12:37:02.943  C [Calibration]: Lift LEFT foot for 10 seconds.
+2025-04-30T12:37:02.943  Client: [Calibration]: Calibrating RIGHT foot.
+2025-04-30T12:37:13.018  C Calibration completed.
+2025-04-30T12:37:13.018  Client: Use 'start' to begin visualization.
+2025-04-30T12:37:26.965  SEND → exit
+2025-04-30T12:37:26.967  Exit command sent to client.
+2025-04-30T12:37:26.967  C HMD Disconnected.
+2025-04-30T12:37:26.967  Client connection lost. No data received.
+2025-04-30T12:37:28.521  GUI Server started. Waiting for Client...
+2025-04-30T12:37:34.194  GUI Server started. Waiting for Client...
+2025-04-30T12:37:35.477  User selected: ID: 1 - Andis
+2025-04-30T12:37:35.483  User confirmed. Now you may connect to the client.
+2025-04-30T12:37:36.061  Client connected!
+2025-04-30T12:37:36.063  Client: connect
+2025-04-30T12:37:36.570  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:37:36.572  Selected user's config sent to client.
+2025-04-30T12:37:36.573  SEND → connect
+2025-04-30T12:37:36.575  Connect command sent to client. Waiting for port list...
+2025-04-30T12:37:36.581  Connect button disabled. Awaiting port information.
+2025-04-30T12:37:36.605  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T12:37:36.609  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T12:37:36.613  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T12:37:36.617  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T12:37:36.620  [DEBUG] Creating button for: COM1
+2025-04-30T12:37:36.627  [DEBUG] Added button for COM1.
+2025-04-30T12:37:36.630  [DEBUG] Creating button for: COM7
+2025-04-30T12:37:36.636  [DEBUG] Added button for COM7.
+2025-04-30T12:37:36.640  [DEBUG] Creating button for: COM8
+2025-04-30T12:37:36.647  [DEBUG] Added button for COM8.
+2025-04-30T12:37:36.651  [DEBUG] Creating button for: COM6
+2025-04-30T12:37:36.662  [DEBUG] Added button for COM6.
+2025-04-30T12:37:36.666  [DEBUG] Creating button for: COM9
+2025-04-30T12:37:36.675  [DEBUG] Added button for COM9.
+2025-04-30T12:37:36.678  [DEBUG] Created 5 buttons.
+2025-04-30T12:37:37.185  Selected: COM6
+2025-04-30T12:37:37.436  Selected: COM9
+2025-04-30T12:37:37.441  Sent selected ports to client: COM6,COM9
+2025-04-30T12:37:37.444  Written selected ports to file.
+2025-04-30T12:37:37.450  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T12:37:38.305  SEND → calibrate
+2025-04-30T12:37:38.310  Calibrate command sent to client.
+2025-04-30T12:37:47.940  Client: Requesting server to calibrate connected devices...
+2025-04-30T12:37:47.941  Client: [Calibration]: Preparing to calibrate...
+2025-04-30T12:37:47.944  Client: [Calibration]: Lift RIGHT foot for 10 seconds.[Calibration]: Calibrating LEFT foot.
+2025-04-30T12:37:57.948  Client: [Calibration]: Lift LEFT foot for 10 seconds.
+2025-04-30T12:37:57.948  Client: [Calibration]: Calibrating RIGHT foot.
+2025-04-30T12:38:08.013  Client: Calibration completed.
+2025-04-30T12:38:08.013  Client: Use 'start' to begin visualization.
+2025-04-30T12:39:21.456  SEND → exit
+2025-04-30T12:39:21.458  Client: HMD Disconnected.
+2025-04-30T12:39:21.458  Client connection lost. No data received.
+2025-04-30T12:39:21.459  Exit command sent to client.

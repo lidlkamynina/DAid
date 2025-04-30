@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -19,112 +20,97 @@ namespace ClientGUI
         private bool _isRunning = true;
         private List<string> selectedPorts = new List<string>();
 
-        // File name for storing users.
+        // for serializing log-file writes
+        private readonly object _logLock = new object();
+        private readonly string _logFilePath =
+            Path.Combine(Application.StartupPath, "message.log");
+
+        // user-selection state
+        private string selectedUserConfig = "";
+        private Dictionary<string, string> userConfigDict = new Dictionary<string, string>();
+        private bool _portsParsed = false;
         private string usersFilePath = Path.Combine(Application.StartupPath, "users.txt");
 
         public Form1()
         {
             InitializeComponent();
+            this.Icon = new Icon(Path.Combine(Application.StartupPath, "GuiLogo.ico"));
 
-            // Initially hide the connect button and status label; they will show only after a user has been selected.
+            // hide controls until a user is chosen
             connectButton.Visible = false;
             statusLabel.Visible = false;
-            textBox1.Visible = false; // debug window
+            textBox1.Visible = false;
 
-            // Start with the user-selection screen.
             ShowUserSelectionScreen();
             StartTcpServer();
         }
 
-        /// <summary>
-        /// Show two buttons at startup: "New User" and "Continue".
-        /// </summary>
         private void ShowUserSelectionScreen()
         {
-            // Clear any existing controls from the flow panel.
             flowLayoutPanel1.Controls.Clear();
 
-            // Create "New User" button.
-            Button newUserButton = new Button
+            var newUserButton = new Button
             {
                 Text = "Jauns lietotājs",
                 Width = 150,
                 Height = 30,
-                Margin = new Padding(5),
-                BackColor = System.Drawing.Color.LightBlue
+                Margin = new Padding(10),
+                BackColor = Color.LightBlue
             };
             newUserButton.Click += newUserButton_Click;
             flowLayoutPanel1.Controls.Add(newUserButton);
 
-            // Create "Continue" button.
-            Button contButton = new Button
+            var contButton = new Button
             {
                 Text = "Turpināt ar esošu lietotāju",
                 Width = 200,
                 Height = 30,
-                Margin = new Padding(5),
-                BackColor = System.Drawing.Color.LightGreen
+                Margin = new Padding(10),
+                BackColor = Color.LightGreen
             };
             contButton.Click += continueButton_Click;
             flowLayoutPanel1.Controls.Add(contButton);
         }
 
-        /// <summary>
-        /// Handler when the New User button is clicked.
-        /// Opens a new form for data entry.
-        /// </summary>
         private void newUserButton_Click(object sender, EventArgs e)
         {
-            // Open the new user entry form as a dialog.
-            NewUserForm newUserForm = new NewUserForm(usersFilePath);
+            var newUserForm = new NewUserForm(usersFilePath);
             if (newUserForm.ShowDialog() == DialogResult.OK)
             {
-                // Optionally, you might reload users in case the user now wants to “continue” with the new user.
                 AppendText("New user saved.");
-                // Proceed to the next step (show connect button etc.)
                 ProceedAfterUserSelection();
             }
         }
 
-        /// <summary>
-        /// Handler when the Continue button is clicked.
-        /// Displays a ComboBox for the operator to select an existing user.
-        /// </summary>
         private void continueButton_Click(object sender, EventArgs e)
         {
-            // Clear the flow panel and show a dropdown (ComboBox) with the list of users.
             flowLayoutPanel1.Controls.Clear();
 
-            Label selectLabel = new Label
+            var selectLabel = new Label
             {
-                Text = "Select User:",
+                Text = "Izvēlēties lietotāju:",
                 AutoSize = true,
                 Margin = new Padding(5)
             };
             flowLayoutPanel1.Controls.Add(selectLabel);
 
-            ComboBox userComboBox = new ComboBox
+            var userComboBox = new ComboBox
             {
                 Width = 200,
                 Margin = new Padding(5)
             };
 
-            // Load the user data from the file (if any)
             if (File.Exists(usersFilePath))
             {
-                // Assuming each line is in CSV format: ID,Name,Age,Sex,Weight,Height,ShoeSize,LeadingLeg,Position,Injury
-                string[] lines = File.ReadAllLines(usersFilePath);
-                foreach (string line in lines)
+                foreach (var line in File.ReadAllLines(usersFilePath))
                 {
-                    if (!string.IsNullOrWhiteSpace(line))
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var parts = line.Split(',');
+                    if (parts.Length >= 2)
                     {
-                        // Use the first two fields (ID and Name) for display.
-                        string[] parts = line.Split(',');
-                        if (parts.Length >= 2)
-                        {
-                            string display = $"ID: {parts[0]} - {parts[1]}";
-                            userComboBox.Items.Add(display);
-                        }
+                        var display = $"ID: {parts[0]} - {parts[1]}";
+                        userComboBox.Items.Add(display);
+                        userConfigDict[display] = line;
                     }
                 }
             }
@@ -142,50 +128,36 @@ namespace ClientGUI
                 return;
             }
 
-            // Select the first item by default.
             userComboBox.SelectedIndex = 0;
             flowLayoutPanel1.Controls.Add(userComboBox);
 
-            // Add a confirmation button.
-            Button selectUserButton = new Button
+            var selectUserButton = new Button
             {
                 Text = "OK",
                 Width = 60,
                 Height = 30,
                 Margin = new Padding(5),
-                BackColor = System.Drawing.Color.LightGreen
+                BackColor = Color.LightGreen
             };
             selectUserButton.Click += (s, ea) =>
             {
-                AppendText($"User selected: {userComboBox.SelectedItem.ToString()}");
+                var selectedDisplay = userComboBox.SelectedItem.ToString();
+                selectedUserConfig = userConfigDict[selectedDisplay];
+                AppendText($"User selected: {selectedDisplay}");
                 ProceedAfterUserSelection();
             };
             flowLayoutPanel1.Controls.Add(selectUserButton);
         }
 
-        /// <summary>
-        /// Once a user has been selected or entered, hide the user-selection controls
-        /// and show the Connect button and debug window.
-        /// </summary>
         private void ProceedAfterUserSelection()
         {
-            // Clear the flow panel and show the Connect button.
             flowLayoutPanel1.Controls.Clear();
             connectButton.Visible = true;
             statusLabel.Visible = true;
             textBox1.Visible = true;
-
             AppendText("User confirmed. Now you may connect to the client.");
-
-            
         }
 
-        // -------------------------
-        // The remaining methods below are your existing code for TCP server,
-        // port button creation, sending messages, etc.
-        // -------------------------
-
-        // Start the server thread and listen for client connections
         private void StartTcpServer()
         {
             _listenerThread = new Thread(() =>
@@ -196,31 +168,31 @@ namespace ClientGUI
                     _server.Start();
                     AppendText("GUI Server started. Waiting for Client...");
 
-                    _client = _server.AcceptTcpClient();  // Wait for the client to connect
+                    _client = _server.AcceptTcpClient();
                     AppendText("Client connected!");
 
                     _stream = _client.GetStream();
 
-                    // Start listening for messages from the client
-                    Thread messageListenerThread = new Thread(ListenForMessages);
-                    messageListenerThread.IsBackground = true;
+                    var messageListenerThread = new Thread(ListenForMessages)
+                    {
+                        IsBackground = true
+                    };
                     messageListenerThread.Start();
                 }
                 catch (Exception ex)
                 {
                     AppendText($"Error: {ex.Message}");
                 }
-            });
-
-            _listenerThread.IsBackground = true;
+            })
+            {
+                IsBackground = true
+            };
             _listenerThread.Start();
         }
 
-        // Listen for incoming messages from the client
         private void ListenForMessages()
         {
-            byte[] buffer = new byte[1024];
-
+            var buffer = new byte[1024];
             while (_isRunning)
             {
                 try
@@ -229,16 +201,15 @@ namespace ClientGUI
                     if (bytesRead == 0) break;
 
                     string message = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
-                    AppendText($"Client: {message}"); // Debugging log
+                    AppendText($"Client: {message}");
 
-                    // If the message contains COM port information, extract it
-                    if (message.ToLower().Contains("com"))
+                    if (!_portsParsed && message.ToLower().Contains("com"))
                     {
-                        string portsString = message.Replace("Client:", "").Trim();
-                        string[] ports = portsString.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
+                        _portsParsed = true;
+                        var portsString = message.Replace("Client:", "").Trim();
+                        var ports = portsString
+                            .Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         AppendText($"Parsed ports: {string.Join(", ", ports)}");
-
                         CreatePortButtons(ports);
                     }
                 }
@@ -251,31 +222,25 @@ namespace ClientGUI
             }
         }
 
-        // Create buttons for each available port
         private void CreatePortButtons(string[] ports)
         {
             try
             {
                 AppendText($"[DEBUG] CreatePortButtons called with {ports.Length} ports.");
-
-                // Clear previous selections (dynamically created buttons)
                 selectedPorts.Clear();
 
-                if (flowLayoutPanel1.InvokeRequired)
-                {
-                    flowLayoutPanel1.Invoke((MethodInvoker)(() =>
-                    {
-                        flowLayoutPanel1.Controls.Clear();
-                        AppendText("[DEBUG] Cleared FlowLayoutPanel (via Invoke).");
-                    }));
-                }
-                else
+                // use MethodInvoker instead of Action
+                MethodInvoker clearPanel = delegate
                 {
                     flowLayoutPanel1.Controls.Clear();
                     AppendText("[DEBUG] Cleared FlowLayoutPanel.");
-                }
+                };
+                if (flowLayoutPanel1.InvokeRequired)
+                    flowLayoutPanel1.Invoke(clearPanel);
+                else
+                    clearPanel();
 
-                if (ports == null || ports.Length == 0)
+                if (ports.Length == 0)
                 {
                     AppendText("No COM ports received. Buttons not created.");
                     return;
@@ -284,73 +249,59 @@ namespace ClientGUI
                 foreach (var port in ports)
                 {
                     AppendText($"[DEBUG] Creating button for: {port}");
-
                     var button = new Button
                     {
                         Text = port,
                         Width = 150,
                         Height = 40,
                         Margin = new Padding(5),
-                        BackColor = System.Drawing.Color.LightBlue
+                        BackColor = Color.LightBlue
                     };
-
-                    button.Click += (sender, e) =>
+                    button.Click += (s, e) =>
                     {
                         if (selectedPorts.Count < 2)
                         {
                             selectedPorts.Add(port);
+                            button.BackColor = Color.LightGreen;
+                            button.ForeColor = Color.White;
                             button.Enabled = false;
                             AppendText($"Selected: {port}");
 
-                            // After selecting the second port, clear all buttons
                             if (selectedPorts.Count == 2)
                             {
-                                string portsMessage = string.Join(",", selectedPorts);
+                                var portsMessage = string.Join(",", selectedPorts);
                                 AppendText($"Sent selected ports to client: {portsMessage}");
+                                File.WriteAllText(
+                                    Path.Combine(Application.StartupPath, "selected_ports.txt"),
+                                    portsMessage);
+                                AppendText("Written selected ports to file.");
 
-                                // Use Application.StartupPath to create the file in the same folder as the executable.
-                                string filePath = Path.Combine(Application.StartupPath, "selected_ports.txt");
-                                File.WriteAllText(filePath, portsMessage);
-                                AppendText($"Written selected ports to file: {filePath}");
-
-                                // Clear the buttons after both ports have been selected
-                                if (flowLayoutPanel1.InvokeRequired)
+                                MethodInvoker clearAfterSelect = delegate
                                 {
-                                    flowLayoutPanel1.Invoke((MethodInvoker)(() =>
-                                    {
-                                        flowLayoutPanel1.Controls.Clear();  // Remove buttons
-                                        AppendText("[DEBUG] Cleared FlowLayoutPanel after selecting two ports.");
-                                    }));
-                                }
-                                else
-                                {
-                                    flowLayoutPanel1.Controls.Clear();  // Remove buttons
+                                    flowLayoutPanel1.Controls.Clear();
                                     AppendText("[DEBUG] Cleared FlowLayoutPanel after selecting two ports.");
-                                }
+                                };
+                                if (flowLayoutPanel1.InvokeRequired)
+                                    flowLayoutPanel1.Invoke(clearAfterSelect);
+                                else
+                                    clearAfterSelect();
 
-                                // Transition to the next screen
                                 SwitchToNextScreen();
                             }
                         }
                     };
 
-                    if (flowLayoutPanel1.InvokeRequired)
-                    {
-                        flowLayoutPanel1.Invoke((MethodInvoker)(() =>
-                        {
-                            flowLayoutPanel1.Controls.Add(button);
-                            flowLayoutPanel1.PerformLayout();
-                            flowLayoutPanel1.Refresh();
-                            AppendText($"[DEBUG] Added button for {port} (via Invoke).");
-                        }));
-                    }
-                    else
+                    MethodInvoker addBtn = delegate
                     {
                         flowLayoutPanel1.Controls.Add(button);
                         flowLayoutPanel1.PerformLayout();
                         flowLayoutPanel1.Refresh();
                         AppendText($"[DEBUG] Added button for {port}.");
-                    }
+                    };
+                    if (flowLayoutPanel1.InvokeRequired)
+                        flowLayoutPanel1.Invoke(addBtn);
+                    else
+                        addBtn();
                 }
 
                 AppendText($"[DEBUG] Created {ports.Length} buttons.");
@@ -361,134 +312,133 @@ namespace ClientGUI
             }
         }
 
-        // Transition to the next screen after selecting the ports
         private void SwitchToNextScreen()
         {
-            // Create and show the 'Calibrate' button first
-            Button calibrateButton = new Button
+            var calibrateButton = new Button
             {
                 Text = "Calibrate",
                 Width = 150,
                 Height = 40,
-                Margin = new Padding(5),
-                BackColor = System.Drawing.Color.LightGreen
+                Margin = new Padding(10),
+                BackColor = Color.LightGreen
             };
-
-            calibrateButton.Click += (sender, e) =>
+            calibrateButton.Click += (s, e) =>
             {
-                // Send message to client for calibration
                 SendMessageToClient("calibrate");
                 calibrateButton.Enabled = false;
                 AppendText("Calibrate command sent to client.");
-
-                // Add Start, Stop, HMD, Exit buttons
                 ShowControlButtons();
             };
-
-            // Add the Calibrate button to the panel
             AddButtonToPanel(calibrateButton);
 
-            // Method to add the other buttons after Calibrate is clicked
             void ShowControlButtons()
             {
-                Button startButton = new Button
+                var startButton = new Button
                 {
                     Text = "Start",
                     Width = 150,
                     Height = 40,
-                    Margin = new Padding(5),
-                    BackColor = System.Drawing.Color.LightGreen
+                    Margin = new Padding(10),
+                    BackColor = Color.LightGreen
                 };
-
-                startButton.Click += (sender, e) =>
+                startButton.Click += (s, e) =>
                 {
                     SendMessageToClient("start");
                     startButton.Enabled = false;
                     AppendText("Start command sent to client.");
                 };
 
-                Button stopsButton = new Button
+                var stopsButton = new Button
                 {
                     Text = "Stop",
                     Width = 150,
                     Height = 40,
-                    Margin = new Padding(5),
-                    BackColor = System.Drawing.Color.IndianRed
+                    Margin = new Padding(10),
+                    FlatStyle = FlatStyle.Flat,
+                    BackColor = Color.FromArgb(25, Color.IndianRed),
+                    ForeColor = Color.White
                 };
-
-                stopsButton.Click += (sender, e) =>
+                stopsButton.FlatAppearance.BorderSize = 0;
+                stopsButton.FlatAppearance.MouseDownBackColor = Color.Transparent;
+                stopsButton.FlatAppearance.MouseOverBackColor = Color.Transparent;
+                stopsButton.Click += (s, e) =>
                 {
                     SendMessageToClient("stop");
                     AppendText("Stop command sent to client.");
                 };
 
-                Button exitButton = new Button
+                var exitButton = new Button
                 {
                     Text = "Exit",
                     Width = 150,
                     Height = 40,
-                    Margin = new Padding(5),
-                    BackColor = System.Drawing.Color.DarkRed
+                    Margin = new Padding(10),
+                    BackColor = Color.IndianRed
                 };
-
-                exitButton.Click += (sender, e) =>
+                exitButton.Click += (s, e) =>
                 {
                     SendMessageToClient("exit");
-                    exitButton.Enabled = true;
                     AppendText("Exit command sent to client.");
                 };
 
-                // Add these buttons to the panel
                 AddButtonToPanel(startButton);
                 AddButtonToPanel(stopsButton);
-                
                 AddButtonToPanel(exitButton);
-            }
-           
-
-            // Method to add buttons to the FlowLayoutPanel
-            void AddButtonToPanel(Button button)
-            {
-                if (flowLayoutPanel1.InvokeRequired)
-                {
-                    flowLayoutPanel1.Invoke((MethodInvoker)(() =>
-                    {
-                        flowLayoutPanel1.Controls.Add(button);
-                        flowLayoutPanel1.PerformLayout();
-                        flowLayoutPanel1.Refresh();
-                    }));
-                }
-                else
-                {
-                    flowLayoutPanel1.Controls.Add(button);
-                    flowLayoutPanel1.PerformLayout();
-                    flowLayoutPanel1.Refresh();
-                }
             }
         }
 
-        // Send messages to the client
+        private void AddButtonToPanel(Button button)
+        {
+            MethodInvoker add = delegate
+            {
+                flowLayoutPanel1.Controls.Add(button);
+                flowLayoutPanel1.PerformLayout();
+                flowLayoutPanel1.Refresh();
+            };
+
+            if (flowLayoutPanel1.InvokeRequired)
+                flowLayoutPanel1.Invoke(add);
+            else
+                add();
+        }
+
         private void SendMessageToClient(string message)
         {
             if (_stream == null) return;
-
-            byte[] responseBytes = Encoding.UTF8.GetBytes(message);
-            _stream.Write(responseBytes, 0, responseBytes.Length);
+            var bytes = Encoding.UTF8.GetBytes(message);
+            _stream.Write(bytes, 0, bytes.Length);
             _stream.Flush();
+            AppendText($"SEND → {message}");
         }
 
-        // Append text to the TextBox (for debugging and feedback)
         private void AppendText(string text)
         {
-            if (InvokeRequired)
+            var timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fff");
+            var line = $"{timestamp}  {text}{Environment.NewLine}";
+
+            try
             {
-                Invoke(new Action(() => AppendText(text)));
-                return;
+                lock (_logLock)
+                {
+                    File.AppendAllText(_logFilePath, line);
+                }
             }
-            textBox1.AppendText(text + Environment.NewLine); // Append to a TextBox for feedback
+            catch (IOException)
+            {
+                // ignore file-in-use errors
+            }
+
+            MethodInvoker uiAppend = delegate
+            {
+                textBox1.AppendText(text + Environment.NewLine);
+            };
+
+            if (InvokeRequired)
+                Invoke(uiAppend);
+            else
+                uiAppend();
         }
 
-        // Handle form closing
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             try
@@ -505,19 +455,24 @@ namespace ClientGUI
             }
         }
 
-        // Connect Button Click handler (now visible only after a user is selected)
         private void connectButton_Click(object sender, EventArgs e)
         {
-            // Send a connection message to the client
+            if (!string.IsNullOrEmpty(selectedUserConfig))
+            {
+                SendMessageToClient("config:" + selectedUserConfig);
+                AppendText("Selected user's config sent to client.");
+            }
+            else
+            {
+                AppendText("No user configuration available to send.");
+            }
+
             SendMessageToClient("connect");
-            connectButton.Enabled = false;
             AppendText("Connect command sent to client. Waiting for port list...");
 
-            // Disable the connect button and inform the user
             connectButton.Enabled = false;
             AppendText("Connect button disabled. Awaiting port information.");
 
-            // After sending the message, wait for the client to send a response
             Task.Run(() => WaitForClientResponse());
         }
 
@@ -525,31 +480,23 @@ namespace ClientGUI
         {
             try
             {
-                // Assuming _stream is the network stream used to communicate with the client
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-
+                var buffer = new byte[1024];
                 while (_isRunning && _stream != null)
                 {
-                    // Keep waiting for the client response (blocking call)
-                    bytesRead = _stream.Read(buffer, 0, buffer.Length);
-
+                    int bytesRead = _stream.Read(buffer, 0, buffer.Length);
                     if (bytesRead == 0)
                     {
                         AppendText("Client connection lost. No data received.");
-                        break; // Connection closed
+                        break;
                     }
 
-                    string clientMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
-                    AppendText($"Received message from client: {clientMessage}");
+                    var clientMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+                    AppendText($"Client: {clientMessage}");
 
-                    // Here, you can handle the specific response from the client
                     if (clientMessage.ToLower() == "ports")
                     {
                         AppendText("Client has sent COM ports information.");
-                        // Do something with the COM ports data (e.g., display buttons, etc.)
                     }
-                
                 }
             }
             catch (Exception ex)

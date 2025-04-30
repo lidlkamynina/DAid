@@ -27,25 +27,25 @@
             // 
             // flowLayoutPanel1
             // 
-            this.flowLayoutPanel1.AutoScroll = true; // Enable scrolling if there are more buttons
+            this.flowLayoutPanel1.AutoScroll = true;
+            this.flowLayoutPanel1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(12, 12);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(500, 200); // Adjust size
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(588, 250);
             this.flowLayoutPanel1.TabIndex = 0;
-            this.flowLayoutPanel1.BackColor = System.Drawing.Color.WhiteSmoke;
             // 
-            // textBox1 (Debug window)
+            // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(12, 220);
+            this.textBox1.Location = new System.Drawing.Point(12, 252);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(500, 100);
+            this.textBox1.Size = new System.Drawing.Size(588, 150);
             this.textBox1.TabIndex = 1;
             // 
             // connectButton
             // 
-            this.connectButton.Location = new System.Drawing.Point(12, 330);
+            this.connectButton.Location = new System.Drawing.Point(12, 408);
             this.connectButton.Name = "connectButton";
             this.connectButton.Size = new System.Drawing.Size(100, 30);
             this.connectButton.TabIndex = 2;
@@ -55,25 +55,26 @@
             // 
             // statusLabel
             // 
-            this.statusLabel.Location = new System.Drawing.Point(12, 370);
+            this.statusLabel.Location = new System.Drawing.Point(12, 405);
             this.statusLabel.Name = "statusLabel";
             this.statusLabel.Size = new System.Drawing.Size(500, 30);
             this.statusLabel.TabIndex = 3;
-            this.statusLabel.Text = "Status: Waiting for action...";
+            this.statusLabel.Text = "";
             this.statusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // Form1
             // 
-            this.ClientSize = new System.Drawing.Size(530, 420);
+            this.ClientSize = new System.Drawing.Size(650, 478);
             this.Controls.Add(this.statusLabel);
             this.Controls.Add(this.connectButton);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Name = "Form1";
-            this.Text = "Client GUI";
+            this.Text = "Client GUI A";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
     }
 }
