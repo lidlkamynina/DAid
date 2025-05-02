@@ -16,9 +16,9 @@ namespace DAid.Clients
     public class Client
     {
  string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
-        string guipath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
-        string portFilePath = "C:/Users/Lietotajs/Desktop/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"  
-        string questip = "127.0.0.1"; // CHANGE AS NEEDED 192.168.8.118
+        string guipath = "D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
+        string portFilePath = "D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"  
+        string questip = "192.168.8.118"; // CHANGE AS NEEDED 192.168.8.118
         private Process _hmdProcess;
         private readonly Server _server;
         private VisualizationWindow _visualizationWindow;
@@ -45,6 +45,7 @@ namespace DAid.Clients
         public Client(Server server)
         {
             _server = server ?? throw new ArgumentNullException(nameof(server));
+            _server.RegisterFeedbackCallback(ReceiveConnectionFeedback);
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -144,6 +145,12 @@ namespace DAid.Clients
 
             Console.WriteLine("[Client]: HandleConnectCommandAsync completed.");
             File.Delete(portFilePath);
+        }
+        
+        private void ReceiveConnectionFeedback(string message)
+        {
+            Console.WriteLine($"{message}");
+            SendMessageToGUI(message); // GUI will show it
         }
 
         private async Task ListenForPortFileAsync(string filePath)

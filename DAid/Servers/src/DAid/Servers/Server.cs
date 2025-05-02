@@ -10,16 +10,40 @@ namespace DAid.Servers
     {
         private readonly object syncLock = new object();
         public Manager Manager { get; }
+
         private string[] ports;
         private bool isRunning;
         private bool isAcquiringData;
+        private bool isCalibrating = false;
 
-        private bool isCalibrating = false; // Prevent multiple calibrations
-
-        // Track connected devices and sensor adapters
         private readonly List<Device> connectedDevices = new List<Device>();
         private readonly List<SensorAdapter> sensorAdapters = new List<SensorAdapter>();
 
+        /// <summary>
+        /// Callback registered by the client to receive feedback messages.
+        /// </summary>
+        private Action<string> _onDeviceConnectionFeedback;
+
+        /// <summary>
+        /// Registers a callback for sending connection or status messages to the client.
+        /// </summary>
+        public void RegisterFeedbackCallback(Action<string> callback)
+        {
+            _onDeviceConnectionFeedback = callback;
+        }
+
+        /// <summary>
+        /// Sends feedback to client and logs to console.
+        /// </summary>
+        private void SendFeedbackToClient(string message)
+        {
+            Console.WriteLine(message);
+            _onDeviceConnectionFeedback?.Invoke(message);
+        }
+
+        /// <summary>
+        /// Initializes the server and device manager.
+        /// </summary>
         public Server()
         {
             Manager = new Manager();
@@ -79,21 +103,22 @@ namespace DAid.Servers
                 sensorAdapters.Clear();
             }
         }
+
         /// <summary>
-        /// Connects to a sensor by scanning available COM ports.
+        /// Stores the client-selected COM ports.
         /// </summary>
         public void HandlePortResponse(string port1, string port2)
         {
-        // Store the ports in the class-level array
-        ports = new string[] { port1, port2 };
-        }
-        public string[] GetPorts()
-        {
-        return ports;
+            ports = new[] { port1, port2 };
         }
 
         /// <summary>
-        /// Connects to a sensor by scanning available COM ports.
+        /// Retrieves the stored COM ports selected by the client.
+        /// </summary>
+        public string[] GetPorts() => ports;
+
+        /// <summary>
+        /// Connects to devices using the selected COM ports and notifies the client of results.
         /// </summary>
         public async Task HandleConnectCommandAsync(CancellationToken cancellationToken, Func<List<string>, Task> sendPortsToClient)
         {
@@ -101,115 +126,118 @@ namespace DAid.Servers
             var ports = SensorAdapter.ScanPorts();
             if (ports.Count == 0)
             {
-                Console.WriteLine("[Server]: No available COM ports.");
+                SendFeedbackToClient("[Server]: No available COM ports.");
                 return;
             }
-    Console.WriteLine("[Server]: Received COM ports: " + string.Join(", ", ports));
-    // Send the list of available COM ports to the client
-    await sendPortsToClient(ports.ToList());
-    string[] coms = GetPorts(); // Here you define the ports directly inside the method
-    // Loop through the provided ports to connect devices
-    for (int i = 0; i < coms.Length; i++)
-    {
-        string comPort = coms[i];
-        if (!SensorAdapter.ScanPorts().Contains(comPort))
-        {
-            Console.WriteLine($"[Server]: Invalid COM port '{comPort}'. Skipping Device {i + 1}.");
-            continue;
-        }
-        // Check if this port is already connected
-        if (connectedDevices.Any(d => d.Path == comPort))
-        {
-            Console.WriteLine($"[Server]: Device on {comPort} is already connected. Skipping.");
-            continue;
-        }
 
-        var connectedDevice = Manager.Connect(comPort);
-        if (connectedDevice != null)
-        {
-            connectedDevices.Add(connectedDevice);
-            sensorAdapters.Add(connectedDevice.SensorAdapter);
-            // Log whether the device is a left or right sock
-            Console.WriteLine($"[Server]: Device {connectedDevice.ModuleName} is a {(connectedDevice.IsLeftSock ? "Left" : "Right")} Sock.");
+            Console.WriteLine("[Server]: Received COM ports: " + string.Join(", ", ports));
+            await sendPortsToClient(ports.ToList());
+
+            string[] coms = GetPorts();
+
+            for (int i = 0; i < coms.Length; i++)
+            {
+                string comPort = coms[i];
+                if (!SensorAdapter.ScanPorts().Contains(comPort))
+                {
+                    SendFeedbackToClient($"[Server]: Invalid COM port '{comPort}'. Skipping Device {i + 1}.");
+                    continue;
+                }
+
+                if (connectedDevices.Any(d => d.Path == comPort))
+                {
+                    SendFeedbackToClient($"[Server]: Device on {comPort} is already connected. Skipping.");
+                    continue;
+                }
+
+                var connectedDevice = Manager.Connect(comPort);
+                if (connectedDevice != null)
+                {
+                    connectedDevices.Add(connectedDevice);
+                    sensorAdapters.Add(connectedDevice.SensorAdapter);
+                    string side = connectedDevice.IsLeftSock ? "Left" : "Right";
+                    SendFeedbackToClient($"[Server]: Device {connectedDevice.ModuleName} is a {side} Sock.");
+                }
+                else
+                {
+                    SendFeedbackToClient($"[Server]: Device Unknown on {comPort} is a Right Sock (connection failed).");
+                }
+            }
+
+            SendFeedbackToClient("[Server]: All devices connected. Waiting for further commands.");
         }
-        else
-        {
-            Console.WriteLine($"[Server]: Failed to connect to device on {comPort}.");
-        }
-    }
-    Console.WriteLine("[Server]: All devices connected. Waiting for further commands.");
-}
 
         /// <summary>
-        /// Handles the calibrate command.
+        /// Handles the calibrate command and performs per-sock calibration.
         /// </summary>
-       public void HandleCalibrateCommand()
-{
-    lock (syncLock)
-    {
-        if (!connectedDevices.Any())
+        public void HandleCalibrateCommand()
         {
-            Console.WriteLine("[Server]: No devices connected. Use 'connect' command first.");
-            return;
-        }
-
-        if (isCalibrating)
-        {
-            Console.WriteLine("[Server]: Calibration is already in progress.");
-            return;
-        }
-
-        if (!isAcquiringData) 
-        {
-            StartDataStream(); 
-        }
-
-        isCalibrating = true;
-    }
-
-    try
-    {
-        var sortedDevices = connectedDevices.OrderBy(d => d.IsLeftSock ? 0 : 1).ToList(); // Left first
-
-        foreach (var device in sortedDevices)
-        {
-            foreach (var d in connectedDevices)
+            lock (syncLock)
             {
-                if (d.IsStreaming) 
-                    d.SensorAdapter.StopSensorStream();
+                if (!connectedDevices.Any())
+                {
+                    SendFeedbackToClient("[Server]: No devices connected. Use 'connect' command first.");
+                    return;
+                }
+
+                if (isCalibrating)
+                {
+                    SendFeedbackToClient("[Server]: Calibration is already in progress.");
+                    return;
+                }
+
+                if (!isAcquiringData)
+                {
+                    StartDataStream();
+                }
+
+                isCalibrating = true;
             }
 
-            device.SensorAdapter.StartSensorStream();
-
-            string side = device.IsLeftSock ? "Left" : "Right";
-            Console.WriteLine($"[Server]: Now calibrating {side} foot (Device {device.ModuleName})...");
-
-            bool calibrationSuccessful = device.Calibrate(device.IsLeftSock);
-
-            if (calibrationSuccessful)
+            try
             {
-                Console.WriteLine($"[Server]: Calibration successful for {side} foot (Device {device.ModuleName}).");
-            }
-            else
-            {
-                Console.WriteLine($"[Server]: Calibration FAILED for {side} foot (Device {device.ModuleName}).");
-            }
+                var sortedDevices = connectedDevices.OrderBy(d => d.IsLeftSock ? 0 : 1).ToList();
 
-            device.SensorAdapter.StopSensorStream();
+                foreach (var device in sortedDevices)
+                {
+                    foreach (var d in connectedDevices)
+                    {
+                        if (d.IsStreaming)
+                            d.SensorAdapter.StopSensorStream();
+                    }
+
+                    device.SensorAdapter.StartSensorStream();
+
+                    string side = device.IsLeftSock ? "Left" : "Right";
+                    SendFeedbackToClient($"[Server]: Now calibrating {side} foot (Device {device.ModuleName})...");
+
+                    bool calibrationSuccessful = device.Calibrate(device.IsLeftSock);
+
+                    if (calibrationSuccessful)
+                    {
+                        SendFeedbackToClient($"[Server]: Calibration successful for {side} foot (Device {device.ModuleName}).");
+                    }
+                    else
+                    {
+                        SendFeedbackToClient($"[Server]: Calibration FAILED for {side} foot (Device {device.ModuleName}).");
+                    }
+
+                    device.SensorAdapter.StopSensorStream();
+                }
+
+                foreach (var d in connectedDevices)
+                {
+                    d.SensorAdapter.StartSensorStream();
+                }
+            }
+            finally
+            {
+                lock (syncLock)
+                {
+                    isCalibrating = false;
+                }
+            }
         }
-        foreach (var d in connectedDevices)
-        {
-            d.SensorAdapter.StartSensorStream();
-        }
-    }
-    finally
-    {
-        lock (syncLock)
-        {
-            isCalibrating = false;
-        }
-    }
-}
 
         /// <summary>
         /// Starts data acquisition for all connected devices.
@@ -220,7 +248,7 @@ namespace DAid.Servers
             {
                 if (isAcquiringData)
                 {
-                    Console.WriteLine("[Server]: Data acquisition is already running.");
+                    SendFeedbackToClient("[Server]: Data acquisition is already running.");
                     return;
                 }
 
@@ -229,7 +257,7 @@ namespace DAid.Servers
 
             foreach (var device in connectedDevices)
             {
-                Console.WriteLine($"[Server]: Starting data stream for device {device.ModuleName}...");
+                SendFeedbackToClient($"[Server]: Starting data stream for device {device.ModuleName}...");
                 device.Start();
             }
         }
@@ -243,39 +271,42 @@ namespace DAid.Servers
             {
                 if (!isAcquiringData)
                 {
-                    Console.WriteLine("[Server]: No active data streams to stop.");
+                    SendFeedbackToClient("[Server]: No active data streams to stop.");
                     return;
                 }
 
-                Console.WriteLine("[Server]: Stopping data streams for all devices...");
+                SendFeedbackToClient("[Server]: Stopping data streams for all devices...");
                 foreach (var device in connectedDevices)
                 {
                     try
                     {
                         device.Stop();
-                        Console.WriteLine($"[Server]: Data stream stopped for device {device.ModuleName}.");
+                        SendFeedbackToClient($"[Server]: Data stream stopped for device {device.ModuleName}.");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"[Server]: Failed to stop data stream for device {device.ModuleName}. Error: {ex.Message}");
+                        SendFeedbackToClient($"[Server]: Failed to stop data stream for device {device.ModuleName}. Error: {ex.Message}");
                     }
                 }
 
                 isAcquiringData = false;
-                Console.WriteLine("[Server]: All data streams stopped.");
+                SendFeedbackToClient("[Server]: All data streams stopped.");
             }
         }
 
+        /// <summary>
+        /// Optional handler for CoP updates, currently unused.
+        /// </summary>
         private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double CoPY, double[] Pressures) copData)
         {
             if (sender is Device device)
             {
                 string sockType = device.IsLeftSock ? "Left Sock" : "Right Sock";
-                //Console.WriteLine($"[Server]: {sockType} CoP for {copData.DeviceName} -> X={copData.CoPX:F2}, Y={copData.CoPY:F2}, Pressures: {string.Join(", ", copData.Pressures.Select(p => p.ToString("F2")))}");
+                // Optionally log CoP data here
             }
             else
             {
-                Console.WriteLine("[Server]: CoP update received from an unknown source.");
+                SendFeedbackToClient("[Server]: CoP update received from an unknown source.");
             }
         }
 
@@ -284,7 +315,7 @@ namespace DAid.Servers
         /// </summary>
         private void HandleExitCommand()
         {
-            Console.WriteLine("[Server]: Exiting and cleaning up resources...");
+            SendFeedbackToClient("[Server]: Exiting and cleaning up resources...");
             Stop();
         }
     }
