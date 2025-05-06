@@ -166,36 +166,22 @@
 
     // Centre‐backs
     "Centra aizsargs (CB)",
-    "Kreisais centra aizsargs (LCB)",
+    "Kreisā centra aizsargs (LCB)",
     "Labais centra aizsargs (RCB)",
 
     // Full‐backs
-    "Kreisais malējais aizsargs (LB)",
-    "Labais malējais aizsargs (RB)",
+    "Kreisais pusaizsargs (ML)",
+    "Labais pussargs (MR)",
 
     // Wing‐backs (spārna aizsargs)
-    "Kreisais spārna aizsargs (LWB)",
-    "Labais spārna aizsargs (RWB)",
+    "Centra pussargs (MC)",
+    "Labais spārns (WR)",
 
     // Sweeper
-    "Tīrītājs (SW)",
+    "Zemuzbrucējs (AMC)",
 
     // Midfielders (pussargs)
-    "Defensīvais pussargs (CDM)",
-    "Centrālais pussargs (CM)",
-    "Uzbrūkošais pussargs (CAM)",
-    "Kreisais pussargs (LM)",
-    "Labais pussargs (RM)",
-    "Box-to-box pussargs (B2B)",
-
-    // Forwards
-    "Uzbrucējs (ST)",
-    "Centra uzbrucējs (CF)",
-    "Otrais uzbrucējs (SS)",
-
-    // Wingers (spārns)
-    "Kreisais spārns (LW)",
-    "Labais spārns (RW)"
+    "Uzbrucējs (FWL,STC,FWR)"
  });
 
             this.comboBoxPosition.Location = new System.Drawing.Point(120, 222);

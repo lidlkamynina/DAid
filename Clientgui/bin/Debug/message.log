@@ -1473,3 +1473,203 @@
 2025-04-30T12:39:21.458  Client: HMD Disconnected.
 2025-04-30T12:39:21.458  Client connection lost. No data received.
 2025-04-30T12:39:21.459  Exit command sent to client.
+2025-04-30T12:44:26.819  GUI Server started. Waiting for Client...
+2025-04-30T12:44:28.047  User selected: ID: 1 - Andis
+2025-04-30T12:44:28.053  User confirmed. Now you may connect to the client.
+2025-04-30T12:44:28.688  Client connected!
+2025-04-30T12:44:28.690  Client: connect
+2025-04-30T12:44:29.163  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:44:29.165  Selected user's config sent to client.
+2025-04-30T12:44:29.166  SEND → connect
+2025-04-30T12:44:29.168  Connect command sent to client. Waiting for port list...
+2025-04-30T12:44:29.174  Connect button disabled. Awaiting port information.
+2025-04-30T12:44:29.203  Client: COM1
+2025-04-30T12:44:29.207  Parsed ports: COM1
+2025-04-30T12:44:29.210  [DEBUG] CreatePortButtons called with 1 ports.
+2025-04-30T12:44:29.214  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T12:44:29.217  [DEBUG] Creating button for: COM1
+2025-04-30T12:44:29.223  [DEBUG] Added button for COM1.
+2025-04-30T12:44:29.227  [DEBUG] Created 1 buttons.
+2025-04-30T12:44:48.065  GUI Server started. Waiting for Client...
+2025-04-30T12:44:49.412  User selected: ID: 1 - Andis
+2025-04-30T12:44:49.418  User confirmed. Now you may connect to the client.
+2025-04-30T12:44:49.925  Client connected!
+2025-04-30T12:44:49.927  Client: connect
+2025-04-30T12:44:51.934  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-04-30T12:44:51.936  Selected user's config sent to client.
+2025-04-30T12:44:51.938  SEND → connect
+2025-04-30T12:44:51.939  Connect command sent to client. Waiting for port list...
+2025-04-30T12:44:51.945  Connect button disabled. Awaiting port information.
+2025-04-30T12:44:51.969  Client: COM1,COM7,COM8,COM6,COM9
+2025-04-30T12:44:51.974  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-04-30T12:44:51.977  [DEBUG] CreatePortButtons called with 5 ports.
+2025-04-30T12:44:51.980  [DEBUG] Cleared FlowLayoutPanel.
+2025-04-30T12:44:51.983  [DEBUG] Creating button for: COM1
+2025-04-30T12:44:51.989  [DEBUG] Added button for COM1.
+2025-04-30T12:44:51.993  [DEBUG] Creating button for: COM7
+2025-04-30T12:44:52.000  [DEBUG] Added button for COM7.
+2025-04-30T12:44:52.003  [DEBUG] Creating button for: COM8
+2025-04-30T12:44:52.012  [DEBUG] Added button for COM8.
+2025-04-30T12:44:52.015  [DEBUG] Creating button for: COM6
+2025-04-30T12:44:52.026  [DEBUG] Added button for COM6.
+2025-04-30T12:44:52.029  [DEBUG] Creating button for: COM9
+2025-04-30T12:44:52.040  [DEBUG] Added button for COM9.
+2025-04-30T12:44:52.043  [DEBUG] Created 5 buttons.
+2025-04-30T12:44:52.459  Selected: COM6
+2025-04-30T12:44:52.687  Selected: COM9
+2025-04-30T12:44:52.691  Sent selected ports to client: COM6,COM9
+2025-04-30T12:44:52.694  Written selected ports to file.
+2025-04-30T12:44:52.700  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-04-30T12:44:57.732  SEND → calibrate
+2025-04-30T12:44:57.737  Calibrate command sent to client.
+2025-04-30T12:45:03.310  Client: Requesting server to calibrate connected devices...
+2025-04-30T12:45:03.310  Client: [Calibration]: Preparing to calibrate...
+2025-04-30T12:45:03.313  Client: [Calibration]: Lift RIGHT foot for 10 seconds.[Calibration]: Calibrating LEFT foot.[Calibration]: Stand on both feet.
+2025-04-30T12:45:14.326  Client: [Calibration]: Lift LEFT foot for 10 seconds.
+2025-04-30T12:45:14.326  Client: [Calibration]: Calibrating RIGHT foot.
+2025-04-30T12:45:23.377  Client: Calibration completed.
+2025-04-30T12:45:23.377  Client: Use 'start' to begin visualization.
+2025-05-06T09:19:09.872  GUI Server started. Waiting for Client...
+2025-05-06T09:19:11.152  User selected: ID: 1 - Andis
+2025-05-06T09:19:11.158  User confirmed. Now you may connect to the client.
+2025-05-06T09:19:11.715  Client connected!
+2025-05-06T09:19:11.719  Client: connect
+2025-05-06T09:19:12.838  Error reading message: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-05-06T09:19:18.245  GUI Server started. Waiting for Client...
+2025-05-06T09:19:20.131  Client connected!
+2025-05-06T09:19:20.133  Client: connect
+2025-05-06T09:20:09.712  Error reading message: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-05-06T09:24:52.669  GUI Server started. Waiting for Client...
+2025-05-06T09:44:37.588  GUI Server started. Waiting for Client...
+2025-05-06T09:44:38.620  User selected: ID: 1 - Andis
+2025-05-06T09:44:38.626  User confirmed. Now you may connect to the client.
+2025-05-06T09:44:39.468  Client connected!
+2025-05-06T09:44:39.471  Client: connect
+2025-05-06T09:44:39.811  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-05-06T09:44:39.814  Selected user's config sent to client.
+2025-05-06T09:44:39.816  SEND → connect
+2025-05-06T09:44:39.817  Connect command sent to client. Waiting for port list...
+2025-05-06T09:44:39.823  Connect button disabled. Awaiting port information.
+2025-05-06T09:44:39.899  Client: COM1
+2025-05-06T09:44:39.903  Parsed ports: COM1
+2025-05-06T09:44:39.908  [DEBUG] CreatePortButtons called with 1 ports.
+2025-05-06T09:44:39.911  [DEBUG] Cleared FlowLayoutPanel.
+2025-05-06T09:44:39.914  [DEBUG] Creating button for: COM1
+2025-05-06T09:44:39.922  [DEBUG] Added button for COM1.
+2025-05-06T09:44:39.925  [DEBUG] Created 1 buttons.
+2025-05-06T09:44:42.766  Error while waiting for client response: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-05-06T09:44:42.766  Error reading message: Unable to read data from the transport connection: A blocking operation was interrupted by a call to WSACancelBlockingCall.
+2025-05-06T09:45:04.342  GUI Server started. Waiting for Client...
+2025-05-06T09:45:05.526  User selected: ID: 1 - Andis
+2025-05-06T09:45:05.531  User confirmed. Now you may connect to the client.
+2025-05-06T09:45:06.219  Client connected!
+2025-05-06T09:45:06.221  Client: connect
+2025-05-06T09:45:06.570  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-05-06T09:45:06.571  Selected user's config sent to client.
+2025-05-06T09:45:06.573  SEND → connect
+2025-05-06T09:45:06.574  Connect command sent to client. Waiting for port list...
+2025-05-06T09:45:06.579  Connect button disabled. Awaiting port information.
+2025-05-06T09:45:06.607  Client: COM1,COM7,COM8,COM6,COM9
+2025-05-06T09:45:06.612  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-05-06T09:45:06.615  [DEBUG] CreatePortButtons called with 5 ports.
+2025-05-06T09:45:06.618  [DEBUG] Cleared FlowLayoutPanel.
+2025-05-06T09:45:06.621  [DEBUG] Creating button for: COM1
+2025-05-06T09:45:06.627  [DEBUG] Added button for COM1.
+2025-05-06T09:45:06.630  [DEBUG] Creating button for: COM7
+2025-05-06T09:45:06.635  [DEBUG] Added button for COM7.
+2025-05-06T09:45:06.638  [DEBUG] Creating button for: COM8
+2025-05-06T09:45:06.644  [DEBUG] Added button for COM8.
+2025-05-06T09:45:06.648  [DEBUG] Creating button for: COM6
+2025-05-06T09:45:06.656  [DEBUG] Added button for COM6.
+2025-05-06T09:45:06.659  [DEBUG] Creating button for: COM9
+2025-05-06T09:45:06.668  [DEBUG] Added button for COM9.
+2025-05-06T09:45:06.671  [DEBUG] Created 5 buttons.
+2025-05-06T09:45:07.118  Selected: COM6
+2025-05-06T09:45:07.391  Selected: COM9
+2025-05-06T09:45:07.395  Sent selected ports to client: COM6,COM9
+2025-05-06T09:45:07.398  Written selected ports to file.
+2025-05-06T09:45:07.403  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-05-06T09:45:12.829  Client: [Server]: Device Unknown is a Right Sock.
+2025-05-06T09:45:17.951  Client: [Server]: Device Unknown is a Right Sock.
+2025-05-06T09:45:17.951  Client: [Server]: All devices connected. Waiting for further commands.
+2025-05-06T09:45:19.805  SEND → calibrate
+2025-05-06T09:45:19.806  Client: Requesting server to calibrate connected devices...
+2025-05-06T09:45:19.806  Client: [Calibration]: Preparing to calibrate...
+2025-05-06T09:45:19.809  Calibrate command sent to client.
+2025-05-06T09:45:19.831  Client: [Calibration]: Lift RIGHT foot for 10 seconds.[Calibration]: Calibrating LEFT foot.[Calibration]: Stand on both feet.[Server]: Starting data stream for device Unknown...[Server]: Starting data stream for device Unknown...[Server]: Now calibrating Right foot (Device Unknown)...
+2025-05-06T09:45:29.838  Client: [Server]: Calibration successful for Right foot (Device Unknown).
+2025-05-06T09:45:29.838  Client: [Server]: Now calibrating Right foot (Device Unknown)...
+2025-05-06T09:45:30.815  Client: [Calibration]: Lift LEFT foot for 10 seconds.
+2025-05-06T09:45:30.815  Client: [Calibration]: Calibrating RIGHT foot.
+2025-05-06T09:45:39.874  Client: [Server]: Calibration successful for Right foot (Device Unknown).
+2025-05-06T09:45:39.874  Client: Calibration completed.
+2025-05-06T09:45:39.877  Client: Use 'start' to begin visualization.
+2025-05-06T09:46:36.551  SEND → exit
+2025-05-06T09:46:36.552  Exit command sent to client.
+2025-05-06T09:46:36.553  Client: HMD Disconnected.
+2025-05-06T09:46:36.553  Client connection lost. No data received.
+2025-05-06T09:49:35.876  GUI Server started. Waiting for Client...
+2025-05-06T09:49:37.836  Error: A blocking operation was interrupted by a call to WSACancelBlockingCall
+2025-05-06T09:49:44.855  GUI Server started. Waiting for Client...
+2025-05-06T09:49:46.260  User selected: ID: 1 - Andis
+2025-05-06T09:49:46.266  User confirmed. Now you may connect to the client.
+2025-05-06T09:49:46.740  Client connected!
+2025-05-06T09:49:47.531  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-05-06T09:49:47.533  Selected user's config sent to client.
+2025-05-06T09:49:47.534  SEND → connect
+2025-05-06T09:49:47.536  Connect command sent to client. Waiting for port list...
+2025-05-06T09:49:47.540  Connect button disabled. Awaiting port information.
+2025-05-06T09:51:23.481  GUI Server started. Waiting for Client...
+2025-05-06T09:55:59.491  GUI Server started. Waiting for Client...
+2025-05-06T09:56:00.778  User selected: ID: 1 - Andis
+2025-05-06T09:56:00.783  User confirmed. Now you may connect to the client.
+2025-05-06T09:56:01.373  Client connected!
+2025-05-06T09:56:01.375  Client: connect
+2025-05-06T09:56:02.211  SEND → config:1,Andis,23,Female,189,170,43,Right,LF,none
+2025-05-06T09:56:02.212  Selected user's config sent to client.
+2025-05-06T09:56:02.214  SEND → connect
+2025-05-06T09:56:02.215  Connect command sent to client. Waiting for port list...
+2025-05-06T09:56:02.220  Connect button disabled. Awaiting port information.
+2025-05-06T09:56:02.245  Client: COM1,COM7,COM8,COM6,COM9
+2025-05-06T09:56:02.249  Parsed ports: COM1, COM7, COM8, COM6, COM9
+2025-05-06T09:56:02.253  [DEBUG] CreatePortButtons called with 5 ports.
+2025-05-06T09:56:02.256  [DEBUG] Cleared FlowLayoutPanel.
+2025-05-06T09:56:02.259  [DEBUG] Creating button for: COM1
+2025-05-06T09:56:02.265  [DEBUG] Added button for COM1.
+2025-05-06T09:56:02.268  [DEBUG] Creating button for: COM7
+2025-05-06T09:56:02.274  [DEBUG] Added button for COM7.
+2025-05-06T09:56:02.278  [DEBUG] Creating button for: COM8
+2025-05-06T09:56:02.287  [DEBUG] Added button for COM8.
+2025-05-06T09:56:02.291  [DEBUG] Creating button for: COM6
+2025-05-06T09:56:02.300  [DEBUG] Added button for COM6.
+2025-05-06T09:56:02.303  [DEBUG] Creating button for: COM9
+2025-05-06T09:56:02.311  [DEBUG] Added button for COM9.
+2025-05-06T09:56:02.315  [DEBUG] Created 5 buttons.
+2025-05-06T09:56:03.514  Selected: COM6
+2025-05-06T09:56:03.941  Selected: COM9
+2025-05-06T09:56:03.945  Sent selected ports to client: COM6,COM9
+2025-05-06T09:56:03.948  Written selected ports to file.
+2025-05-06T09:56:03.953  [DEBUG] Cleared FlowLayoutPanel after selecting two ports.
+2025-05-06T09:56:09.472  Client: [Server]: Device Unknown is a Right Sock.
+2025-05-06T09:56:14.595  Client: [Server]: Device Unknown is a Right Sock.
+2025-05-06T09:56:14.595  Client: [Server]: All devices connected. Waiting for further commands.
+2025-05-06T09:56:16.138  SEND → calibrate
+2025-05-06T09:56:16.139  Client: Requesting server to calibrate connected devices...
+2025-05-06T09:56:16.139  Client: [Calibration]: Preparing to calibrate...
+2025-05-06T09:56:16.142  Calibrate command sent to client.
+2025-05-06T09:56:16.163  Client: [Calibration]: Lift RIGHT foot for 10 seconds.[Calibration]: Calibrating LEFT foot.[Calibration]: Stand on both feet.[Server]: Starting data stream for device Unknown...[Server]: Starting data stream for device Unknown...[Server]: Now calibrating Right foot (Device Unknown)...
+2025-05-06T09:56:26.177  Client: [Server]: Calibration successful for Right foot (Device Unknown).
+2025-05-06T09:56:26.177  Client: [Server]: Now calibrating Right foot (Device Unknown)...
+2025-05-06T09:56:27.154  Client: [Calibration]: Lift LEFT foot for 10 seconds.
+2025-05-06T09:56:27.154  Client: [Calibration]: Calibrating RIGHT foot.
+2025-05-06T09:56:36.215  Client: [Server]: Calibration successful for Right foot (Device Unknown).
+2025-05-06T09:56:36.215  Client: Calibration completed.
+2025-05-06T09:56:36.217  Client: Use 'start' to begin visualization.
+2025-05-06T09:56:54.500  SEND → start
+2025-05-06T09:56:54.503  Start command sent to client.
+2025-05-06T09:56:54.510  Client: [Server]: Data acquisition is already running.
+2025-05-06T09:56:54.519  Client: Starting HMD application...
+2025-05-06T09:57:08.284  SEND → exit
+2025-05-06T09:57:08.286  Exit command sent to client.
+2025-05-06T09:57:08.286  Client connection lost. No data received.
+2025-05-06T09:57:08.286  Client: HMD Disconnected.
