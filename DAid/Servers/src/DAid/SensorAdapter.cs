@@ -13,7 +13,9 @@ public class SensorAdapter
     private const byte StartByte = 0xF0;
     private const byte StopByte = 0x55;
     private const int PacketLength = 47;
-    private const int MedianWindowSize = 10; //this?
+
+    // Used to apply noise filtering over time for each sensor
+    private const int MedianWindowSize = 10; 
     private readonly Queue<double>[] pressureHistories = new Queue<double>[4];
     private readonly byte[] buffer = new byte[2048]; 
     private int bufferPos = 0;
@@ -59,9 +61,15 @@ public class SensorAdapter
         DeviceId = deviceId ?? throw new ArgumentNullException(nameof(deviceId));
         SensorPositions = RightSensorPositions;
 
+        // Initialize per-sensor rolling history buffers
         for (int i = 0; i < pressureHistories.Length; i++)
             pressureHistories[i] = new Queue<double>(FilterWindowSize); 
     }
+
+     /// <summary>
+    /// Initializes and opens the serial port with optional baud rate.
+    /// Configures the hardware before streaming begins.
+    /// </summary>
     public void Initialize(string comPort, int baudRate = DefaultBaudRate)
     {
             if (serialPort != null && serialPort.IsOpen)
@@ -95,6 +103,10 @@ public class SensorAdapter
             throw;
         }
     }
+
+    /// <summary>
+    /// Lists available COM ports on the machine.
+    /// </summary>
      public static List<string> ScanPorts()
     {
         try
@@ -116,6 +128,9 @@ public class SensorAdapter
         SendCommand($"BTS4={config}");
         }
 
+        /// <summary>
+       /// Thread-safe command dispatch to sensor over serial.
+       /// </summary>
         private void SendCommand(string command)
     {
           lock (syncLock)
@@ -135,7 +150,9 @@ public class SensorAdapter
     }
 
 
-
+    /// <summary>
+    /// Starts streaming sensor data. Also launches the optional debug UI.
+    /// </summary>
     public void StartSensorStream()
     {
         lock (syncLock)
@@ -161,6 +178,9 @@ public class SensorAdapter
         }
     }
 
+    /// <summary>
+    /// Stops streaming and logs to console.
+    /// </summary>
     public void StopSensorStream()
     {
         lock (syncLock)
@@ -174,6 +194,10 @@ public class SensorAdapter
         }
     }
 
+    /// <summary>
+    /// Handles raw serial data input and queues for parsing.
+    /// Triggers name retrieval on first data.
+    /// </summary>
     private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
 {
     try
@@ -201,6 +225,11 @@ public class SensorAdapter
         Console.WriteLine($"[SensorAdapter]: Error receiving data: {ex.Message}");
     }
 }
+
+/// <summary>
+/// Sends a command to the sensor to retrieve the module name (BTS6 register).
+/// Determines if the device is a left or right sock based on module number parity.
+/// </summary>
 public void RetrieveModuleName()
 {
     if (moduleNameRetrieved) return;
@@ -250,7 +279,9 @@ public void RetrieveModuleName()
     }
 }
 
-
+/// <summary>
+/// Determines left/right sock mapping based on module number.
+/// </summary>
  private void CheckLeftOrRight(int moduleNumber)
 {
     if (moduleNumber % 2 == 0)
@@ -263,7 +294,9 @@ public void RetrieveModuleName()
     }
 }
 
-
+/// <summary>
+/// Processes incoming raw serial data, reconstructs valid packets, and extracts sensor values.
+/// </summary>
     private void ProcessIncomingData(byte[] incomingData)
     {
         lock (syncLock)
@@ -301,7 +334,11 @@ public void RetrieveModuleName()
             }
         }
     }
-
+    
+/// <summary>
+/// Extracts and filters raw sensor values from the packet.
+/// Applies calibration and computes smoothed pressure values.
+/// </summary>
 private void ExtractSensorValues(byte[] packet)
 {
     lock (syncLock)
@@ -349,6 +386,9 @@ private void ExtractSensorValues(byte[] packet)
 
     }
 
+/// <summary>
+/// Thread-safe access to filtered resistance values.
+/// </summary>
 public double[] GetSensorPressures()
 {
     lock (syncLock)
@@ -357,7 +397,10 @@ public double[] GetSensorPressures()
     }
 }
 
-
+/// <summary>
+/// Runs a 10-second calibration by averaging pressure values while the user stands.
+/// Offsets are stored to zero baseline for each sock side.
+/// </summary>
 public bool Calibrate(bool isLeftSock)
 {
     int seconds = 10;
@@ -408,6 +451,9 @@ public bool Calibrate(bool isLeftSock)
     return true;
 }
 
+/// <summary>
+/// Applies a median filter to a history queue to reduce noise.
+/// </summary>
 private double MedianFilter(Queue<double> history)
     {
         var arraySorted = history.OrderBy(x => x).ToList();
@@ -417,7 +463,10 @@ private double MedianFilter(Queue<double> history)
             : (arraySorted[(count - 1) / 2] + arraySorted[count / 2]) / 2.0;
     }
 
-
+/// <summary>
+/// Calculates Center of Pressure from the 3 virtual pressure points.
+/// Sends a CoPUpdated event for GUI or HMD.
+/// </summary>
 private void CalculateAndNotifyCoP()
 {
     lock (syncLock)
@@ -460,6 +509,10 @@ private void CalculateAndNotifyCoP()
             Task.Run(() => CoPUpdated?.Invoke(this, (copX, copY, (double[])cleanPressures.Clone())));
         }
 }
+
+/// <summary>
+/// Validates that packet ends with stop byte and has matching checksum.
+/// </summary>
     private bool ValidatePacket(byte[] packet)
     {
         if (packet.Length < PacketLength) return false;
@@ -467,11 +520,18 @@ private void CalculateAndNotifyCoP()
         return calculatedChecksum == packet[PacketLength - 2] && packet[PacketLength - 1] == StopByte;
     }
 
+/// <summary>
+/// Adds up packet data bytes to compute checksum.
+/// </summary>
     private byte CalculateChecksum(byte[] data, int length)
     {
         int sum = data.Take(length).Sum(b => b);
         return (byte)(sum & 0xFF);
     }
+
+    /// <summary>
+/// Stops streaming, closes serial port, and shuts down debug window.
+/// </summary>
     public void Cleanup()
     {
         lock (syncLock)

@@ -34,6 +34,9 @@ namespace DAid.Clients
             Shown += (sender, e) => Console.WriteLine("[VisualizationWindow]: Visualization started.");
         }
 
+        /// <summary>
+        /// Called by client to update CoP position and refresh the trail.
+        /// </summary>
         public void UpdateVisualization((double X, double Y, double TotalPressure) copLeft,
                                         (double X, double Y, double TotalPressure) copRight)
         {
@@ -54,6 +57,9 @@ namespace DAid.Clients
             Invalidate(); 
         }
 
+        /// <summary>
+        /// Appends a new CoP point to the trail if the pressure is significant.
+        /// </summary>
         private void UpdateTrail(List<PointF> trail, (double X, double Y, double TotalPressure) cop)
         {
             if (cop.TotalPressure > 0.0001)
@@ -69,6 +75,9 @@ namespace DAid.Clients
             }
         }
 
+        /// <summary>
+        /// Paints the full window, including both foot panels.
+        /// </summary>
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -79,6 +88,9 @@ namespace DAid.Clients
             DrawFootPanel(graphics, SockSpacing + SockSpacing / 2, "Right Foot", _copRight, _copTrailRight, lastRightDataUpdate);
         }
 
+        /// <summary>
+        /// Draws the grid, labels, trail, and CoP dot for a single foot.
+        /// </summary>
         private void DrawFootPanel(Graphics graphics, int xOffset, string title,
             (double X, double Y, double TotalPressure) cop, List<PointF> trail, DateTime lastUpdate)
         {
@@ -102,6 +114,9 @@ namespace DAid.Clients
             graphics.ResetTransform();
         }
 
+        /// <summary>
+        /// Draws X and Y grid axes with numeric labels.
+        /// </summary>
         private void DrawAxes(Graphics graphics)
         {
             Pen axisPen = new Pen(Color.LightGray, 1);
@@ -119,6 +134,9 @@ namespace DAid.Clients
             graphics.DrawString("Y", new Font("Arial", 9, FontStyle.Bold), Brushes.Black, -20, -7.0f * scaleY - 25);
         }
 
+        /// <summary>
+        /// Draws the historical CoP trail as a blue path.
+        /// </summary>
         private void DrawTrail(Graphics graphics, List<PointF> trail)
         {
             if (trail.Count < 2) return;
@@ -130,6 +148,9 @@ namespace DAid.Clients
             }
         }
 
+        /// <summary>
+        /// Draws a red dot at the current CoP position and shows coordinates.
+        /// </summary>
         private void DrawCurrentCoP(Graphics graphics, (double X, double Y, double TotalPressure) cop)
         {
             float x = (float)(cop.X * scaleX);

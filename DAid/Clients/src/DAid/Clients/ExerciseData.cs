@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-public class ExerciseData
+public class ExerciseData //consists of exercise specific data individual for each
 {
     public int RepetitionID { get; set; }
     public string Name { get; set; }
