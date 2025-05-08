@@ -70,6 +70,7 @@ public class GameManager : MonoBehaviour
     // Control flags.
     private bool preparationSuccessful = false;
     private bool restartExerciseRequested = false;
+    private bool preperationrequested = false;
     int reps = 1;
     int repss = 0; // ex 6 logic
     string right = "right";
@@ -177,6 +178,11 @@ public class GameManager : MonoBehaviour
     Quaternion.Euler(0, -40, 0),
     Quaternion.Euler(0, -70, 0),
     0.25f));
+        yield return StartCoroutine(AnimatePosition(
+    instructionText.transform,
+    instructionText.transform.localPosition,
+    new Vector3(-0.55f, -0.7f, 0f),
+    0.25f));
         yield return RunSequenceForExercise4();
         FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
         gifDisplay.gameObject.SetActive(false);
@@ -184,6 +190,11 @@ public class GameManager : MonoBehaviour
             leftFootInstructionText.gameObject.SetActive(false);
         if (rightFootInstructionText != null)
             rightFootInstructionText.gameObject.SetActive(false);
+        yield return StartCoroutine(AnimatePosition(
+    instructionText.transform,
+    instructionText.transform.localPosition,
+    new Vector3(-0.4f, -0.7f, 0f),
+    0f));
         yield return new WaitForSeconds(2f);
         yield return StartCoroutine(AnimatePosition(characterAnimator.transform, characterAnimator.transform.localPosition, new Vector3(0f, -0.3f, 4.669f), 0.25f));
         currentExercise = exerciseConfigs[5]; // change to 5
@@ -205,7 +216,11 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(2f);
         yield return StartCoroutine(AnimatePosition(characterAnimator.transform, characterAnimator.transform.localPosition, new Vector3(0f, -0.3f, 4.669f), 0.25f));
         currentExercise = exerciseConfigs[6]; //change to 6
-
+        yield return StartCoroutine(AnimatePosition(
+   instructionText.transform,
+   instructionText.transform.localPosition,
+   new Vector3(-0.5f, -0.7f, 0f),
+   0f));
         yield return RunSequenceForExercise6();
 
         FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
@@ -229,6 +244,22 @@ public class GameManager : MonoBehaviour
     characterAnimator.transform.localPosition,
     new Vector3(0f, -0.3f, 4.669f),
     0.25f));
+        yield return StartCoroutine(AnimatePosition(
+    instructionText.transform,
+    instructionText.transform.localPosition,
+    new Vector3(-0.65f, -0.8f, 0f),
+    0.25f));
+        yield return StartCoroutine(AnimatePosition(
+   reptestText.transform,
+   reptestText.transform.localPosition,
+   new Vector3(0f, -0.25f, 0f),
+   0f));
+        yield return StartCoroutine(AnimatePosition(
+  countdownText.transform,
+  countdownText.transform.localPosition,
+  new Vector3(0.1f, -0.1f, 0f),
+  0f));
+
         currentExercise = exerciseConfigs[8]; // change to 8
 
         yield return RunSequenceForExercise7();
@@ -237,7 +268,12 @@ public class GameManager : MonoBehaviour
     Quaternion.Euler(0, 0, 0),
     Quaternion.Euler(0, -40, 0),
     0.25f));
-        }
+        yield return StartCoroutine(AnimatePosition(
+    instructionText.transform,
+    instructionText.transform.localPosition,
+    new Vector3(-0.4f, -0.7f, 0f),
+    0.25f));
+    }
 
 
         // New routine for Exercise ID 3.
@@ -260,7 +296,7 @@ public class GameManager : MonoBehaviour
                 instructionText.color = Color.cyan;
                 characterAnimator.SetTrigger("Idle");
                 FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
-                instructionText.text = "Nostājies uz ABĀM kājām";
+                instructionText.text = "Nostājies uz\nABĀM kājām";
                 yield return StartCountdown(currentExercise.Release);
                 //yield return WaitForExerciseConfigs();
             }
@@ -290,7 +326,7 @@ public class GameManager : MonoBehaviour
             instructionText.color = Color.cyan;
             characterAnimator.SetTrigger("Idle");
             FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
-            instructionText.text = "Nostājies uz ABĀM kājām";
+            instructionText.text = "Nostājies uz\nABĀM kājām";
             yield return StartCountdown(currentExercise.Release);
             }
             yield return WaitForExerciseConfigs();
@@ -323,9 +359,14 @@ public class GameManager : MonoBehaviour
             audioManager.Instance.PlayReleaseLeg();
             instructionText.color = Color.cyan;
             SetGif(exercise3DemoGifs[8]);
+                yield return StartCoroutine(AnimatePosition(
+    instructionText.transform,
+    instructionText.transform.localPosition,
+    new Vector3(-0.4f, -0.7f, 0f),
+    0.25f));
             FootOverlayManagerTwoFeet.Instance.SetActiveFoot("both");
             FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
-            instructionText.text = "Nostājies uz ABĀM kājām";
+            instructionText.text = "Nostājies uz\nABĀM kājām";
             yield return StartCountdown(currentExercise.Release);
             }
             instructionText.text = "";
@@ -366,7 +407,7 @@ public class GameManager : MonoBehaviour
                 FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
                 SetGif(exercise3DemoGifs[8]);
                 countdownText.gameObject.SetActive(true);
-                instructionText.text = "Nostājies uz ABĀM kājām";
+                instructionText.text = "Nostājies uz\nABĀM kājām";
                 characterAnimator.ResetTrigger("Ex5");
                 characterAnimator.SetTrigger("Idle");
 
@@ -411,11 +452,16 @@ public class GameManager : MonoBehaviour
                 instructionText.text = "";
                 audioManager.Instance.PlayReleaseLeg();
                 SetGif(exercise3DemoGifs[8]);
-                FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
+        //            yield return StartCoroutine(AnimatePosition(
+        //instructionText.transform,
+        //instructionText.transform.localPosition,
+        //new Vector3(-0.40f, -0.7f, 0f),
+        //0f));
+            FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
                 FootOverlayManagerTwoFeet.Instance.SetActiveFoot("both");
                 instructionText.color = Color.cyan;
                 characterAnimator.Play("Idle", 0, 0f);
-                instructionText.text = "Nostājies uz ABĀM kājām";
+                instructionText.text = "Nostājies uz\nABĀM kājām";
 
                 yield return StartCountdown(currentExercise.Release);
                 instructionText.text = "";
@@ -465,13 +511,18 @@ public class GameManager : MonoBehaviour
             Quaternion.Euler(-90, -90, 90),
             Quaternion.Euler(0, -40, 0),
             0f));
+                yield return StartCoroutine(AnimatePosition(
+ instructionText.transform,
+ instructionText.transform.localPosition,
+ new Vector3(-0.4f, -0.7f, 0f),
+ 0.25f));
                 reptestText.text = "";
                 audioManager.Instance.PlayReleaseLeg();
                 SetGif(exercise3DemoGifs[8]);
                 instructionText.color = Color.cyan;
                 characterAnimator.Play("Idle", 0, 0f);
                 // FootOverlayManagerTwoFeet.Instance.SetActiveFoot("both");
-                instructionText.text = "Nostājies uz ABĀM \n kājām";
+                instructionText.text = "Nostājies uz\nABĀM kājām";
                 yield return StartCountdown(currentExercise.Release);
                 instructionText.text = "";
             }
@@ -556,79 +607,113 @@ public class GameManager : MonoBehaviour
     public int sets5 = -1;
 
     public int sets13 = -1;
+    // In your GameManager (or wherever RunPreparationPhase lives):
+
+    // --- add these in GameManager ---
+    public bool PreparationRestartRequested { get; private set; }
+
+    public void RequestPreparationRestart()
+    {
+        PreparationRestartRequested = true;
+        Debug.Log("GameManager: PreparationRestartRequested flag set");
+    }
+
+    public void ResetPreparationRestartFlag()
+    {
+        PreparationRestartRequested = false;
+    }
+    // ----------------------------------
+
     IEnumerator RunPreparationPhase()
     {
-        
+        // 0) Clear any old restart flags up-front:
+        GameManager.Instance.ResetPreparationRestartFlag();
+
         reptestText.gameObject.SetActive(true);
         preparationSuccessful = false;
-        if (sets13 < 1)
-        {
-            reptestText.text = $"Set <color=#FFFFFF>1</color> / 2";
-        }
-        else
-        {
-            reptestText.text = $"Set <color=#FFFFFF>2</color> / 2";
-        }
+
+        // show set counter once
+        reptestText.text = sets13 < 1
+            ? "Set <color=#FFFFFF>1</color> / 2"
+            : "Set <color=#FFFFFF>2</color> / 2";
 
         while (!preparationSuccessful)
         {
-            // Determine the correct exercise configuration based on reps
-            if (reps == 1 || reps == 3)
-            {
-                currentExercise = exerciseConfigs.Find(e => e.RepetitionID == 1); // Right leg config
-            }
-            else if (reps == 2 || reps == 4)
-            {
-                currentExercise = exerciseConfigs.Find(e => e.RepetitionID == 2); // Left leg config
-            }
-
+            // 1) Pick config + UI/audio:
+            bool isRight = (reps == 1 || reps == 3);
+            currentExercise = exerciseConfigs
+                .Find(e => e.RepetitionID == (isRight ? 1 : 2));
             if (currentExercise == null)
             {
                 Debug.LogError("Current exercise config not found!");
                 yield break;
             }
 
-            if (reps == 1 || reps == 3)
-            {
-                audioManager.Instance.PlayPreparation(right);
-                instructionText.text = "GATAVOTIES! Nostājies uz LABĀS kājas";
-                UpdateActiveFootDisplay();
-                instructionText.color = Color.cyan;
-            }
-            else if (reps == 2 || reps == 4)
-            {
-                audioManager.Instance.PlayPreparation(left);
-                instructionText.text = "GATAVOTIES! Nostājies uz KREISĀS kājas";
-                instructionText.color = Color.cyan;
-                UpdateActiveFootDisplay();
-            }
+            audioManager.Instance.PlayPreparation(isRight ? right : left);
+            instructionText.text = isRight
+                ? "GATAVOTIES! Nostājies uz LABĀS kājas"
+                : "GATAVOTIES! Nostājies uz KREISĀS kājas";
+            instructionText.color = Color.cyan;
+            UpdateActiveFootDisplay();
+            characterAnimator.SetBool("IsLeftLeg", !isRight);
 
-            bool isRightLeg = (reps == 1 || reps == 3);
-            characterAnimator.SetBool("IsLeftLeg", !isRightLeg);
+            // 2) Trigger & manually freeze with countdown:
             yield return new WaitForEndOfFrame();
             characterAnimator.SetTrigger("StartExercise");
-            // Freeze the animation without resuming
-            yield return FreezeAtLastFrame(currentExercise.PreparationCop, false);
-            characterAnimator.ResetTrigger("StartExercise");
-            
 
-            if (restartExerciseRequested)
+            float t = 0f;
+            float prepDur = currentExercise.PreparationCop; // e.g. 3f
+            bool restartNow = false;
+
+            while (t < prepDur)
             {
-                restartExerciseRequested = false;
-                instructionText.text = "Līdzsvars zaudēts, sāc no sākuma!";
-                yield return new WaitForSeconds(1f); // wait before restarting
+                // update a UI text (assign in Inspector) so user sees 3→2→1
+                int secsLeft = Mathf.CeilToInt(prepDur - t);
+                countdownText.text = $"{secsLeft}";
+
+                // if ANY zone 8 came through GameManager.GetSingleZoneMessage:
+                if (GameManager.Instance.PreparationRestartRequested)
+                {
+                    restartNow = true;
+                    break;
+                }
+
+                yield return null;
+                t += Time.deltaTime;
             }
-            else
+
+            // clear
+            countdownText.text = "";
+            characterAnimator.ResetTrigger("StartExercise");
+
+            if (restartNow)
             {
+                audioManager.Instance.StopAllAudio();
+                instructionText.text = "Mēģināt vēlreiz";
+                // give 1 s to display “bad stance” before re-loop
+                Debug.Log("Restarting preparation (zone 8) mid-countdown.");
                 
-                preparationSuccessful = true;
+                yield return new WaitForSeconds(1f);
+                // clear flag so next loop is clean
+                GameManager.Instance.ResetPreparationRestartFlag();
+                continue;
             }
+
+            // 3) success
+            preparationSuccessful = true;
         }
+
+        // 4) wrap up
         sets13++;
+        reptestText.gameObject.SetActive(false);
+        countdownText.text = "";
     }
 
 
-    
+
+
+
+
     IEnumerator RunExerciseExecution()
     {
         int configIndex = 0;
@@ -736,7 +821,7 @@ public class GameManager : MonoBehaviour
             audioManager.Instance.StopAllAudio();
             FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
             audioManager.Instance.PlayReleaseLeg();
-            instructionText.text = "Nostājies uz ABĀM kājām";
+            instructionText.text = "Nostājies uz\nABĀM kājām";
             instructionText.color = Color.cyan;
             FootOverlayManagerTwoFeet.Instance.SetActiveFoot("both");
 
@@ -792,7 +877,7 @@ public class GameManager : MonoBehaviour
             reptestText.text = $"Set <color=#FFFFFF>{sets6}</color> / 2";
             characterAnimator.SetTrigger("Idle");
             audioManager.Instance.PlayReleaseLeg();
-            instructionText.text = "Nostājies uz ABĀM kājām";
+            instructionText.text = "Nostājies uz\nABĀM kājām";
             instructionText.color = Color.cyan;
             UpdateActiveFootDisplay();
 
@@ -1092,7 +1177,7 @@ public class GameManager : MonoBehaviour
             reptestText.text = $"Set <color=#FFFFFF>{sets7}</color> / 2";
             audioManager.Instance.PlayReleaseLeg();
             instructionText.color = Color.cyan;
-            instructionText.text = "Nostājies uz ABĀM kājām";
+            instructionText.text = "Nostājies uz\nABĀM kājām";
             UpdateActiveFootDisplay();
 
             yield return StartCountdown(currentExercise.PreparationCop);
@@ -1164,7 +1249,7 @@ public class GameManager : MonoBehaviour
                 if (sets7 == 1)
                 {
                     audioManager.Instance.PlayExercise4Step1();
-                    instructionText.text = "Veic pietupienu uz leju!";
+                    instructionText.text = "Veic pietupienu\nuz leju!";
                 }
                 else
                 {
@@ -1323,12 +1408,16 @@ public class GameManager : MonoBehaviour
             instructionText.color = Color.cyan;
             characterAnimator.SetTrigger("Idle");
             audioManager.Instance.PlayReleaseLeg();
-            instructionText.text = "Nostājies uz ABĀM kājām";
+            instructionText.text = "Nostājies uz\nABĀM kājām";
             FootOverlayManagerTwoFeet.Instance.SetActiveFoot("both");
             FootOverlayManagerTwoFeet.Instance.setDefaultGreen();
             reptestText.text = $"Set <color=#FFFFFF>{sets}</color> / 2";
-            
-            
+            yield return StartCoroutine(AnimatePosition(
+    instructionText.transform,
+    instructionText.transform.localPosition,
+    new Vector3(-0.4f, -0.7f, 0f),
+    0.25f));
+
             //UpdateActiveFootDisplay();
             SetGif(exercise3DemoGifs[8]);
             yield return StartCountdown(currentExercise.PreparationCop);
@@ -1353,6 +1442,11 @@ public class GameManager : MonoBehaviour
     IEnumerator RunExerciseExecutionForExercise4()
     {
         countdownText.gameObject.SetActive(false);
+        yield return StartCoroutine(AnimatePosition(
+    instructionText.transform,
+    instructionText.transform.localPosition,
+    new Vector3(-0.55f, -0.7f, 0f),
+    0.25f));
         yield return StartCoroutine(AnimatePosition(characterAnimator.transform, characterAnimator.transform.localPosition, new Vector3(0f, -0.3f, 4.669f), 0.25f));
         
         float initialDuration = 2f;
@@ -1409,7 +1503,7 @@ public class GameManager : MonoBehaviour
                 {
 
                     audioManager.Instance.PlayExercise5Step2();
-                    instructionText.text = "Izklupiens ar labo kāju!";
+                    instructionText.text = "Izklupiens ar\nlabo kāju!";
 
                 }
                 else
@@ -1446,7 +1540,7 @@ public class GameManager : MonoBehaviour
                 {
                     
                     audioManager.Instance.PlayExercise5Step3();
-                    instructionText.text = "Izklupiens ar kreiso kāju!";
+                    instructionText.text = "Izklupiens ar\nkreiso kāju!";
 
                 }
                 FootOverlayManagerTwoFeet.Instance.ResetFootPositions();
@@ -1552,7 +1646,7 @@ public class GameManager : MonoBehaviour
         FootOverlayManagerTwoFeet.Instance?.SetActiveFoot("none");
         audioManager.Instance.PlayDemo5();
         instructionText.color = Color.cyan;
-        instructionText.text = "Vingrojums 5: sānu lecieni";
+        instructionText.text = "Vingrojums 5:\nsānu lecieni";
         // Show the demo GIF sequence.
         characterAnimator.ResetTrigger("Idle");
         characterAnimator.speed = 1;
@@ -1571,9 +1665,9 @@ public class GameManager : MonoBehaviour
         {
             countdownText.gameObject.SetActive(true);
             characterAnimator.SetTrigger("Idle");
-
+            instructionText.color = Color.cyan;
             audioManager.Instance.PlayReleaseLeg();
-            instructionText.text = "Nostājies uz ABĀM kājām";
+            instructionText.text = "Nostājies uz\nABĀM kājām";
             reptestText.text = $"Set <color=#FFFFFF>{sets2}</color> / 2";
             UpdateActiveFootDisplay();
             
@@ -1607,6 +1701,7 @@ public class GameManager : MonoBehaviour
         totalTime -= Time.deltaTime;
         if (!audioPlayed)
         {
+            instructionText.color = Color.white;
             instructionText.text = "Sāc\n vingrojumu";
             audioManager.Instance.PlayStartExercise();
             float waitDuration = 2f;
@@ -1813,7 +1908,7 @@ public class GameManager : MonoBehaviour
                 UpdateActiveFootDisplay();
                 bool isRightLeg = (repss == 0 || repss == 2);
                 characterAnimator.ResetTrigger("Idle");
-                
+ 
                 characterAnimator.SetBool("IsLeftLeg", !isRightLeg);
                 yield return new WaitForEndOfFrame();
                 characterAnimator.SetTrigger("Ex6");
@@ -1839,7 +1934,7 @@ public class GameManager : MonoBehaviour
                 audioManager.Instance.PlayPreparation(left);
                 instructionText.text = "GATAVOTIES! Nostājies uz KREISĀS kājas";
                 UpdateActiveFootDisplay();
-                
+
                 bool isRightLeg = (repss == 1 || repss == 3);
                 characterAnimator.ResetTrigger("Idle");
 
@@ -2281,12 +2376,17 @@ public class GameManager : MonoBehaviour
         characterAnimator.transform.localPosition,
         new Vector3(0f, -0.3f, 4.669f),
         0f));
+            yield return StartCoroutine(AnimatePosition(
+ instructionText.transform,
+ instructionText.transform.localPosition,
+ new Vector3(-0.4f, -0.7f, 0f),
+ 0.25f));
             characterAnimator.gameObject.SetActive(true);
             cross.gameObject.SetActive(false);
             characterAnimator.SetTrigger("Idle");
             audioManager.Instance.PlayReleaseLeg();
             instructionText.color = Color.cyan;
-            instructionText.text = "Nostājies uz ABĀM \n kājām";
+            instructionText.text = "Nostājies uz\nABĀM kājām";
             reptestText.text = $"Set <color=#FFFFFF>{sets4}</color> / 2";
 
 
@@ -2319,7 +2419,11 @@ public class GameManager : MonoBehaviour
             characterAnimator.transform.localPosition,
             new Vector3(-0.025f, 0.155f, 4.669f),
             0f));
-
+        yield return StartCoroutine(AnimatePosition(
+ instructionText.transform,
+ instructionText.transform.localPosition,
+ new Vector3(-0.65f, -0.8f, 0f),
+ 0.25f));
         boxjump.gameObject.SetActive(true);
         cross.gameObject.SetActive(false);
 
@@ -2933,6 +3037,9 @@ public class GameManager : MonoBehaviour
                     return "Pa kreisi!"; // Pa kreisi!
                 case 6:
                     return "Pa labi!"; // Pa labi!
+                case 8:
+                    RequestPreparationRestart();
+                    return "Mēģinat vēlreiz";
                 case 7:
                     RequestExerciseRestart();
                     return "Līdzsvars zaudēts, sāc no sākuma!";
@@ -2959,6 +3066,9 @@ public class GameManager : MonoBehaviour
                 case 7:
                     RequestExerciseRestart();
                     return "Līdzsvars zaudēts, sāc no sākuma!";
+                case 8:
+                    RequestPreparationRestart();
+                    return "Mēģinat vēlreiz";
                 default:
                     return "Nezināma zona.";
             }
@@ -2971,6 +3081,7 @@ public class GameManager : MonoBehaviour
     {
         preparationSuccessful = true;
     }
+   
 
     public void RequestExerciseRestart()
     {

@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -9,14 +9,14 @@ using System.Collections.Generic;
 public class HMDDataReceiver : MonoBehaviour
 {
     public static HMDDataReceiver Instance { get; private set; }
-    private bool restartInProgress = false;
+    private bool restartInProgress = false;                        // flag for exercise restart
     private TcpListener _listener;
     private TcpClient _client;
     private NetworkStream _stream;
     private bool _isConnected = false;
     public bool IsClientConnected => _isConnected;
 
-    [Header("Server Settings")] 
+    [Header("Server Settings")]
     [Tooltip("Server IP Address (e.g., 127.0.0.1)")]
     public string serverIp = "127.0.0.1";
     [Tooltip("Server Port")]
@@ -31,17 +31,14 @@ public class HMDDataReceiver : MonoBehaviour
     public Transform rightFoot;
 
     private static readonly Queue<Action> mainThreadActions = new Queue<Action>();
-
     private string incomingBuffer = "";
 
     void Awake()
     {
         if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject); // prevent duplicate instances
-            return;
-        }
-        Instance = this;
+            Destroy(gameObject);
+        else
+            Instance = this;
     }
 
     void Start()
@@ -51,102 +48,66 @@ public class HMDDataReceiver : MonoBehaviour
 
     void Update()
     {
-        // Process queued actions on the main thread.
         lock (mainThreadActions)
         {
             while (mainThreadActions.Count > 0)
-            {
                 mainThreadActions.Dequeue().Invoke();
-            }
         }
 
-        // Process incoming data only if a client is connected.
-        if (_isConnected && _stream != null && _stream.DataAvailable)
+        if (!_isConnected || _stream == null || !_stream.DataAvailable) return;
+
+        try
         {
-            try
+            byte[] buffer = new byte[1024];
+            int bytesRead = _stream.Read(buffer, 0, buffer.Length);
+            string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            Debug.Log($"Sa≈Üemtais JSON: {receivedData}");
+            LogToFile($"Received JSON chunk: {receivedData}");
+
+            incomingBuffer += receivedData;
+            while (true)
             {
-                byte[] buffer = new byte[1024];
-                int bytesRead = _stream.Read(buffer, 0, buffer.Length);
-                string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                Debug.Log($"SaÚemtais JSON: {receivedData}");
-
-                // Append the received data to persistent buffer.
-                incomingBuffer += receivedData;
-
-                // Process complete JSON objects from the buffer.
-                while (true)
+                int startIndex = incomingBuffer.IndexOf("{");
+                if (startIndex < 0)
                 {
-                    // Find the first opening brace.
-                    int startIndex = incomingBuffer.IndexOf("{");
-                    if (startIndex == -1)
-                    {
-                        // No JSON object found.
-                        incomingBuffer = "";
-                        break;
-                    }
-
-                    int braceCount = 0;
-                    int endIndex = -1;
-                    // Loop over the buffer starting at the first '{'.
-                    for (int i = startIndex; i < incomingBuffer.Length; i++)
-                    {
-                        if (incomingBuffer[i] == '{')
-                        {
-                            braceCount++;
-                        }
-                        else if (incomingBuffer[i] == '}')
-                        {
-                            braceCount--;
-                        }
-
-                        // When the brace count returns to zero, it is a completed JSON object.
-                        if (braceCount == 0)
-                        {
-                            endIndex = i;
-                            break;
-                        }
-                    }
-
-                    // If cant find a complete JSON object, wait for more data.
-                    if (endIndex == -1)
-                    {
-                        break;
-                    }
-
-                    // Extract the complete JSON message.
-                    string completeJson = incomingBuffer.Substring(startIndex, endIndex - startIndex + 1);
-                    Debug.Log($"Processing complete JSON message: {completeJson}");
-                    ParseAndUpdateVisualization(completeJson);
-
-                    // Remove the processed JSON from the buffer.
-                    incomingBuffer = incomingBuffer.Substring(endIndex + 1);
+                    incomingBuffer = "";
+                    break;
                 }
+                int braceCount = 0, endIndex = -1;
+                for (int i = startIndex; i < incomingBuffer.Length; i++)
+                {
+                    if (incomingBuffer[i] == '{') braceCount++;
+                    else if (incomingBuffer[i] == '}') braceCount--;
+                    if (braceCount == 0) { endIndex = i; break; }
+                }
+                if (endIndex < 0) break;
+
+                string completeJson = incomingBuffer.Substring(startIndex, endIndex - startIndex + 1);
+                Debug.Log($"Processing complete JSON message: {completeJson}");
+                LogToFile($"Processing JSON message: {completeJson}");
+                ParseAndUpdateVisualization(completeJson);
+                incomingBuffer = incomingBuffer.Substring(endIndex + 1);
             }
-            catch (Exception ex)
-            {
-                Debug.LogError($"KÔ˚da datu saÚeman‚: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Kƒº≈´da datu sa≈Üem≈°anƒÅ: {ex.Message}");
+            LogToFile($"Error reading data: {ex.Message}");
         }
     }
-
 
     public static void RunOnMainThread(Action action)
     {
         if (action == null) return;
         lock (mainThreadActions)
-        {
             mainThreadActions.Enqueue(action);
-        }
     }
 
-   
     private void LogToFile(string message)
     {
         string path = Application.persistentDataPath + "/server_log.txt";
         using (StreamWriter writer = new StreamWriter(path, true))
-        {
-            writer.WriteLine($"{System.DateTime.Now}: {message}");
-        }
+            writer.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {message}");
     }
 
     private void StartServer()
@@ -158,33 +119,30 @@ public class HMDDataReceiver : MonoBehaviour
             _listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             _listener.Start();
             LogToFile("Server started on port " + serverPort);
-            _listener.BeginAcceptTcpClient(new AsyncCallback(OnClientConnect), _listener);
+            _listener.BeginAcceptTcpClient(OnClientConnect, _listener);
         }
         catch (Exception ex)
         {
             Debug.LogError($"Error starting the server: {ex.Message}");
+            LogToFile($"Server start error: {ex.Message}");
         }
     }
-
 
     private void OnClientConnect(IAsyncResult result)
     {
         try
         {
-            // Get the new client connection.
             TcpClient newClient = _listener.EndAcceptTcpClient(result);
-
-            // If theres already an active connection, disconnect it.
             if (_client != null)
             {
-                Debug.LogWarning("Already connected to a client, disconnecting the old connection and accepting new one.");
+                Debug.LogWarning("Already connected to a client, disconnecting old connection.");
+                LogToFile("Disconnecting old client");
                 DisconnectFromServer();
             }
-
-            // Assign the new client and set up the stream.
             _client = newClient;
             _stream = _client.GetStream();
             _isConnected = true;
+            LogToFile("Client connected to HMD");
 
             RunOnMainThread(() =>
             {
@@ -197,198 +155,118 @@ public class HMDDataReceiver : MonoBehaviour
                 }
             });
 
-            // Accept the next client connection.
-            _listener.BeginAcceptTcpClient(new AsyncCallback(OnClientConnect), _listener);
+            _listener.BeginAcceptTcpClient(OnClientConnect, _listener);
         }
         catch (Exception ex)
         {
-            RunOnMainThread(() =>
-            {
-                Debug.LogError($"Error accepting client connection: {ex.Message}");
-            });
+            Debug.LogError($"Error accepting client connection: {ex.Message}");
+            LogToFile($"Accept client error: {ex.Message}");
         }
     }
 
     private void OnApplicationQuit()
     {
-        // Properly disconnect any client and stop the listener.
         DisconnectFromServer();
         if (_listener != null)
-        {
             _listener.Stop();
-            _listener = null;
-        }
     }
-
-
 
     private void DisconnectFromServer()
     {
-        if (_stream != null)
-        {
-            _stream.Close();
-            _stream = null;
-        }
-        if (_client != null)
-        {
-            _client.Close();
-            _client = null;
-        }
+        if (_stream != null) { _stream.Close(); _stream = null; }
+        if (_client != null) { _client.Close(); _client = null; }
         _isConnected = false;
         Debug.Log("Atvienots no servera.");
+        LogToFile("Disconnected from HMD client");
     }
 
-    /// <summary>
-    /// Parses the incoming JSON based on a MessageType field and routes it accordingly.
-    /// </summary>
-    /// <param name="jsonData">The JSON data received from the client.</param>
     private void ParseAndUpdateVisualization(string jsonData)
     {
-        BaseMessage baseMsg = JsonUtility.FromJson<BaseMessage>(jsonData);
+        var baseMsg = JsonUtility.FromJson<BaseMessage>(jsonData);
         if (baseMsg == null || string.IsNullOrEmpty(baseMsg.MessageType))
         {
-            Debug.LogWarning("NederÓgi ziÚojumi!");
+            Debug.LogWarning("Nederƒ´gi zi≈Üojumi!");
+            LogToFile("Invalid messageType in JSON");
             return;
         }
-        if (baseMsg.MessageType == "Feedback")
+        switch (baseMsg.MessageType)
         {
-            FeedbackMessage feedback = JsonUtility.FromJson<FeedbackMessage>(jsonData);
-            UpdateFootFeedback(feedback);
-        }
-        else if (baseMsg.MessageType == "ExerciseConfig")
-        {
-            ExerciseConfigMessage config = JsonUtility.FromJson<ExerciseConfigMessage>(jsonData);
-            GameManager.Instance?.UpdateExerciseConfiguration(config);
-        }
-        else if (baseMsg.MessageType == "Command")
-        {
-            CommandData cmdData = JsonUtility.FromJson<CommandData>(jsonData);
-            ProcessCommand(cmdData);
+            case "Feedback":
+                var feedback = JsonUtility.FromJson<FeedbackMessage>(jsonData);
+                UpdateFootFeedback(feedback);
+                break;
+            case "ExerciseConfig":
+                var config = JsonUtility.FromJson<ExerciseConfigMessage>(jsonData);
+                GameManager.Instance?.UpdateExerciseConfiguration(config);
+                break;
+            case "Command":
+                var cmd = JsonUtility.FromJson<CommandData>(jsonData);
+                ProcessCommand(cmd);
+                break;
+            default:
+                Debug.LogWarning("Unknown MessageType: " + baseMsg.MessageType);
+                LogToFile("Unknown MessageType: " + baseMsg.MessageType);
+                break;
         }
     }
 
-    /// <summary>
-    /// Updates the visual feedback on the appropriate foot based on the feedback message.
-    /// </summary>
-    /// <param name="feedback">The feedback message containing zone and foot info.</param>
     private void UpdateFootFeedback(FeedbackMessage feedback)
     {
-        Debug.Log($"SaÚemts feedback: Foot: {feedback.Foot}, Zone: {feedback.Zone}");
+        Debug.Log($"Sa≈Üemts feedback: Foot={feedback.Foot}, Zone={feedback.Zone}");
+        LogToFile($"Feedback received: Foot={feedback.Foot}, Zone={feedback.Zone}");
 
-        // Check if this is a restart command (zone 7)
+        if (feedback.Zone == 8)
+        {
+            Debug.Log("Zone 8 received: triggering preparation restart.");
+            LogToFile("Zone 8 received: triggering preparation restart.");
+            ProcessCommand(new CommandData { Command = "PREPARATION_RESTART" });
+            return;
+        }
         if (feedback.Zone == 7)
         {
-            if (!restartInProgress)
-            {
-                restartInProgress = true;
-                Debug.Log("Zone 7 received: triggering restart.");
-                // Instead of normal feedback handling, convert this into a command call.
-                ProcessCommand(new CommandData { Command = "RESTART_EXERCISE" });
-            }
+            Debug.Log("Zone 7 received: triggering exercise restart.");
+            LogToFile("Zone 7 received: triggering exercise restart.");
+            ProcessCommand(new CommandData { Command = "RESTART_EXERCISE" });
             return;
         }
 
-        // If a restart is already in progress, ignore other feedback messages.
         if (restartInProgress)
         {
             Debug.Log("Restart in progress, ignoring feedback.");
             return;
         }
 
-        // Process feedback normally:
-        if (feedback.Foot.ToLower() == "left")
-        {
-            GameManager.Instance?.UpdateFootStatusForFoot(feedback.Zone, "Left");
-        }
-        else if (feedback.Foot.ToLower() == "right")
-        {
-            GameManager.Instance?.UpdateFootStatusForFoot(feedback.Zone, "Right");
-        }
-        else if (feedback.Foot.ToLower() == "both")
-        {
-            GameManager.Instance?.UpdateFootStatusForFoot(feedback.Zone, "Both");
-        }
+        string footKey = feedback.Foot.Equals("left", StringComparison.OrdinalIgnoreCase) ? "Left"
+                        : feedback.Foot.Equals("right", StringComparison.OrdinalIgnoreCase) ? "Right"
+                        : "Both";
+        GameManager.Instance?.UpdateFootStatusForFoot(feedback.Zone, footKey);
     }
 
-    /// <summary>
-    /// Processes command messages sent from the client.
-    /// </summary>
-    /// <param name="cmdData">The command data.</param>
     private void ProcessCommand(CommandData cmdData)
     {
-        Debug.Log($"SaÚemta komanda: {cmdData.Command}");
+        Debug.Log($"Sa≈Üemta komanda: {cmdData.Command}");
+        LogToFile($"ProcessCommand: {cmdData.Command}");
         switch (cmdData.Command)
         {
             case "PREPARATION_SUCCESS":
                 GameManager.Instance?.MarkPreparationSuccessful();
                 break;
+            case "PREPARATION_RESTART":
+                GameManager.Instance?.RequestPreparationRestart();
+                break;
             case "RESTART_EXERCISE":
                 GameManager.Instance?.RequestExerciseRestart();
-                Debug.Log("Received RESTART_EXERCISE command. Calling RequestExerciseRestart.");
-                // Start a coroutine to reset the restart flag after a delay,
-                // allowing the restart command to complete before resuming normal updates.
-                StartCoroutine(ResetRestartFlagAfterDelay(5f));
                 break;
             default:
-                Debug.LogWarning("Nezin‚ma komanda!");
+                Debug.LogWarning("NezinƒÅma komanda: " + cmdData.Command);
+                LogToFile("Unknown command: " + cmdData.Command);
                 break;
         }
     }
 
-    private System.Collections.IEnumerator ResetRestartFlagAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        restartInProgress = false;
-        Debug.Log("Restart flag reset, resuming normal feedback processing.");
-    }
-
-    // --------------------- JSON Message Classes ---------------------
-    [Serializable]
-    public class BaseMessage
-    {
-        public string MessageType;
-    }
-
-    [Serializable]
-    public class FeedbackMessage
-    {
-        public string MessageType;
-        public int RepetitionID;
-        public string Foot;
-        public int Zone;  
-    }
-
-
-    [Serializable]
-    public class ExerciseConfigMessage
-    {
-        public string MessageType;
-        public int RepetitionID;
-        public string Name;
-        public string LegsUsed;
-        public int Intro;
-        public int Demo;
-        public int PreparationCop;
-        public int TimingCop;
-        public int Release;
-        public int Switch;
-        public int Sets;
-        public ZoneSequenceItem[] ZoneSequence;
-    }
-
-    [Serializable]
-    public class ZoneSequenceItem
-    {
-        public double Duration;
-        public Vector2 GreenZoneX;
-        public Vector2 GreenZoneY;
-        public Vector2 RedZoneX;
-        public Vector2 RedZoneY;
-    }
-
-    [Serializable]
-    public class CommandData
-    {
-        public string Command;
-    }
+    [Serializable] public class BaseMessage { public string MessageType; }
+    [Serializable] public class FeedbackMessage { public string MessageType; public int RepetitionID; public string Foot; public int Zone; }
+    [Serializable] public class ExerciseConfigMessage { public string MessageType; public int RepetitionID; public string Name; public string LegsUsed; public int Intro; public int Demo; public int PreparationCop; public int TimingCop; public int Release; public int Switch; public int Sets; public ZoneSequenceItem[] ZoneSequence; }
+    [Serializable] public class ZoneSequenceItem { public double Duration; public Vector2 GreenZoneX; public Vector2 GreenZoneY; public Vector2 RedZoneX; public Vector2 RedZoneY; }
+    [Serializable] public class CommandData { public string Command; }
 }
