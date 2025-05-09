@@ -342,8 +342,8 @@ namespace DAid.Clients
     while (true)
     {
         bool isFootValid = false;
-        (double Min, double Max) copRangeX = (-2.0, 2.0);
-        (double Min, double Max) copRangeY = (-2.0, 2.0);
+        (double Min, double Max) copRangeX = (-2.1, 2.1);
+        (double Min, double Max) copRangeY = (-4.1, 4.1);
 
         double copXLeft = _copXLeft, copYLeft = _copYLeft;
         double copXRight = _copXRight, copYRight = _copYRight;
@@ -503,9 +503,9 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
                     outOfZoneTimeRight = DateTime.Now;
 
                 bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
-                                          ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 50);
+                                          ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 60);
                 bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
-                                           ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 50);
+                                           ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 60);
 
                 if (leftFootOutTooLong || rightFootOutTooLong)
                 {
@@ -660,9 +660,9 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
                     }
 
                     bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
-                                              ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 50);
+                                              ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 60);
                     bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
-                                               ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 50);
+                                               ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 60);
                     if (leftFootOutTooLong || rightFootOutTooLong)
                     {
                         lostBalance = true;

@@ -68,12 +68,12 @@ public static class ExerciseList
             intro: 4,
             demo: 4,
             preparationCop: 3,
-            timingCop: 30, 
+            timingCop: 5, 
             release: 3,
             sets: 1,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
-                   (30.0, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
+                   (5.0, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
             }
         ),
         new ExerciseData( 
@@ -83,12 +83,12 @@ public static class ExerciseList
             intro: 0,
             demo: 0,
             preparationCop: 3,
-            timingCop: 30,
+            timingCop: 5,
             release: 3,
             sets: 1,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
-                 (30.0, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
+                 (5.0, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
             }
         ),
         new ExerciseData( 
@@ -98,7 +98,7 @@ public static class ExerciseList
             intro: 0,
             demo: 6,
             preparationCop: 3,
-            timingCop: 30,
+            timingCop: 6,
             release: 3,
             sets: 2,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
@@ -116,7 +116,7 @@ public static class ExerciseList
             intro: 0,
             demo: 6,
             preparationCop: 3,
-            timingCop: 30,
+            timingCop: 6,
             release: 2,
             sets: 2,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
