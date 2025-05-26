@@ -159,23 +159,31 @@
             this.comboBoxPosition.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxPosition.FormattingEnabled = true;
             // Add options (you can adjust or group these as needed)
-            this.comboBoxPosition.Items.AddRange(new object[] {
-                "Vārtsargs (GK)",
-                "Aizsargu (CB)",
-                "Mala aizsargs (LB / RB)",
-                "Spārnains aizsargs (LWB / RWB)",
-                "Sweeper (SW)",
-                "Defensīvais puslodzis (CDM)",
-                "Centrālais puslodzis (CM)",
-                "Uzbrukuma puslodzis (CAM)",
-                "Kreisais puslodzis (LM)",
-                "Labais puslodzis (RM)",
-                "Box-to-Box puslodzis",
-                "Uzbrucējs (ST)",
-                "Centra uzbrucējs (CF)",
-                "Otrais uzbrucējs (SS)",
-                "Spārnains uzbrucējs (LW / RW)"
-            });
+            this.comboBoxPosition.Items.AddRange(new object[]
+ {
+    // Goalkeeper
+    "Vārtsargs (GK)",
+
+    // Centre‐backs
+    "Centra aizsargs (CB)",
+    "Kreisā centra aizsargs (LCB)",
+    "Labais centra aizsargs (RCB)",
+
+    // Full‐backs
+    "Kreisais pusaizsargs (ML)",
+    "Labais pussargs (MR)",
+
+    // Wing‐backs (spārna aizsargs)
+    "Centra pussargs (MC)",
+    "Labais spārns (WR)",
+
+    // Sweeper
+    "Zemuzbrucējs (AMC)",
+
+    // Midfielders (pussargs)
+    "Uzbrucējs (FWL,STC,FWR)"
+ });
+
             this.comboBoxPosition.Location = new System.Drawing.Point(120, 222);
             this.comboBoxPosition.Width = 200;
             // 
