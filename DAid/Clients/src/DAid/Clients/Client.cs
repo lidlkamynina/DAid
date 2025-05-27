@@ -16,8 +16,8 @@ namespace DAid.Clients
     public class Client
     {
  string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
-        string guipath = "C:/Users/Lidzis/Documents/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
-        string portFilePath = "C:/Users/Lidzis/Documents/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"  
+        string guipath = "D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
+        string portFilePath = "D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"  
         string questip = "127.0.0.1"; // CHANGE AS NEEDED 192.168.8.118
         private Process _hmdProcess;
         private readonly Server _server;
@@ -42,18 +42,12 @@ namespace DAid.Clients
         private int currentExerciseID = 0;
         private CancellationTokenSource _exerciseCancellationTokenSource;
 
-        /// <summary>
-        // Constructor that accepts a server instance and registers a callback for connection feedback
-        /// </summary>
         public Client(Server server)
         {
             _server = server ?? throw new ArgumentNullException(nameof(server));
             _server.RegisterFeedbackCallback(ReceiveConnectionFeedback);
         }
 
-        /// <summary>
-        // Main client entry point. Waits for console input and handles commands accordingly.
-        /// </summary>
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             Console.WriteLine("Client started. Enter commands: connect, calibrate, start, stop, hmd, gui, exit");
@@ -105,9 +99,6 @@ namespace DAid.Clients
             }
         }
 
-        /// <summary>
-        // Handles clean shutdown of all systems including HMD, GUI, and sensor streams
-        /// </summary>
         private void HandleExitCommand()
         {
             Console.WriteLine("Stopping client...");
@@ -118,9 +109,6 @@ namespace DAid.Clients
             CloseGUI();
         }
 
-        /// <summary>
-        // Handles the connect command which lets GUI select ports and initialize sensors
-        /// </summary>
         private async Task HandleConnectCommandAsync(CancellationToken cancellationToken) //retrieves port names and shows them them on gui
         {
             Console.WriteLine("[Client]: Requesting available COM ports from the server...");
@@ -159,18 +147,12 @@ namespace DAid.Clients
             File.Delete(portFilePath);
         }
         
-        /// <summary>
-        // Callback method that receives sensor connection feedback from the server
-        /// </summary>
         private void ReceiveConnectionFeedback(string message)
         {
             Console.WriteLine($"{message}");
             SendMessageToGUI(message); // GUI will show it
         }
 
-        /// <summary>
-        // Continuously checks for a specific file (selected_ports.txt) until found
-        /// </summary>
         private async Task ListenForPortFileAsync(string filePath)
         {
             Console.WriteLine($"[Client]: Waiting for file '{filePath}'...");
@@ -328,9 +310,6 @@ namespace DAid.Clients
         _isVisualizing = false;
     }
 
-    /// <summary>
-        /// Preparation check
-        /// </summary>
     private async Task CheckPreparationCop(double duration, string activeLeg, CancellationToken token)
 {
     Console.WriteLine($"[Preparation CoP]: Checking for {duration} sec (Active Leg: {activeLeg})...");
@@ -342,8 +321,8 @@ namespace DAid.Clients
     while (true)
     {
         bool isFootValid = false;
-        (double Min, double Max) copRangeX = (-2.1, 2.1);
-        (double Min, double Max) copRangeY = (-4.1, 4.1);
+        (double Min, double Max) copRangeX = (-2.0, 2.0);
+        (double Min, double Max) copRangeY = (-2.0, 2.0);
 
         double copXLeft = _copXLeft, copYLeft = _copYLeft;
         double copXRight = _copXRight, copYRight = _copYRight;
@@ -395,10 +374,8 @@ namespace DAid.Clients
     }
 }
 
-/// <summary>
-        /// Runs 4th and 5th exercises squats - walking lunges, lateral jumps
-        /// </summary>
-private async Task Run5and6Async(ExerciseData exercise, int set, CancellationToken token) 
+
+private async Task Run5and6Async(ExerciseData exercise, int set, CancellationToken token) // runs 4th and 5th exercises squats - walking lunges, lateral jumps
 {
     Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
     SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
@@ -503,9 +480,9 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
                     outOfZoneTimeRight = DateTime.Now;
 
                 bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
-                                          ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 60);
+                                          ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 50);
                 bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
-                                           ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 60);
+                                           ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 50);
 
                 if (leftFootOutTooLong || rightFootOutTooLong)
                 {
@@ -555,9 +532,6 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
          }
 }
 
-        /// <summary>
-        /// Runs all exercises (except 4and 5), sends the feedback
-        /// </summary>
         private async Task RunExerciseAsync(ExerciseData exercise, int set, CancellationToken token)
 {
         DateTime outOfZoneTimeLeft = DateTime.MinValue;
@@ -660,9 +634,9 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
                     }
 
                     bool leftFootOutTooLong = (outOfZoneTimeLeft != DateTime.MinValue) &&
-                                              ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 60);
+                                              ((DateTime.Now - outOfZoneTimeLeft).TotalSeconds >= 50);
                     bool rightFootOutTooLong = (outOfZoneTimeRight != DateTime.MinValue) &&
-                                               ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 60);
+                                               ((DateTime.Now - outOfZoneTimeRight).TotalSeconds >= 50);
                     if (leftFootOutTooLong || rightFootOutTooLong)
                     {
                         lostBalance = true;
@@ -724,11 +698,6 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
          }
 }
 
-        /// <summary>
-        // Evaluates current CoP (Center of Pressure) against exercise-defined zones
-        // Returns:
-        // 1 = green zone, 3–6 = red zones (quadrants), 0 = outside all zones
-        /// </summary>
         private int Feedback(double copX, double copY,  
                           (double Min, double Max) greenZoneX, (double Min, double Max) greenZoneY, 
                           (double Min, double Max) redZoneX, (double Min, double Max) redZoneY)
@@ -777,10 +746,6 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
                 }
                 return phaseData;
                 }
-
-        /// <summary>
-        // Sends feedback code (1–7) to GUI and HMD for a specified foot
-        /// </summary>
         private void SendFeedback(int feedbackCode, string foot)
         {
             Console.WriteLine($"[Feedback]: Received feedback code for {foot} foot: {feedbackCode}");
@@ -795,9 +760,6 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
             SendDataToHMD(feedbackMessage);
         }
 
-        /// <summary>
-        // Sends full exercise metadata to the HMD for rendering and synchronization
-        /// </summary>
         private void SendExerciseConfiguration(ExerciseData exercise)
         {
             Console.WriteLine($"[Feedback]: Sending exercise configuration for exercise {exercise.RepetitionID}");
@@ -820,9 +782,6 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
             SendDataToHMD(configMessage); 
         }
 
-        /// <summary>
-        // Gracefully stops all active data streams and feedback mechanisms
-        /// </summary>
         private void HandleStopCommand()
         {
             if (!_isVisualizing)
@@ -842,9 +801,6 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
             SendMessageToGUI("[Client]: Visualization and data streams stopped.");
         }
 
-        /// <summary>
-        // Subscribes to CoP updates from all connected sensor devices
-        /// </summary>
         private void SubscribeToDeviceUpdates()
         {
             var activeDevices = _server.Manager.GetConnectedDevices();
@@ -861,9 +817,6 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
             }
         }
 
-        /// <summary>
-        // Handles incoming CoP updates from sensor devices and sends them to visualization
-        /// </summary>
        private void OnCoPUpdated(object sender, (string DeviceName, double CoPX, double CoPY, double[] Pressures) copData)
 {
     if (_visualizationWindow == null || _visualizationWindow.IsDisposed) return;
@@ -897,9 +850,6 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
     }
 }
 
-        /// <summary>
-        // Launches the CoP visualization window in its own UI thread
-        /// </summary>
         private void OpenVisualizationWindow()
         {
             if (_visualizationWindow == null || _visualizationWindow.IsDisposed)
@@ -916,9 +866,6 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
             }
         }
 
-        /// <summary>
-        // Cleanly closes and disposes the visualization window
-        /// </summary>
         private void CloseVisualizationWindow()
         {
             if (_visualizationWindow != null && !_visualizationWindow.IsDisposed)
@@ -1231,6 +1178,26 @@ private void CreateLogFile(int userId, string sockType)
 
 
 
+        //private void SendMessageToGUI(string message)
+        //{
+        //    try
+        //    {
+        //        if (_guiClient == null || !_guiClient.Connected)
+        //        {
+        //            Console.WriteLine("Not connected to GUI.");
+        //            return;
+        //        }
+        //        byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+        //        _guiStream.Write(messageBytes, 0, messageBytes.Length);
+        //        _guiStream.Flush();
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Error sending message to GUI: {ex.Message}");
+        //    }
+        //}
+
         private void SendMessageToGUI(string message)
         {
             try
@@ -1240,7 +1207,8 @@ private void CreateLogFile(int userId, string sockType)
                     Console.WriteLine("Not connected to GUI.");
                     return;
                 }
-                byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+                // Append newline delimiter to each message
+                byte[] messageBytes = Encoding.UTF8.GetBytes(message + "\n");
                 _guiStream.Write(messageBytes, 0, messageBytes.Length);
                 _guiStream.Flush();
             }

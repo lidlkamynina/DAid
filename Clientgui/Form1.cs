@@ -19,6 +19,7 @@ namespace ClientGUI
         private Thread _listenerThread;
         private bool _isRunning = true;
         private List<string> selectedPorts = new List<string>();
+        private StringBuilder _messageBuffer = new StringBuilder();
 
         // for serializing log-file writes
         private readonly object _logLock = new object();
@@ -200,17 +201,21 @@ namespace ClientGUI
                     int bytesRead = _stream.Read(buffer, 0, buffer.Length);
                     if (bytesRead == 0) break;
 
-                    string message = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
-                    AppendText($"Client: {message}");
+                    string dataChunk = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    _messageBuffer.Append(dataChunk);
 
-                    if (!_portsParsed && message.ToLower().Contains("com"))
+                    // Split messages using newline delimiter
+                    string delimiter = "\n";
+                    int delimiterIndex;
+                    while ((delimiterIndex = _messageBuffer.ToString().IndexOf(delimiter)) != -1)
                     {
-                        _portsParsed = true;
-                        var portsString = message.Replace("Client:", "").Trim();
-                        var ports = portsString
-                            .Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                        AppendText($"Parsed ports: {string.Join(", ", ports)}");
-                        CreatePortButtons(ports);
+                        string message = _messageBuffer.ToString(0, delimiterIndex).Trim();
+                        _messageBuffer.Remove(0, delimiterIndex + delimiter.Length);
+
+                        if (!string.IsNullOrEmpty(message))
+                        {
+                            ProcessReceivedMessage(message);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -219,6 +224,20 @@ namespace ClientGUI
                     AppendText("Connection closed.");
                     break;
                 }
+            }
+        }
+
+        private void ProcessReceivedMessage(string message)
+        {
+            AppendText($"Client: {message}");
+
+            if (!_portsParsed && message.ToLower().Contains("com"))
+            {
+                _portsParsed = true;
+                var portsString = message.Replace("Client:", "").Trim();
+                var ports = portsString.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                AppendText($"Parsed ports: {string.Join(", ", ports)}");
+                CreatePortButtons(ports);
             }
         }
 
