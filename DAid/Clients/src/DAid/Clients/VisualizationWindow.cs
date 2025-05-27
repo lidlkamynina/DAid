@@ -12,7 +12,8 @@ namespace DAid.Clients
         private const int SockSpacing = CanvasSize + 100;
         private const int DataTimeoutMilliseconds = 2000;
         private const int MaxTrailLength = 100;
-
+        public double LastLeftTotalPressure => _copLeft.TotalPressure;
+        public double LastRightTotalPressure => _copRight.TotalPressure;
         private (double X, double Y, double TotalPressure) _copLeft;
         private (double X, double Y, double TotalPressure) _copRight;
         private DateTime lastLeftDataUpdate = DateTime.MinValue;
@@ -26,7 +27,7 @@ namespace DAid.Clients
 
         public VisualizationWindow()
         {
-            Text = "Real-Time CoP Visualization with Expanded Graph";
+            Text = "Visualization WIndow";
             Size = new Size(SockSpacing * 2, CanvasSize + 200);
             DoubleBuffered = true;
 
@@ -62,7 +63,7 @@ namespace DAid.Clients
         /// </summary>
         private void UpdateTrail(List<PointF> trail, (double X, double Y, double TotalPressure) cop)
         {
-            if (cop.TotalPressure > 0.0001)
+            if (cop.TotalPressure > 0.000001)
             {
                 PointF point = new PointF(
                     (float)(cop.X * scaleX),

@@ -10,6 +10,8 @@
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="NLog" Version="5.0.0" />
+    <PackageReference Include="NLog.Config" Version="4.7.15" />  <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
   </ItemGroup>
 
 </Project>

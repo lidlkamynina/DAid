@@ -6,6 +6,8 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics; // add at the top
+
 
 public class SensorAdapter
 {
@@ -13,6 +15,9 @@ public class SensorAdapter
     private const byte StartByte = 0xF0;
     private const byte StopByte = 0x55;
     private const int PacketLength = 47;
+private PressureDebugWindow _debugWindow;
+private Thread _debugThread;
+private bool _debugLaunched = false;
 
     // Used to apply noise filtering over time for each sensor
     private const int MedianWindowSize = 10; 
@@ -32,7 +37,7 @@ public class SensorAdapter
     private readonly int[] RightSensorPositions = { 30, 32, 38, 40 }; 
     private readonly int[] LeftSensorPositions = {  32, 30, 40, 38 }; 
     private int[] SensorPositions;    
-    private readonly double[] XPositions = { 2.0, -2.0, 2.0, -2.0 }; //for left
+    private readonly double[] XPositions = { 2.0, -2.0, 0.0, -2.0 }; //for left
     private readonly double[] YPositions = { 4.0, 4.0, -4.0, -4.0 };
     private double[] sensorResistance = new double[4];
     private double[] sensorPressures = new double[3]; // 3 combined pressures
@@ -43,12 +48,11 @@ public class SensorAdapter
     public string DeviceId { get; } 
     private bool isLeftSock; //checks for isleftsock based of module number
     private double[] sensorOffsets = new double[4];
-
     public bool moduleNameRetrieved = false;
     private PressureDebugWindow _pressureDebugWindow;
     private Thread _debugWindowThread;
     private DateTime lastCoPUpdate = DateTime.MinValue;
-    private readonly TimeSpan CoPUpdateInterval = TimeSpan.FromMilliseconds(100);
+    private readonly TimeSpan CoPUpdateInterval = TimeSpan.FromMilliseconds(50);
     public event EventHandler<string> ModuleNameRetrieved; 
     
     public event EventHandler<(string ModuleName, bool IsLeftSock)> ModuleInfoUpdated; 
@@ -154,30 +158,34 @@ public class SensorAdapter
     /// Starts streaming sensor data. Also launches the optional debug UI.
     /// </summary>
     public void StartSensorStream()
+{
+    lock (syncLock)
     {
-        lock (syncLock)
+        if (serialPort?.IsOpen == true && !isStreaming)
         {
-            if (serialPort?.IsOpen == true && !isStreaming)
-            {
-                SendCommand("BT^START");
-                isStreaming = true;
+            SendCommand("BT^START");
+            isStreaming = true;
 
-                if (_pressureDebugWindow == null || _pressureDebugWindow.IsDisposed)
+            if (!_debugLaunched)
+            {
+                _debugLaunched = true;
+
+                _debugThread = new Thread(() =>
                 {
-                    _debugWindowThread = new Thread(() =>
-                    {
-                        _pressureDebugWindow = new PressureDebugWindow();
-                        _pressureDebugWindow.Text = $"Pressure Debug - {(isLeftSock ? "Left" : "Right")}";
-                        Application.Run(_pressureDebugWindow);
-                    });
-                    _debugWindowThread.SetApartmentState(ApartmentState.STA);
-                    _debugWindowThread.IsBackground = true;
-                    _debugWindowThread.Start();
-                }
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    _debugWindow = new PressureDebugWindow();
+                    _debugWindow.Text = $"Pressure Debug - {(isLeftSock ? "Left" : "Right")}";
+                    Application.Run(_debugWindow);
+                });
+
+                _debugThread.SetApartmentState(ApartmentState.STA);
+                _debugThread.IsBackground = true;
+                _debugThread.Start();
             }
         }
     }
-
+}
     /// <summary>
     /// Stops streaming and logs to console.
     /// </summary>
@@ -262,7 +270,7 @@ public void RetrieveModuleName()
                                 moduleName = moduleValue;
                                 moduleNameRetrieved = true;
 
-                                bool isLeftSock = moduleNumber % 2 != 0;
+                               this.isLeftSock = moduleNumber % 2 != 0;
                                 SensorPositions = isLeftSock ? LeftSensorPositions : RightSensorPositions;
                                 ModuleInfoUpdated?.Invoke(this, (moduleName, isLeftSock));
                                 return;
@@ -341,48 +349,56 @@ public void RetrieveModuleName()
 /// </summary>
 private void ExtractSensorValues(byte[] packet)
 {
-    lock (syncLock)
-    {
-        double[] rawSensorValues = new double[4];
-        //double[] rawSensorValues = new double[sensorResistance.Length]; 
-
-        for (int i = 0; i < SensorPositions.Length; i++)
+        lock (syncLock)
         {
-            int pos = SensorPositions[i];
-            int rawValue = (packet[pos] << 8) | packet[pos + 1];
-            rawSensorValues[i] = rawValue > 0 ? (1000.0 / rawValue) : 0.0;
-       }
-        //var medianFiltered = ApplyRollingMedian(rawSensorValues);
-        //sensorResistance = MovingAverageFilter(medianFiltered, 4);
-        for (int i = 0; i < 4; i++)
-    {
-        double adjustedValue = isCalibrated ? (rawSensorValues[i] - calibrationOffsets[Math.Min(i, 2)]) : rawSensorValues[i]; 
-        adjustedValue = Math.Max(adjustedValue, 0.0);
+            double[] rawSensorValues = new double[4];
+            //double[] rawSensorValues = new double[sensorResistance.Length]; 
 
-        pressureHistories[i].Enqueue(adjustedValue);
-        if (pressureHistories[i].Count > FilterWindowSize)
-            pressureHistories[i].Dequeue();
-    }
+            for (int i = 0; i < SensorPositions.Length; i++)
+            {
+                int pos = SensorPositions[i];
+                int rawValue = (packet[pos] << 8) | packet[pos + 1];
+                rawSensorValues[i] = rawValue > 0 ? (10000.0 / rawValue) : 0.0;
+            }
+            //var medianFiltered = ApplyRollingMedian(rawSensorValues);
+            //sensorResistance = MovingAverageFilter(medianFiltered, 4);
+            for (int i = 0; i < 4; i++)
+            {
+                double adjustedValue = isCalibrated ? (rawSensorValues[i]) : rawSensorValues[i];
+                adjustedValue = Math.Max(adjustedValue, 0.01);
 
-    double frontRight = pressureHistories[0].Average();
-    double frontLeft = pressureHistories[1].Average();
-    double rearRight = MedianFilter(pressureHistories[2]);
-    double rearLeft = MedianFilter(pressureHistories[3]);
+                pressureHistories[i].Enqueue(adjustedValue);
+                if (pressureHistories[i].Count > FilterWindowSize)
+                    pressureHistories[i].Dequeue();
+            }
 
-    // Weighted average for rear
-    double rearTotal = rearRight + rearLeft;
-    double rearWeighted = rearTotal > 0.00001
-    ? ((rearRight * rearRight) + (rearLeft * rearLeft)) / rearTotal
-    : 0.0;
+            double frontRight = pressureHistories[0].Average();   //connsider Median for all data
+            double frontLeft = pressureHistories[1].Average();
+            var stopwatch = Stopwatch.StartNew();
+            double rearRight = MedianFilter(pressureHistories[2]);
+            double rearLeft = MedianFilter(pressureHistories[3]);
 
-    sensorPressures[0] = frontRight;
-    sensorPressures[1] = frontLeft;
-    sensorPressures[2] = rearWeighted;
-    //sensorPressures[2] = (rearRight + rearLeft) / 2;
 
-    for (int i = 0; i < 4; i++)
-        rawSensorPressures[i] = rawSensorValues[i];
-}
+
+            //Console.WriteLine($"Time for median {elapsedTime} and initial: {start}");
+
+            // Weighted average for rear
+            double rearTotal = rearRight + rearLeft;
+            double rearWeighted = rearTotal > 0.00001
+            ? ((rearRight * rearRight) + (rearLeft * rearLeft)) / rearTotal
+            : 0.0;
+
+            sensorPressures[0] = frontRight;
+            sensorPressures[1] = frontLeft;
+            sensorPressures[2] = rearWeighted;
+
+            //sensorPressures[2] = (rearRight + rearLeft) / 2;
+
+            for (int i = 0; i < 4; i++)
+                rawSensorPressures[i] = rawSensorValues[i];
+                stopwatch.Stop();
+Console.WriteLine($"Median filter time: {stopwatch.Elapsed.TotalMilliseconds:F3} ms");
+        }
 
     }
 
@@ -425,15 +441,16 @@ public bool Calibrate(bool isLeftSock)
                 Thread.Sleep(50);
             }
             lock (syncLock)
-        {
-            for (int i = 0; i < calibrationOffsets.Length; i++)
-                calibrationOffsets[i] = sampleSum[i] / sampleCount;
+            {
+                for (int i = 0; i < calibrationOffsets.Length; i++)
+                    calibrationOffsets[i] = sampleSum[i] / sampleCount;
 
-            isCalibrated = true;
+                isCalibrated = true;
         }
     }
     if (sampleCount == 0)
     {
+        Console.WriteLine($"[Calibration Result] Offsets: {string.Join(", ", calibrationOffsets.Select(x => x.ToString("F2")))}");
         Console.WriteLine("[Calibration]: Calibration failed. Invalid pressure range.");
         return false;
     }
@@ -451,16 +468,17 @@ public bool Calibrate(bool isLeftSock)
     return true;
 }
 
-/// <summary>
-/// Applies a median filter to a history queue to reduce noise.
-/// </summary>
-private double MedianFilter(Queue<double> history)
+    /// <summary>
+    /// Applies a median filter to a history queue to reduce noise.
+    /// </summary>
+    private double MedianFilter(Queue<double> history)
     {
         var arraySorted = history.OrderBy(x => x).ToList();
         int count = arraySorted.Count;
         return (count % 2 == 1)
             ? arraySorted[count / 2]
             : (arraySorted[(count - 1) / 2] + arraySorted[count / 2]) / 2.0;
+        
     }
 
 /// <summary>
@@ -471,19 +489,19 @@ private void CalculateAndNotifyCoP()
 {
     lock (syncLock)
     {
-        if ((DateTime.Now - lastCoPUpdate) < CoPUpdateInterval)
+        if ((DateTime.Now - lastCoPUpdate) < CoPUpdateInterval) 
                 return;
 
         double[] cleanPressures = new double[3];
         for (int i = 0; i < 3; i++)
-        cleanPressures[i] = (sensorPressures[i] < 0.0005) ? 0.0 : sensorPressures[i];
+        cleanPressures[i] = (sensorPressures[i] < 0.000005) ? 0.0 : sensorPressures[i];
         double[] adjustedXPositions = SensorPositions == RightSensorPositions 
             ? XPositions.Select(x =>-x).ToArray()  
             : XPositions;
 
         double totalPressure = sensorPressures.Sum(); 
 
-            if (totalPressure <= 0.00001)
+            if (totalPressure <= 0.000001)
             {
                 Task.Run(() => CoPUpdated?.Invoke(this, (0.0, 0.0, cleanPressures)));
                 Console.WriteLine("[CoP]: No valid pressure detected, CoP remains at (0,0).");
@@ -501,10 +519,10 @@ private void CalculateAndNotifyCoP()
             copX /= totalPressure;
             copY /= totalPressure;
             lastCoPUpdate = DateTime.Now;
+        Console.WriteLine($"CopX {copX}, CopY {copY}");
 
-            _pressureDebugWindow?.UpdatePressures(
-                isLeftSock ? rawSensorPressures : Array.Empty<double>(),
-                !isLeftSock ? rawSensorPressures : Array.Empty<double>());
+
+            _debugWindow?.UpdatePressures(rawSensorPressures);
 
             Task.Run(() => CoPUpdated?.Invoke(this, (copX, copY, (double[])cleanPressures.Clone())));
         }
@@ -544,10 +562,10 @@ private void CalculateAndNotifyCoP()
                     serialPort.Close();
                     Console.WriteLine($"[SensorAdapter {DeviceId}]: Serial port closed.");
 
-                    if (_pressureDebugWindow != null && !_pressureDebugWindow.IsDisposed)
+                    if (_debugWindow != null && !_debugWindow.IsDisposed)
                     {
-                        _pressureDebugWindow.Invoke(new Action(() => _pressureDebugWindow.Close()));
-                        _pressureDebugWindow = null;
+                        _debugWindow.Invoke(new Action(() => _debugWindow.Close()));
+                        _debugWindow = null;
                     }
                 }
                 catch (Exception ex)

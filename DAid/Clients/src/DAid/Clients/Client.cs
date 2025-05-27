@@ -16,8 +16,8 @@ namespace DAid.Clients
     public class Client
     {
  string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
-        string guipath = "D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
-        string portFilePath = "D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"  
+        string guipath = "C:/Users/Lidzis/Documents/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
+        string portFilePath = "C:/Users/Lidzis/Documents/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"  
         string questip = "127.0.0.1"; // CHANGE AS NEEDED 192.168.8.118
         private Process _hmdProcess;
         private readonly Server _server;
@@ -25,7 +25,7 @@ namespace DAid.Clients
         private bool _isCalibrated = false;
         private bool _isVisualizing = false;
 
-        private bool _bypassHMD = false; // New bypass flag
+        private bool _bypassHMD = true; // New bypass flag
 
         // Internal sensor values (CoP)
         private double _copXLeft = 0, _copYLeft = 0;
@@ -876,22 +876,24 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
             SendMessageToGUI($"[Client]: Skipping CoP check for Exercise {_currentExercise.RepetitionID}, Phase 4.");
             return; 
         }
+         double total = copData.Pressures.Sum();
 
-        if (device.IsLeftSock)
-        {
-            _copXLeft = copData.CoPX;
-            _copYLeft = copData.CoPY;
-        }
-        else
-        {
-            _copXRight = copData.CoPX;
-            _copYRight = copData.CoPY;
-        }
+                if (device.IsLeftSock)
+                {
+                    _copXLeft = copData.CoPX;
+                    _copYLeft = copData.CoPY;
+                }
+                else
+                {
+                    _copXRight = copData.CoPX;
+                    _copYRight = copData.CoPY;
+                     Console.WriteLine($"CopX Client {_copXRight}, CopY Client {_copYRight}");
+                }
 
-        _visualizationWindow.UpdateVisualization(
-            (_copXLeft, _copYLeft, device.IsLeftSock ? copData.Pressures.Sum() : 0.0),
-            (_copXRight, _copYRight, !device.IsLeftSock ? copData.Pressures.Sum() : 0.0)
-        );
+        var left = (_copXLeft, _copYLeft, device.IsLeftSock ? total : _visualizationWindow.LastLeftTotalPressure);
+        var right = (_copXRight, _copYRight, !device.IsLeftSock ? total : _visualizationWindow.LastRightTotalPressure);
+
+        _visualizationWindow.UpdateVisualization(left, right);
     }
 }
 
