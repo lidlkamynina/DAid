@@ -6,19 +6,16 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Diagnostics; // add at the top
-
-
+using System.Diagnostics;
 public class SensorAdapter
 {
     private SerialPort serialPort;
     private const byte StartByte = 0xF0;
     private const byte StopByte = 0x55;
     private const int PacketLength = 47;
-private PressureDebugWindow _debugWindow;
-private Thread _debugThread;
-private bool _debugLaunched = false;
-
+    private PressureDebugWindow _debugWindow;
+    private Thread _debugThread;
+    private bool _debugLaunched = false;
     // Used to apply noise filtering over time for each sensor
     private const int MedianWindowSize = 10; 
     private readonly Queue<double>[] pressureHistories = new Queue<double>[4];
@@ -54,7 +51,6 @@ private bool _debugLaunched = false;
     private DateTime lastCoPUpdate = DateTime.MinValue;
     private readonly TimeSpan CoPUpdateInterval = TimeSpan.FromMilliseconds(50);
     public event EventHandler<string> ModuleNameRetrieved; 
-    
     public event EventHandler<(string ModuleName, bool IsLeftSock)> ModuleInfoUpdated; 
 
     public event EventHandler<string> RawDataReceived;
@@ -70,12 +66,12 @@ private bool _debugLaunched = false;
             pressureHistories[i] = new Queue<double>(FilterWindowSize); 
     }
 
-     /// <summary>
+    /// <summary>
     /// Initializes and opens the serial port with optional baud rate.
     /// Configures the hardware before streaming begins.
     /// </summary>
-    public void Initialize(string comPort, int baudRate = DefaultBaudRate)
-    {
+        public void Initialize(string comPort, int baudRate = DefaultBaudRate)
+        {
             if (serialPort != null && serialPort.IsOpen)
             {
                 Console.WriteLine($"[SensorAdapter {DeviceId}]: Serial port already initialized.");
@@ -106,7 +102,7 @@ private bool _debugLaunched = false;
             Console.WriteLine($"[SensorAdapter]: Error initializing on {comPort}: {ex.Message}");
             throw;
         }
-    }
+        }
 
     /// <summary>
     /// Lists available COM ports on the machine.
@@ -374,7 +370,7 @@ private void ExtractSensorValues(byte[] packet)
 
             double frontRight = pressureHistories[0].Average();   //connsider Median for all data
             double frontLeft = pressureHistories[1].Average();
-            var stopwatch = Stopwatch.StartNew();
+            //var stopwatch = Stopwatch.StartNew();
             double rearRight = MedianFilter(pressureHistories[2]);
             double rearLeft = MedianFilter(pressureHistories[3]);
 
@@ -396,8 +392,8 @@ private void ExtractSensorValues(byte[] packet)
 
             for (int i = 0; i < 4; i++)
                 rawSensorPressures[i] = rawSensorValues[i];
-                stopwatch.Stop();
-Console.WriteLine($"Median filter time: {stopwatch.Elapsed.TotalMilliseconds:F3} ms");
+                //stopwatch.Stop();
+                //Console.WriteLine($"Median filter time: {stopwatch.Elapsed.TotalMilliseconds:F3} ms");
         }
 
     }
@@ -489,7 +485,7 @@ private void CalculateAndNotifyCoP()
 {
     lock (syncLock)
     {
-        if ((DateTime.Now - lastCoPUpdate) < CoPUpdateInterval) 
+        if ((DateTime.Now - lastCoPUpdate) < CoPUpdateInterval) //interval how often cop is calculated 
                 return;
 
         double[] cleanPressures = new double[3];
@@ -519,7 +515,7 @@ private void CalculateAndNotifyCoP()
             copX /= totalPressure;
             copY /= totalPressure;
             lastCoPUpdate = DateTime.Now;
-        Console.WriteLine($"CopX {copX}, CopY {copY}");
+            //Console.WriteLine($"CopX {copX}, CopY {copY}");
 
 
             _debugWindow?.UpdatePressures(rawSensorPressures);
