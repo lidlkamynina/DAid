@@ -381,7 +381,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
     SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
     if (exercise.RepetitionID > 2)
     {
-        await Task.Delay(2000, token).ConfigureAwait(false);  // shows exercise text for 2 seconds so both client and HMD wait
+        await Task.Delay(4000, token).ConfigureAwait(false);  // shows exercise text for 2 seconds so both client and HMD wait
     }
     DateTime exerciseStartTime = DateTime.Now;
     int phase1Completed = 0; 
