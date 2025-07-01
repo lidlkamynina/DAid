@@ -37,7 +37,7 @@ public class PressureDebugWindow : Form
         var chartArea = new ChartArea("MainArea")
         {
             AxisX = { Title = "Time", Minimum = 0, Maximum = 100, Interval = 10 },
-            AxisY = { Title = "Pressure", Minimum = 0, Maximum = 100, Interval = 20 }
+            AxisY = { Title = "Pressure", Minimum = 0, Maximum = 500, Interval = 25 }
         };
         chartArea.AxisX.MajorGrid.LineColor = System.Drawing.Color.LightGray;
         chartArea.AxisY.MajorGrid.LineColor = System.Drawing.Color.LightGray;

@@ -31,8 +31,10 @@ public class SensorAdapter
     public string ModuleName => moduleName; 
 
     private const int DefaultBaudRate = 92600;
-    private readonly int[] RightSensorPositions = { 30, 32, 38, 40 }; 
-    private readonly int[] LeftSensorPositions = {  32, 30, 40, 38 }; 
+    private readonly int[] RightSensorPositionsOld = { 30, 32, 38, 40 }; 
+    private readonly int[] LeftSensorPositionsOld = {  32, 30, 40, 38 }; 
+    private readonly int[] RightSensorPositions = { 36, 34, 40, 30 }; 
+    private readonly int[] LeftSensorPositions = {  34, 36, 30, 40 }; 
     private int[] SensorPositions;    
     private readonly double[] XPositions = { 2.0, -2.0, 0.0, -2.0 }; //for left
     private readonly double[] YPositions = { 4.0, 4.0, -4.0, -4.0 };
@@ -91,7 +93,11 @@ public class SensorAdapter
 
             ConfigureBTS1("8");
             ConfigureBTS234("1");
-            ConfigureBTS8("*,2");
+            //ConfigureBTS8("*, 2");
+            ConfigureBTS8("1, 8");
+            ConfigureBTS8("2, 8");
+            ConfigureBTS8("5, 8");
+            ConfigureBTS8("6, 2");
 
             serialPort.DataReceived += DataReceivedHandler;
             serialPort.Open();
@@ -433,6 +439,7 @@ public bool Calibrate(bool isLeftSock)
                     Console.Write($"S{i + 1}: {rawSensorPressures[i]:F4} | ");
                     sampleSum[i] += rawSensorPressures[i];
                 }
+                Console.WriteLine();
                 sampleCount++;
                 Thread.Sleep(50);
             }
@@ -490,7 +497,7 @@ private void CalculateAndNotifyCoP()
 
         double[] cleanPressures = new double[3];
         for (int i = 0; i < 3; i++)
-        cleanPressures[i] = (sensorPressures[i] < 0.000005) ? 0.0 : sensorPressures[i];
+        cleanPressures[i] = (sensorPressures[i] < 0.001) ? 0.0 : sensorPressures[i];
         double[] adjustedXPositions = SensorPositions == RightSensorPositions 
             ? XPositions.Select(x =>-x).ToArray()  
             : XPositions;
