@@ -16,8 +16,8 @@ namespace DAid.Clients
     public class Client
     {
  string hmdpath = "C:/Users/Lietotajs/Desktop/balls/OculusIntegration_trial.exe"; // change as needed
-        string guipath = "D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
-        string portFilePath = "D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"  
+        string guipath = "D:/GitHub/DAid_B/Clientgui_B/bin/Debug/Clientgui.exe"; // change as needed, need to run once gui alone D:/GitHub/DAid/Clientgui/bin/Debug/Clientgui.exe
+        string portFilePath = "D:/GitHub/DAid_B/Clientgui_B/bin/Debug/selected_ports.txt"; // change as needed D:/GitHub/DAid/Clientgui/bin/Debug/selected_ports.txt"  
         string questip = "127.0.0.1"; // CHANGE AS NEEDED 192.168.8.118
         private Process _hmdProcess;
         private readonly Server _server;
@@ -51,7 +51,7 @@ namespace DAid.Clients
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             Console.WriteLine("Client started. Enter commands: connect, calibrate, start, stop, hmd, gui, exit");
-            OpenGUI(5555);
+            OpenGUI(8888);
             _bypassHMD = false; // Bypass HMD connection for now
 
             while (!cancellationToken.IsCancellationRequested)

@@ -303,12 +303,12 @@ private void StartLogging(CancellationToken cancellationToken)
                         short accX = BitConverter.ToInt16(rawData, 23);
                         short accY = BitConverter.ToInt16(rawData, 25);
                         short accZ = BitConverter.ToInt16(rawData, 27);
-                        short sensor1 = BitConverter.ToInt16(rawData, 29);
-                        short sensor2 = BitConverter.ToInt16(rawData, 31);
-                        short sensor3 = BitConverter.ToInt16(rawData, 33);
-                        short sensor4 = BitConverter.ToInt16(rawData, 35);
-                        short sensor5 = BitConverter.ToInt16(rawData, 37);
-                        short sensor6 = BitConverter.ToInt16(rawData, 39);
+                        short sensor1 = BitConverter.ToInt16(rawData, 35);
+                        short sensor2 = BitConverter.ToInt16(rawData, 33);
+                        short sensor3 = BitConverter.ToInt16(rawData, 31);
+                        short sensor4 = BitConverter.ToInt16(rawData, 37);
+                        short sensor5 = BitConverter.ToInt16(rawData, 39);
+                        short sensor6 = BitConverter.ToInt16(rawData, 29);
                         short sensor7 = BitConverter.ToInt16(rawData, 41);
                         short sensor8 = BitConverter.ToInt16(rawData, 43);
 

@@ -1,1 +1,1 @@
-C:\Users\Lietotajs\Desktop\plux2\plux-adapter\DAid\Clients\bin\Debug\net48\UserID_1_Right_688.txt
+D:\GitHub\DAid_B\DAid\Clients\bin\Debug\net48\UserID_1_Right_1.txt
