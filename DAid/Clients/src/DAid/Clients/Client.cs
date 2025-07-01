@@ -51,7 +51,7 @@ namespace DAid.Clients
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             Console.WriteLine("Client started. Enter commands: connect, calibrate, start, stop, hmd, gui, exit");
-            OpenGUI(8888);
+            OpenGUI(9999);
             _bypassHMD = false; // Bypass HMD connection for now
 
             while (!cancellationToken.IsCancellationRequested)
