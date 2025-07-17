@@ -66,14 +66,14 @@ public static class ExerciseList
             name: "Single-Leg Stance - Right Leg",
             legsUsed: "right",
             intro: 4,
-            demo: 4,
-            preparationCop: 3,
-            timingCop: 5, 
+            demo: 8,
+            preparationCop: 5,
+            timingCop: 30, 
             release: 3,
             sets: 1,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
-                   (5.0, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
+                   (30.0, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
             }
         ),
         new ExerciseData( 
@@ -82,13 +82,13 @@ public static class ExerciseList
             legsUsed: "left",
             intro: 0,
             demo: 0,
-            preparationCop: 3,
-            timingCop: 5,
+            preparationCop: 5,
+            timingCop: 30,
             release: 3,
             sets: 1,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
-                 (5.0, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
+                 (30.0, (-0.5, 0.5), (-0.7, 0.7), (-1.0, 1.0), (-2.0, 2.0))
             }
         ),
         new ExerciseData( 
@@ -96,9 +96,9 @@ public static class ExerciseList
             name: "Squats With Toe Rise",
             legsUsed: "both",
             intro: 0,
-            demo: 6,
-            preparationCop: 3,
-            timingCop: 6,
+            demo: 12,
+            preparationCop: 5,
+            timingCop: 30,
             release: 3,
             sets: 2,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
@@ -114,9 +114,9 @@ public static class ExerciseList
             name: "Vertical Jumps",
             legsUsed: "both",
             intro: 0,
-            demo: 6,
-            preparationCop: 3,
-            timingCop: 6,
+            demo: 12,
+            preparationCop: 5,
+            timingCop: 30,
             release: 2,
             sets: 2,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
@@ -132,16 +132,16 @@ public static class ExerciseList
             name: "Squats Walking Lunges - Both Leg",
             legsUsed: "both",
             intro: 0,
-            demo: 4,
-            preparationCop: 3,
-            timingCop: 48,
+            demo: 12,
+            preparationCop: 5,
+            timingCop: 68,
             release: 2,
             sets: 2,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
                 //(1, (-0.5, 0.5), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (2.0, (-0.5, 0.5), (-2.0, 2.0), (-1.5, 1.5), (-5.0, 5.0)), //right leg,  left leg (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 6.0))
-                (2.0, (-0.5, 1.5), (0.0, 3.0), (-2.0, 2.0), (0.0, 3.0)), // right leg, left leg (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-5.0, 5.0))
+                (3.0, (-0.5, 0.5), (-2.0, 2.0), (-1.5, 1.5), (-5.0, 5.0)), //right leg,  left leg (2, (-1.5, 1.5), (0.3, 5.5), (-2.0, 2.0), (0.0, 6.0))
+                (3.0, (-0.5, 1.5), (0.0, 3.0), (-2.0, 2.0), (0.0, 3.0)), // right leg, left leg (2, (-1.5, 1.5), (-3.0, 3.0), (-1.9, 1.9), (-5.0, 5.0))
                 (8.0, (-0.5, 1.5), (1.0, 2.0), (-2.0, 2.0), (0.0, 1.0)) //no COP check
             }
         ),
@@ -150,16 +150,16 @@ public static class ExerciseList
             name: "Jumping - Lateral Jumps Both",
             legsUsed: "both",
             intro: 0,
-            demo: 4,
-            preparationCop: 3,
+            demo: 10,
+            preparationCop: 5,
             timingCop: 30,
             release: 2,
             sets: 2,
             zoneSequence: new List<(double, (double, double), (double, double), (double, double), (double, double))>
             {
                 //(1, (-1.0, 1.0), (-1.0, 1.0), (-2.0, 2.0), (-4.0, 4.0)),
-                (1.875, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 4.0)), //right leg, 
-                (1.875, (-0.7, 0.7), (-4.0, 4.0), (-1.5, 1.5), (-4.0, 4.0)) // right leg,
+                (2.5, (-1.5, 1.5), (0.5, 1.9), (-2.0, 2.0), (0.0, 4.0)), //right leg, 
+                (2.5, (-0.7, 0.7), (-4.0, 4.0), (-1.5, 1.5), (-4.0, 4.0)) // right leg,
             }
         ),
         new ExerciseData( 
@@ -167,8 +167,8 @@ public static class ExerciseList
             name: "Squats - One-leg Squats Right",
             legsUsed: "right",
             intro: 0,
-            demo: 5,
-            preparationCop: 3,
+            demo: 10,
+            preparationCop: 5,
             timingCop: 50,
             release: 2,
             sets: 1,
@@ -184,7 +184,7 @@ public static class ExerciseList
             legsUsed: "left",
             intro: 0,
             demo: 0,
-            preparationCop: 3,
+            preparationCop: 5,
             timingCop: 50,
             release: 2,
             sets: 1,
@@ -200,7 +200,7 @@ public static class ExerciseList
             legsUsed: "both",
             intro: 0,
             demo: 10,
-            preparationCop: 3,
+            preparationCop: 5,
             timingCop: 30,
             release: 2,
             sets: 2,

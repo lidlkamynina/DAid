@@ -39,6 +39,9 @@ public class audioManager : MonoBehaviour
     public AudioClip Release;
     [Tooltip("Default generic instruction audio clip.")]
     public AudioClip instructionClip;
+    public AudioClip Next;
+    [Tooltip("New preperation audio")]
+    public AudioClip PrepNew;
 
     public AudioClip Demo2;
     // --- New fields for Exercise 3's steps ---
@@ -58,6 +61,7 @@ public class audioManager : MonoBehaviour
     public AudioClip Exercise4Step2;
     [Tooltip("Voice clip for exercise 3 - Step 3: Lec!")]
     public AudioClip Exercise4Step3;
+
     //[Tooltip("Voice clip for exercise 3 - Step 4: Uz pirkstgaliem!")]
     //public AudioClip Exercise4Step4; // Not used in Exercise 4 because audio exists in ex 3 for it
     public AudioClip Demo4;
@@ -69,8 +73,17 @@ public class audioManager : MonoBehaviour
     public AudioClip Exercise5Step3;
     [Tooltip("Voice clip for exercise 3 - Step 4: Skriet atpakaï uz sâkumu!")]
     public AudioClip Exercise5Step4;
+    [Tooltip("Voice clip for exercise 3 - Step 2: Ar labo")]
+    public AudioClip Exercise5Step2short;
+    [Tooltip("Voice clip for exercise 3 - Step 3: Ar kreiso")]
+    public AudioClip Exercise5Step3short;
 
     public AudioClip Demo5;
+    [Tooltip("Voice clip for exercise 5  short - pa labi")]
+    public AudioClip Exercise6Step1short;
+    [Tooltip("Voice clip for exercise 5 short - pa kreisi")]
+    public AudioClip Exercise6Step2short;
+
 
     [Tooltip("Voice clip for exercise 3 - Step 2: Izklupiens ar labo kâju!")]
     public AudioClip Exercise6Step2;
@@ -111,6 +124,7 @@ public class audioManager : MonoBehaviour
     [Tooltip("List of voice clips for in-exercise zone feedback (zone 1 = index 0, zone 2 = index 1, etc.). Set the size and assign each clip accordingly.")]
     public List<AudioClip> exerciseZoneClips = new List<AudioClip>();
     public AudioClip beepClip;
+    
     [Header("Dynamic Exercise Audio Clips")]
     [Tooltip("List of audio clips specific to each exercise (by ExerciseID).")]
     public List<ExerciseAudioClips> exerciseAudioClips = new List<ExerciseAudioClips>();
@@ -203,6 +217,10 @@ public class audioManager : MonoBehaviour
             PlayClip(RightLeg, stopPrevious: false);
         }
     }
+    public void PlayPrepNew()
+    {
+        PlayClip(PrepNew, stopPrevious: false);
+    }
 
     public void PlayNoturi()
     {
@@ -213,6 +231,10 @@ public class audioManager : MonoBehaviour
     {
         PlayClip(Hold, stopPrevious: false);
     }
+    public void PlayNext()
+    {
+        PlayClip(Next, stopPrevious: false);
+    }
 
     /// <summary>
     /// Plays the release leg phase audio clip.
@@ -221,7 +243,14 @@ public class audioManager : MonoBehaviour
     {
         PlayClip(Release, stopPrevious: false);
     }
-
+    public void PlayExercise5Step1s()
+    {
+        PlayClip(Exercise6Step1short, stopPrevious: false);
+    }
+    public void PlayExercise5Step2s()
+    {
+        PlayClip(Exercise6Step2short, stopPrevious: false);
+    }
     /// <summary>
     /// Plays the switch leg audio clip based on the current leg.
     /// If an exerciseID is provided and a dynamic clip exists, that clip is used.
@@ -341,9 +370,17 @@ public class audioManager : MonoBehaviour
     {
         PlayClip(Exercise4Step2, stopPrevious: false);
     }
+    public void PlayExercise5Step2short()
+    {
+        PlayClip(Exercise5Step2short, stopPrevious: false);
+    }
     public void PlayExercise4Step3()
     {
         PlayClip(Exercise4Step3, stopPrevious: false);
+    }
+    public void PlayExercise5Step3short()
+    {
+        PlayClip(Exercise5Step3short, stopPrevious: false);
     }
     public void PlayExercise4Step4()
     {
@@ -354,10 +391,12 @@ public class audioManager : MonoBehaviour
     {
         PlayClip(Exercise5Step1, stopPrevious: false);
     }
+    
     public void PlayExercise5Step2()
     {
         PlayClip(Exercise5Step2, stopPrevious: false);
     }
+   
     public void PlayExercise5Step3()
     {
         PlayClip(Exercise5Step3, stopPrevious: false);

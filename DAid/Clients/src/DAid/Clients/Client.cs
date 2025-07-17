@@ -204,7 +204,7 @@ namespace DAid.Clients
             }
             _server.StartDataStream();
             OpenVisualizationWindow();
-            ConnectToHMD(questip, 9003);
+            ConnectToHMD(questip, 9002);
             SubscribeToDeviceUpdates();
             _isVisualizing = true;
 
@@ -307,8 +307,8 @@ namespace DAid.Clients
     while (true)
     {
         bool isFootValid = false;
-        (double Min, double Max) copRangeX = (-2.0, 2.0);
-        (double Min, double Max) copRangeY = (-2.0, 2.0);
+        (double Min, double Max) copRangeX = (-4.0, 4.0);
+        (double Min, double Max) copRangeY = (-4.0, 4.0);
 
         double copXLeft = _copXLeft, copYLeft = _copYLeft;
         double copXRight = _copXRight, copYRight = _copYRight;
@@ -521,14 +521,14 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
 {
         DateTime outOfZoneTimeLeft = DateTime.MinValue;
         DateTime outOfZoneTimeRight = DateTime.MinValue;
-    if (exercise.RepetitionID == 1 || exercise.RepetitionID == 2)
-    {
-        await Task.Delay(1940).ConfigureAwait(false);  // shows exercise text for 2 seconds so both client and HMD wait
-    }
-     if (exercise.RepetitionID > 2)
-    {
-        await Task.Delay(2000).ConfigureAwait(false);  // shows exercise text for 2 seconds so both client and HMD wait
-    }
+    // if (exercise.RepetitionID == 1 || exercise.RepetitionID == 2)
+    // {
+    //     await Task.Delay(1940).ConfigureAwait(false);  // shows exercise text for 2 seconds so both client and HMD wait
+    // }
+    //  if (exercise.RepetitionID > 2)
+    // {
+    //     await Task.Delay(2000).ConfigureAwait(false);  // shows exercise text for 2 seconds so both client and HMD wait
+    // }
     Console.WriteLine($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
     SendMessageToGUI($"[Exercise]: {exercise.Name} started for {exercise.TimingCop} seconds...");
         DateTime exerciseStartTime = DateTime.Now;
@@ -873,7 +873,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
             Console.Write("> ");
             string input = Console.ReadLine()?.Trim();
             if (input == "1")
-                ConnectToHMD(questip, 9003);
+                ConnectToHMD(questip, 9002);
             else if (input == "2")
                 DisconnectFromHMD();
         }
@@ -1099,7 +1099,7 @@ private async Task Run5and6Async(ExerciseData exercise, int set, CancellationTok
             else if (response.ToLower() == "1")
             {
                 Console.WriteLine("[Client]: 1 command received from GUI.");
-                ConnectToHMD(questip, 9003);
+                ConnectToHMD(questip, 9002);
             }
             else if (response.ToLower() == "2")
             {
